@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicketNova - AI Ticket Resolution Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+  <!-- Login Screen Overlay -->
+  <div id="login-screen" class="active">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="logo-icon">N</div>
+        <span>TicketNova</span>
+      </div>
+      <h2 style="font-weight: 800; font-size: 22px; letter-spacing: -0.5px;">Welcome back</h2>
+      <p class="login-subtitle">Sign in to your enterprise AI resolution platform.</p>
+      
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Work Email</label>
+          <input type="email" id="login-email" class="form-control" required placeholder="name@company.com" value="pranjal.choudhary@ticketnova.ai">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label for="login-password">Password</label>
+            <a href="#" style="font-size: 11px; color: var(--accent-primary);" onclick="showToast('Password Reset', 'Password recovery instructions sent to email.', 'info')">Forgot password?</a>
+          </div>
+          <input type="password" id="login-password" class="form-control" required placeholder="••••••••" value="password123">
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;" id="btn-login-submit">
+          <span>Sign In</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-container" style="display: none;">
+    
+    <!-- Left Sidebar Menu -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">N</div>
+          <span class="logo-text">TicketNova</span>
+        </div>
+        <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-target="dashboard">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" data-target="tickets">
+          <svg viewBox="0 0 24 24"><path d="M20 12V8H4v4m16 0v8H4v-8m16 0H4M8 4h8" stroke="currentColor"/></svg>
+          <span class="nav-label">Tickets</span>
+        </div>
+        <div class="nav-item" data-target="assistant">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor"/></svg>
+          <span class="nav-label">AI Assistant</span>
+        </div>
+        <div class="nav-item" data-target="kb">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1M20 17V2H6.5" stroke="currentColor"/></svg>
+          <span class="nav-label">Knowledge Base</span>
+        </div>
+        <div class="nav-item" data-target="workflow">
+          <svg viewBox="0 0 24 24"><path d="M20 7h-9m0 0l4-4m-4 4l4 4M4 17h9m0 0l-4-4m4 4l-4 4" stroke="currentColor"/></svg>
+          <span class="nav-label">Agent Workflow</span>
+        </div>
+        <div class="nav-item" data-target="analytics">
+          <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor"/></svg>
+          <span class="nav-label">Analytics</span>
+        </div>
+        <div class="nav-item" data-target="email">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm0 0l8 7 8-7" stroke="currentColor"/></svg>
+          <span class="nav-label">Email Automation</span>
+        </div>
+        <div class="nav-item" data-target="integrations">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10" /></svg>
+          <span class="nav-label">Integrations</span>
+        </div>
+        <div class="nav-item" data-target="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor"/></svg>
+          <span class="nav-label">Settings</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer" id="sidebar-profile-box" style="cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%;">
+        <div class="user-avatar" id="sidebar-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <img id="sidebar-avatar-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+          <span id="sidebar-avatar-txt">PC</span>
+        </div>
+        <div class="user-info" style="display: flex; flex-direction: column;">
+          <span class="user-name" id="sidebar-user-name">Pranjal Choudhary</span>
+          <span class="user-role">Administrator</span>
+        </div>
+        <button id="sidebar-logout-btn" class="nav-action-btn" style="margin-left: auto; width: 28px; height: 28px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;" aria-label="Sign Out">
+          <svg viewBox="0 0 24 24" width="16" height="16" style="stroke: var(--text-secondary); fill: none; stroke-width: 2;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Section Content Area -->
+    <main id="main-content">
+      
+      <!-- Top Sticky Navbar -->
+      <header class="navbar">
+        <div class="search-container">
+          <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke="currentColor"/></svg>
+          <input type="text" class="search-input" id="global-search" placeholder="Search tickets, knowledge base...">
+        </div>
+
+        <div class="navbar-actions">
+          <div class="ai-status-badge">
+            <span class="ai-indicator-dot"></span>
+            <span>Nova Engine Active</span>
+          </div>
+
+          <button class="nav-action-btn" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+            <svg viewBox="0 0 24 24" id="theme-sun-icon"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M16.96 16.96l1.42 1.42M1 12h2M21 12h2M4.22 19.07l1.42-1.42M16.96 7.04l1.42-1.42" stroke="currentColor"/></svg>
+            <svg viewBox="0 0 24 24" id="theme-moon-icon" style="display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor"/></svg>
+          </button>
+
+          <button class="nav-action-btn" id="notif-toggle" aria-label="Notifications">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor"/></svg>
+            <span class="notification-count" id="notif-badge">4</span>
+          </button>
+
+          <button class="nav-action-btn" id="navbar-profile-btn" aria-label="User Profile" style="border-radius: 50%; padding: 0; overflow: hidden; width: 36px; height: 36px; border: 1px solid var(--border-color); cursor: pointer;">
+            <div class="user-avatar" id="navbar-avatar" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background-color: var(--accent-primary); color: white; position: relative;">
+              <img id="navbar-avatar-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+              <span id="navbar-avatar-txt">PC</span>
+            </div>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section class="view-section active-view" id="dashboard-view">
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Overview</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and resolution telemetry for TicketNova.</p>
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-container">
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>TOTAL TICKETS</span>
+              <div class="kpi-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 12V8H4v4m16 0v8H4v-8m16 0H4" stroke="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-total">1,248</div>
+            <div class="kpi-trend trend-up">
+              <span>+12.4%</span> vs last week
+            </div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>OPEN TICKETS</span>
+              <div class="kpi-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-open" style="color: var(--badge-open-text);">52</div>
+            <div class="kpi-trend trend-down">
+              <span>-3.1%</span> vs last week
+            </div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>RESOLVED TICKETS</span>
+              <div class="kpi-icon">
+                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-resolved" style="color: var(--badge-resolved-text);">1,196</div>
+            <div class="kpi-trend trend-up">
+              <span>+15.3%</span> vs last week
+            </div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>AI RESOLUTION RATE</span>
+              <div class="kpi-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-ai-rate">86.4%</div>
+            <div class="kpi-trend trend-up">
+              <span>+1.8%</span> target > 85%
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Grid (CSS Charts & Quick Actions) -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-title">
+              <span>AI Resolution Performance</span>
+              <div style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Weekly SLA Targets</div>
+            </div>
+            <!-- Custom CSS Chart -->
+            <div class="chart-container-box" id="dashboard-bar-chart">
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 60%;" data-value="60%"></div>
+                <span class="bar-label">Mon</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 75%;" data-value="75%"></div>
+                <span class="bar-label">Tue</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 85%;" data-value="85%"></div>
+                <span class="bar-label">Wed</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 94%;" data-value="94%"></div>
+                <span class="bar-label">Thu</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 80%;" data-value="80%"></div>
+                <span class="bar-label">Fri</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 98%;" data-value="98%"></div>
+                <span class="bar-label">Sat</span>
+              </div>
+              <div class="bar-column">
+                <div class="bar-fill" style="height: 92%;" data-value="92%"></div>
+                <span class="bar-label">Sun</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Quick Tasks</div>
+            <div class="quick-actions-list">
+              <button class="quick-action-btn" id="dash-action-new-tkt">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Create New Ticket</span>
+              </button>
+              <button class="quick-action-btn" id="dash-action-run-wf">
+                <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg>
+                <span>Simulate Agent Workflow</span>
+              </button>
+              <button class="quick-action-btn" id="dash-action-assistant">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor"/></svg>
+                <span>Ask AI Assistant</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Tickets Panel -->
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-title">Recent System Activity</div>
+          <div class="table-container" style="border: none;">
+            <table id="dash-activity-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dash-activity-tbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: TICKETS TABLE -->
+      <section class="view-section" id="tickets-view">
+        <div class="table-controls">
+          <div class="table-filters">
+            <input type="text" class="table-filter-select" id="tkt-search-bar" placeholder="Search ID, user, or topic..." style="width: 250px;">
+            <select class="table-filter-select" id="filter-dept">
+              <option value="all">All Departments</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Billing">Billing</option>
+              <option value="Customer Support">Customer Support</option>
+            </select>
+            <select class="table-filter-select" id="filter-priority">
+              <option value="all">All Priorities</option>
+              <option value="Urgent">Urgent</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <select class="table-filter-select" id="filter-status">
+              <option value="all">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="Pending">Pending</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+
+          <div class="table-actions-right">
+            <button class="btn btn-secondary" id="btn-export-ui">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor"/></svg>
+              <span>Export CSV</span>
+            </button>
+            <button class="btn btn-primary" id="btn-create-ticket-modal">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span>New Ticket</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table id="main-tickets-table">
+            <thead>
+              <tr>
+                <th data-sort="id">Ticket ID ↕</th>
+                <th data-sort="user">User ↕</th>
+                <th data-sort="department">Department ↕</th>
+                <th data-sort="subject">Subject ↕</th>
+                <th data-sort="category">Category ↕</th>
+                <th data-sort="priority">Priority ↕</th>
+                <th data-sort="status">Status ↕</th>
+                <th data-sort="createdDate">Created Date ↕</th>
+              </tr>
+            </thead>
+            <tbody id="tickets-tbody">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+          
+          <div class="table-pagination">
+            <span id="pagination-info">Showing 1 to 5 of 12 entries</span>
+            <div class="pagination-btn-group" id="pagination-controls">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: AI ASSISTANT -->
+      <section class="view-section" id="assistant-view">
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Nova AI Assistant</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Instant resolution generation, confidence assessments, and troubleshooting procedures.</p>
+
+        <div class="dashboard-grid">
+          <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="card-title">Select Active Reference Ticket</div>
+            <select class="table-filter-select" id="assistant-ticket-select" style="width: 100%;">
+              <!-- Populated dynamically -->
+            </select>
+
+            <div class="meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">AI Confidence Score</span>
+                <span class="meta-value" id="assist-confidence" style="color: var(--accent-primary);">97%</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Escalation Threat</span>
+                <span class="meta-value" id="assist-escalation" style="color: #ef4444;">Low Risk</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>AI Diagnosis Summary</label>
+              <div id="assist-diagnosis-summary" style="font-size: 14px; line-height: 1.6; color: var(--text-secondary); background-color: var(--bg-app); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <!-- Dynamic text -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Suggested Resolution Template</div>
+            <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+              <pre id="assist-resolution-body" style="font-family: monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.6; color: var(--text-secondary);">
+                <!-- Resolution body dynamic -->
+              </pre>
+            </div>
+            
+            <div class="card-title" style="font-size: 14px;">Step-by-Step Troubleshooting Procedure</div>
+            <ul id="assist-troubleshoot-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+              <!-- Troubleshooting checkboxes dynamic -->
+            </ul>
+
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" id="btn-assist-copy">
+                <span>Copy Instructions</span>
+              </button>
+              <button class="btn btn-secondary" id="btn-assist-regenerate">
+                <span>Regenerate Solution</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: KNOWLEDGE BASE -->
+      <section class="view-section" id="kb-view">
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Knowledge Base</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Browse system documentation templates and execute dynamic AI vector checks.</p>
+
+        <div class="kb-grid">
+          <!-- Categories & Navigation -->
+          <div class="kb-sidebar-nav">
+            <div class="card" style="padding: 16px;">
+              <input type="text" class="table-filter-select" id="kb-search-bar" placeholder="Search documentation..." style="width: 100%; margin-bottom: 12px;">
+              
+              <div class="kb-list" id="kb-category-list">
+                <div class="kb-item active" data-category="All">
+                  <span>All Documents</span>
+                </div>
+                <div class="kb-item" data-category="Authentication">
+                  <span>Authentication</span>
+                </div>
+                <div class="kb-item" data-category="Billing">
+                  <span>Billing & Payments</span>
+                </div>
+                <div class="kb-item" data-category="Database">
+                  <span>Database Operations</span>
+                </div>
+                <div class="kb-item" data-category="API">
+                  <span>API Integration</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documentation and Generated Articles -->
+          <div class="kb-content-area">
+            <div class="kb-solution-box" id="kb-ai-solution-panel" style="display: none;">
+              <div class="kb-solution-header">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor" stroke-width="2"/></svg>
+                <span>AI Generated Real-Time Solution</span>
+              </div>
+              <p id="kb-ai-content" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);"></p>
+            </div>
+
+            <div class="card" id="kb-docs-card">
+              <h2 id="kb-doc-title" style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">OAuth Endpoint Signature Troubleshooting</h2>
+              <div id="kb-doc-body" style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);">
+                Select an article or query search term.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: MULTI-AGENT WORKFLOW -->
+      <section class="view-section" id="workflow-view">
+        <div class="workflow-control-bar">
+          <div>
+            <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Multi-Agent AI Pipeline</h1>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Watch specialized AI agents coordinate diagnostics and resolutions sequentially.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-trigger-workflow">
+            <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg>
+            <span>Simulate Ticket Flow</span>
+          </button>
+        </div>
+
+        <div class="workflow-pipeline" id="workflow-pipeline-container">
+          <!-- Rendered dynamically by workflow.js -->
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">Active Resolution Sequence Logs</div>
+          <div id="workflow-overall-logs" style="font-family: monospace; font-size: 12px; background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; height: 180px; overflow-y: auto; line-height: 1.7;">
+            <!-- Logs populated during simulator execution -->
+            Waiting to execute pipeline simulation. Select "Simulate Ticket Flow" above.
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: ANALYTICS -->
+      <section class="view-section" id="analytics-view">
+        <div class="workflow-control-bar">
+          <div>
+            <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Analytics</h1>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Service Level Agreement (SLA) conformance and execution latency logs.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary active" id="btn-report-weekly">Weekly Report</button>
+            <button class="btn btn-secondary" id="btn-report-monthly">Monthly Report</button>
+          </div>
+        </div>
+
+        <!-- Analytics widget rows -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-title">Daily Ticket Volumes</div>
+            <div class="chart-container-box" id="analytics-chart-vol">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">SLA Performance Target</div>
+            <div class="circle-chart-box">
+              <div class="circle-chart-ring" id="analytics-sla-ring">
+                <div class="circle-chart-inner">
+                  <span style="font-size: 24px; font-weight: 800; color: var(--accent-primary);" id="sla-percentage-text">94.8%</span>
+                  <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">SLA Conformed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-container">
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>AVG RESOLUTION TIME</span>
+            </div>
+            <div class="kpi-value" style="font-size: 22px;">4m 32s</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Target < 10 minutes</span>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>CUSTOMER SATISFACTION</span>
+            </div>
+            <div class="kpi-value" style="font-size: 22px;">4.92 / 5.0</div>
+            <span style="font-size: 11px; color: #10b981;">Excellent (98.4% favorable)</span>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-header">
+              <span>INTEGRATION STATUS</span>
+            </div>
+            <div class="kpi-value" style="font-size: 22px; color: #10b981;">100% Online</div>
+            <span style="font-size: 11px; color: var(--text-muted);">9 webhook nodes active</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 7: EMAIL AUTOMATION -->
+      <section class="view-section" id="email-view">
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Email Outbox & Delivery Status</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Audit automated responses sent to customers containing AI suggested resolutions.</p>
+
+        <div class="email-grid">
+          <!-- Email previews -->
+          <div class="card email-list-panel" id="email-list-container" style="padding: 0;">
+            <!-- Populated via email.js -->
+          </div>
+
+          <!-- Email Delivery timeline details -->
+          <div class="card email-detail-panel">
+            <div id="email-detail-empty" class="empty-state">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm0 0l8 7 8-7" stroke="currentColor"/></svg>
+              <h3>No Email Selected</h3>
+              <p>Select an automated dispatch item from the inbox pane to audit compliance histories.</p>
+            </div>
+            
+            <div id="email-detail-content" style="display: none;">
+              <h2 id="email-view-subject" style="font-size: 18px; font-weight: 700; margin-bottom: 4px;"></h2>
+              <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+                From: <span id="email-view-from" style="font-weight: 600;"></span> &rarr; To: <span id="email-view-to" style="font-weight: 600;"></span>
+              </div>
+              
+              <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 20px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text-secondary);" id="email-view-body">
+              </div>
+
+              <div class="drawer-section-title">Delivery Audit Trail</div>
+              <div class="delivery-timeline" id="email-delivery-timeline">
+                <!-- Dynamic timeline items -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 9: INTEGRATIONS -->
+      <section class="view-section" id="integrations-view">
+        <div class="workflow-control-bar" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Integrations</h1>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Connect TicketNova with your essential tools and workflows.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-request-integration" onclick="showToast('Integration Requested', 'Our support team will contact you to configure custom endpoints.', 'info')">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Request Integration</span>
+          </button>
+        </div>
+
+        <!-- Jira Featured Integration Card -->
+        <div class="card" style="margin-bottom: 24px; padding: 24px; background-color: var(--bg-sidebar);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <div style="width: 54px; height: 54px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: #0052cc; font-size: 20px;">J</div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h3 style="font-size: 18px; font-weight: 700;">Jira Integration</h3>
+                  <span class="badge" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 10px;">Connected</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px; line-height: 1.5; max-width: 650px;">
+                  Two-way sync between TicketNova tickets and Jira issues. Automatically create bugs from user reports and track engineering progress without leaving the dashboard.
+                </p>
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="showToast('Jira Configuration', 'Opening Jira endpoint mapping settings...', 'info')">Configure</button>
+          </div>
+          <div style="border-top: 1px solid var(--border-color); padding-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+            <div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Sync Status</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>
+                Active (Real-time)
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Project Mapping</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">3 Projects Synced</div>
+            </div>
+            <div>
+              <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Last Sync</div>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">Today, 10:42 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter tabs -->
+        <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px;">
+          <span class="integration-tab active" data-type="all" style="cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 8px; margin-bottom: -10px;">All Integrations</span>
+          <span class="integration-tab" data-type="communication" style="cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-bottom: 8px;">Communication</span>
+          <span class="integration-tab" data-type="crm" style="cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-bottom: 8px;">CRM</span>
+          <span class="integration-tab" data-type="dev" style="cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-bottom: 8px;">Developer Tools</span>
+        </div>
+
+        <!-- Integrations Grid -->
+        <div class="kpi-container" id="integrations-list-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <!-- Slack -->
+          <div class="card integration-card-item" data-category="communication" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: #4a154b;">S</div>
+                <span class="badge" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 10px;">Connected</span>
+              </div>
+              <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Slack</h4>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Receive ticket notifications, reply directly from channels, and collaborate on complex issues without leaving Slack.</p>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Slack Configuration', 'Opening Slack webhook mapping settings...', 'info')">Configure</button>
+          </div>
+
+          <!-- Salesforce -->
+          <div class="card integration-card-item" data-category="crm" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: #00a1e0;">SF</div>
+                <span class="badge" style="background-color: var(--border-color); color: var(--text-secondary); font-size: 10px;">Not Connected</span>
+              </div>
+              <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Salesforce</h4>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Sync customer profiles, view account health, and track MRR alongside support tickets for full context.</p>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; font-size: 12px;" onclick="showToast('Connecting Salesforce', 'Redirecting to Salesforce OAuth page...', 'info')">Connect</button>
+          </div>
+
+          <!-- Zendesk Migration -->
+          <div class="card integration-card-item" data-category="crm" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: #03363d;">Z</div>
+                <span class="badge" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 10px;">Connected</span>
+              </div>
+              <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Zendesk Migration</h4>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Import historical tickets, users, and macros from Zendesk to TicketNova seamlessly.</p>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Zendesk Settings', 'Synchronizing historic database logs...', 'info')">Configure</button>
+          </div>
+
+          <!-- Email -->
+          <div class="card integration-card-item" data-category="communication" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: var(--accent-primary);">@</div>
+                <span class="badge" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 10px;">Connected</span>
+              </div>
+              <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Email (SMTP/IMAP)</h4>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Connect custom email domains to route support inquiries directly into your TicketNova resolution queues.</p>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Email Settings', 'Opening mail server credentials dialog...', 'info')">Configure</button>
+          </div>
+
+          <!-- Custom Webhooks -->
+          <div class="card integration-card-item" data-category="dev" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: var(--bg-app); font-weight: 800; color: #f25f22;">W</div>
+                <span class="badge" style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 10px;">2 Active</span>
+              </div>
+              <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Custom Webhooks</h4>
+              <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Build your own workflows by sending real-time HTTP requests to external endpoints upon ticket resolution updates.</p>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Webhooks Settings', 'Opening webhooks editor interface...', 'info')">Configure</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 8: SETTINGS -->
+      <section class="view-section" id="settings-view">
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Settings</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Manage corporate profile configuration preferences and safety filters.</p>
+
+        <div class="dashboard-grid">
+          <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="card-title">User Profile Details</div>
+
+            <!-- Profile Picture Section -->
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label>Profile Picture</label>
+              <div style="display: flex; align-items: center; gap: 16px; margin-top: 6px;">
+                <div id="settings-avatar-preview" style="width: 54px; height: 54px; border-radius: 50%; background-color: var(--accent-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; overflow: hidden; position: relative; transition: background-color var(--transition-speed);">
+                  <img id="settings-avatar-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                  <span id="settings-avatar-preview-txt">PC</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button type="button" class="btn btn-secondary" id="btn-upload-photo" style="padding: 6px 12px; font-size: 12px; cursor: pointer;">Upload Photo</button>
+                  <button type="button" class="btn btn-secondary" id="btn-remove-photo" style="padding: 6px 12px; font-size: 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.2); cursor: pointer;">Remove</button>
+                  <input type="file" id="settings-photo-input" accept="image/*" style="display: none;">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Select Profile Theme Color</label>
+              <div id="avatar-color-selector" style="display: flex; gap: 10px; margin-top: 6px; margin-bottom: 12px;">
+                <div class="avatar-color-choice selected" data-color="#2563eb" style="width: 32px; height: 32px; border-radius: 50%; background-color: #2563eb; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
+                <div class="avatar-color-choice" data-color="#10b981" style="width: 32px; height: 32px; border-radius: 50%; background-color: #10b981; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
+                <div class="avatar-color-choice" data-color="#4f46e5" style="width: 32px; height: 32px; border-radius: 50%; background-color: #4f46e5; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
+                <div class="avatar-color-choice" data-color="#d97706" style="width: 32px; height: 32px; border-radius: 50%; background-color: #d97706; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
+                <div class="avatar-color-choice" data-color="#7c3aed" style="width: 32px; height: 32px; border-radius: 50%; background-color: #7c3aed; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="settings-fullname">Full Name</label>
+              <input type="text" class="form-control" id="settings-fullname" value="Pranjal Choudhary">
+            </div>
+
+            <div class="form-group">
+              <label for="settings-email">Email Address</label>
+              <input type="email" class="form-control" id="settings-email" value="pranjal.choudhary@ticketnova.ai">
+            </div>
+
+            <div class="form-group">
+              <label for="settings-role">Platform Role</label>
+              <input type="text" class="form-control" id="settings-role" value="Administrator" disabled style="opacity: 0.7;">
+            </div>
+
+            <button class="btn btn-primary" id="btn-save-settings">Save Profile changes</button>
+          </div>
+
+          <!-- Log Out Section in Settings -->
+          <div class="card" style="display: flex; flex-direction: column; gap: 16px; border-color: rgba(239, 68, 68, 0.2);">
+            <div class="card-title" style="color: #ef4444;">Session Management</div>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+              Sign out of your active TicketNova workspace session. You will need to enter your email and password to log in again.
+            </p>
+            <button class="btn" id="btn-settings-logout" style="background-color: #ef4444; color: white; border: none; font-weight: 700; width: fit-content; cursor: pointer;">
+              Log Out of Account
+            </button>
+          </div>
+
+          <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="card-title">System Preferences</div>
+            
+            <div class="form-group">
+              <label for="settings-theme">Active UI Theme</label>
+              <select class="form-control" id="settings-theme-select">
+                <option value="light">Light Theme Mode</option>
+                <option value="dark">Dark Theme Mode</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="settings-language">Interface Language</label>
+              <select class="form-control" id="settings-lang-select">
+                <option value="en">English (US)</option>
+                <option value="es">Español (ES)</option>
+                <option value="de">Deutsch (DE)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; margin-top: 8px;">
+                <input type="checkbox" id="settings-notif-checkbox" checked style="width: 16px; height: 16px;">
+                <span>Enable System Sound Alerts</span>
+              </label>
+            </div>
+            
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500;">
+                <input type="checkbox" id="settings-auto-chk" checked style="width: 16px; height: 16px;">
+                <span>Auto-allocate tickets with confidence score > 95%</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Ticket Details Drawer backdrop overlay -->
+  <div class="drawer-backdrop" id="ticket-drawer-backdrop">
+    <div class="drawer" id="ticket-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title" id="drawer-ticket-id">TKT-1024</span>
+        <button class="drawer-close" id="drawer-close-btn" aria-label="Close details">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      
+      <div class="drawer-content">
+        <div>
+          <h2 id="drawer-subject" style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">API Authentication failing in Production</h2>
+          <div style="display: flex; gap: 8px;" id="drawer-badges">
+            <span class="badge badge-priority-urgent">Urgent</span>
+            <span class="badge badge-status-open">Open</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Description</div>
+          <p id="drawer-desc" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);">
+            Details.
+          </p>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">AI Engine Classification</div>
+          <div class="ai-recommendation-box">
+            <span class="ai-box-badge" id="drawer-ai-confidence">97% Confident</span>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 12px;"><strong>Predicted Category:</strong> <span id="drawer-ai-category">Authentication</span></span>
+              <span style="font-size: 12px;"><strong>Suggested Action:</strong> <span id="drawer-ai-dept">Engineering Department Escalation</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Suggested AI Response</div>
+          <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: var(--text-secondary);" id="drawer-resolution-text">
+            Solution content.
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">History timeline</div>
+          <div class="timeline-flow" id="drawer-timeline-flow">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div>
+          <div class="drawer-section-title">Attachments</div>
+          <div id="drawer-attachments-list" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-actions">
+        <button class="btn btn-primary" id="btn-drawer-resolve" style="flex-grow: 1;">Resolve Ticket</button>
+        <button class="btn btn-secondary" id="btn-drawer-escalate">Escalate</button>
+        <button class="btn btn-secondary" id="btn-drawer-assign">Re-assign Agent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create New Ticket Dialog Modal -->
+  <div class="modal-backdrop" id="new-ticket-modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Create Premium Support Ticket</span>
+        <button class="drawer-close" id="modal-close-btn" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <form id="new-ticket-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="tkt-subject">Subject Header</label>
+            <input type="text" class="form-control" id="tkt-subject" required placeholder="Briefly summarize the system anomaly...">
+          </div>
+
+          <div class="form-group">
+            <label for="tkt-desc">Detailed Description</label>
+            <textarea class="form-control" id="tkt-desc" rows="4" required placeholder="Describe steps to reproduce, errors encountered, logs, etc..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tkt-dept">Department Target</label>
+              <select class="form-control" id="tkt-dept" required>
+                <option value="Customer Support">Customer Support</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Billing">Billing</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tkt-category">Incident Category</label>
+              <select class="form-control" id="tkt-category" required>
+                <option value="Authentication">Authentication</option>
+                <option value="Payment Issues">Payment Issues</option>
+                <option value="Workspace Settings">Workspace Settings</option>
+                <option value="Webhooks">Webhooks</option>
+                <option value="Database Performance">Database Performance</option>
+                <option value="User Experience">User Experience</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tkt-priority">Severity / Priority</label>
+              <select class="form-control" id="tkt-priority" required>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tkt-file">Attachments (Optional)</label>
+              <input type="file" class="form-control" id="tkt-file" style="padding: 6px;">
+            </div>
+          </div>
+
+          <!-- AI Prediction Processing Loader State -->
+          <div id="ai-loading-container" style="display: none; align-items: center; justify-content: center; gap: 12px; margin-top: 16px;">
+            <div class="loader-spinner"></div>
+            <span style="font-size: 13px; font-weight: 600; color: var(--accent-primary);">Analyzing with TicketNova Core...</span>
+          </div>
+
+          <!-- AI Prediction Results Card -->
+          <div class="ai-prediction-overlay" id="ai-prediction-card" style="display: none;">
+            <div class="ai-prediction-header">
+              <div class="ai-prediction-logo">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor" stroke-width="2"/></svg>
+                <span>AI Prediction Assessment</span>
+              </div>
+              <span style="font-size: 11px; font-weight: 700; color: #10b981;" id="ai-pred-confidence">96% confidence</span>
+            </div>
+            
+            <div class="ai-prediction-grid">
+              <div class="ai-pred-item">
+                <div class="ai-pred-label">Suggested Priority</div>
+                <div class="ai-pred-val" id="ai-pred-priority">High</div>
+              </div>
+              <div class="ai-pred-item">
+                <div class="ai-pred-label">Suggested Department</div>
+                <div class="ai-pred-val" id="ai-pred-dept">Engineering</div>
+              </div>
+              <div class="ai-pred-item" style="grid-column: span 2;">
+                <div class="ai-pred-label">Resolution Guide Index</div>
+                <div class="ai-pred-val" id="ai-pred-category" style="color: var(--accent-primary);">Auth Gateway Issues</div>
+              </div>
+            </div>
+            <span style="font-size: 11px; color: var(--text-secondary);">Confirm submission to insert ticket.</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-modal-submit">Create Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Stack -->
+  <div class="toast-container" id="toast-stack-container">
+    <!-- Rendered dynamically -->
+  </div>
+
+  <!-- Javascript Modules Load -->
+  <script src="js/data.js"></script>
+  <script src="js/tickets.js"></script>
+  <script src="js/assistant.js"></script>
+  <script src="js/knowledge.js"></script>
+  <script src="js/workflow.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/email.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
