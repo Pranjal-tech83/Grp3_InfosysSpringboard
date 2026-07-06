@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.TicketNovaTickets.init();
   window.TicketNovaAssistant.init();
   window.TicketNovaKB.init();
-  window.TicketNovaWorkflow.init();
+  
   window.TicketNovaAnalytics.init();
   window.TicketNovaEmail.init();
   window.TicketNovaSettings.init();
@@ -238,7 +238,7 @@ function initAuthEngine() {
   const loginScreen = document.getElementById("login-screen");
   const appContainer = document.getElementById("app-container");
   const loginForm = document.getElementById("login-form");
-  const logoutBtn = document.getElementById("sidebar-logout-btn");
+  const logoutBtn = document.getElementById("btn-settings-logout");
   const loginSubmitBtn = document.getElementById("btn-login-submit");
 
   // Check login state
@@ -264,7 +264,7 @@ function initAuthEngine() {
       
       // Update UI panels with user initials
       const storedName = localStorage.getItem("nova-user-name") || "Pranjal Choudhary";
-      document.getElementById("sidebar-user-name").textContent = storedName;
+      
       
       if (window.TicketNovaSettings) {
         window.TicketNovaSettings.updateUIInitials(storedName);
@@ -280,7 +280,7 @@ function initAuthEngine() {
       loginSubmitBtn.disabled = false;
       loginSubmitBtn.innerHTML = `<span>Sign In</span>`;
 
-      showToast("Sign In Successful", "Welcome to TicketNova Dashboard.", "success");
+      showToast("Sign In Successful", "Welcome to SupportPilot Dashboard.", "success");
     }, 1000);
   });
 
@@ -295,7 +295,7 @@ function initAuthEngine() {
     appContainer.style.display = "none";
     loginScreen.classList.add("active");
     
-    showToast("Logged Out", "Signed out of TicketNova session.", "info");
+    showToast("Logged Out", "Signed out of SupportPilot session.", "info");
   });
 }
 
