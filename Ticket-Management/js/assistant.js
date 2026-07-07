@@ -1,133 +1,128 @@
-// assistant.js - AI Assistant Page View Controller
+// assistant.js - Smart AI Chatbox Controller
 
 function initAssistantModule() {
-  const ticketSelect = document.getElementById("assistant-ticket-select");
-  if (!ticketSelect) return;
+  const sendBtn = document.getElementById("btn-send-message");
+  const chatInput = document.getElementById("chat-input");
 
-  // Populate selection list from current tickets
-  populateAssistantTicketDropdown();
+  if (!sendBtn || !chatInput) return;
 
-  // Handle dropdown change event
-  ticketSelect.addEventListener("change", (e) => {
-    loadAssistantTicketData(e.target.value);
-  });
-
-  // Action Buttons
-  document.getElementById("btn-assist-copy").addEventListener("click", copyAssistantResolution);
-  document.getElementById("btn-assist-regenerate").addEventListener("click", regenerateAssistantResolution);
-
-  // Load first ticket by default
-  const tickets = window.TicketNovaTickets.getTickets();
-  if (tickets.length > 0) {
-    loadAssistantTicketData(tickets[0].id);
-  }
-
-  // Handle sidebar target clicks to refresh list
-  document.getElementById("dash-action-assistant").addEventListener("click", () => {
-    populateAssistantTicketDropdown();
-    const tickets = window.TicketNovaTickets.getTickets();
-    if (tickets.length > 0) {
-      loadAssistantTicketData(tickets[0].id);
+  sendBtn.addEventListener("click", handleSendMessage);
+  chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
     }
   });
 }
 
-function populateAssistantTicketDropdown() {
-  const ticketSelect = document.getElementById("assistant-ticket-select");
-  ticketSelect.innerHTML = "";
+function handleSendMessage() {
+  const chatInput = document.getElementById("chat-input");
+  const message = chatInput.value.trim();
+  if (!message) return;
 
-  const tickets = window.TicketNovaTickets.getTickets();
-  if (tickets.length === 0) {
-    ticketSelect.innerHTML = `<option value="">No Active Tickets Available</option>`;
+  appendMessage(message, "user");
+  chatInput.value = "";
+  chatInput.disabled = true;
+  document.getElementById("btn-send-message").disabled = true;
+
+  // Simulate AI typing delay
+  setTimeout(() => {
+    generateAIResponse(message);
+    chatInput.disabled = false;
+    document.getElementById("btn-send-message").disabled = false;
+    chatInput.focus();
+  }, 1000);
+}
+
+function appendMessage(text, sender, isHTML = false) {
+  const chatMessages = document.getElementById("chat-messages");
+  const msgDiv = document.createElement("div");
+  msgDiv.className = `chat-message ${sender}`;
+  
+  if (sender === "user") {
+    msgDiv.style.cssText = "align-self: flex-end; background-color: var(--accent-primary); color: white; padding: 12px 16px; border-radius: 8px; max-width: 80%;";
+  } else {
+    msgDiv.style.cssText = "align-self: flex-start; background-color: var(--bg-sidebar); padding: 12px 16px; border-radius: 8px; max-width: 80%; border: 1px solid var(--border-color);";
+  }
+
+  if (isHTML) {
+    msgDiv.innerHTML = text;
+  } else {
+    const p = document.createElement("p");
+    p.style.margin = "0";
+    p.style.fontSize = "14px";
+    p.textContent = text;
+    msgDiv.appendChild(p);
+  }
+
+  chatMessages.appendChild(msgDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function generateAIResponse(userMessage) {
+  const lowerMsg = userMessage.toLowerCase();
+  
+  if (lowerMsg.includes("book") || lowerMsg.includes("confirm")) {
+    appendMessage(`
+      <p style="margin: 0 0 10px 0; font-size: 14px;">Booking confirmed! Your tickets have been issued successfully.</p>
+      <div style="padding: 10px; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 4px; font-size: 13px;">
+        <strong>Booking Reference:</strong> SP-${Math.floor(1000 + Math.random() * 9000)}<br>
+        <strong>Status:</strong> Confirmed<br>
+        A detailed itinerary has been sent to your email.
+      </div>
+    `, "ai", true);
+    
+    // Also trigger global toast
+    if (typeof showToast === "function") {
+      showToast("Booking Confirmed", "Your trip has been booked successfully.", "success");
+    }
     return;
   }
 
-  tickets.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id;
-    opt.textContent = `${t.id} - ${t.subject} (${t.status})`;
-    ticketSelect.appendChild(opt);
-  });
-}
-
-function loadAssistantTicketData(ticketId) {
-  const tickets = window.TicketNovaTickets.getTickets();
-  const ticket = tickets.find(t => t.id === ticketId);
-  if (!ticket) return;
-
-  // Populate Details
-  document.getElementById("assist-confidence").textContent = `${ticket.confidenceScore}%`;
-  
-  const escalationLabel = document.getElementById("assist-escalation");
-  if (ticket.priority === "Urgent" || ticket.priority === "High") {
-    escalationLabel.textContent = "High Risk";
-    escalationLabel.style.color = "#ef4444";
-  } else {
-    escalationLabel.textContent = "Low Risk";
-    escalationLabel.style.color = "#10b981";
+  if (lowerMsg.includes("to ") || lowerMsg.includes("from ") || lowerMsg.includes("trip") || lowerMsg.includes("plan")) {
+    const aiHTML = `
+      <p style="margin: 0 0 10px 0; font-size: 14px;">I've analyzed the best routes and prices for your requested trip. Here is the comparison:</p>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 13px; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 8px;">Provider</th>
+            <th style="padding: 8px;">Duration</th>
+            <th style="padding: 8px;">Price</th>
+            <th style="padding: 8px;">Recommendation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px;">SkyLink Airways</td>
+            <td style="padding: 8px;">4h 15m</td>
+            <td style="padding: 8px;">$345</td>
+            <td style="padding: 8px;"><span class="badge badge-status-resolved">Best Price</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 8px;">AeroSwift (Direct)</td>
+            <td style="padding: 8px;">3h 50m</td>
+            <td style="padding: 8px;">$410</td>
+            <td style="padding: 8px;"><span class="badge badge-priority-high">Fastest</span></td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">Global Transit Train</td>
+            <td style="padding: 8px;">12h 30m</td>
+            <td style="padding: 8px;">$120</td>
+            <td style="padding: 8px;"><span class="badge badge-status-open">Eco-friendly</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin: 0 0 10px 0; font-size: 14px;">Based on your preferences, I recommend <strong>SkyLink Airways</strong> for the best balance of price and duration.</p>
+      <button onclick="document.getElementById('chat-input').value = 'Book SkyLink Airways'; document.getElementById('btn-send-message').click();" class="btn btn-primary" style="padding: 6px 12px; font-size: 13px;">Book Complete Ticket ($345)</button>
+    `;
+    appendMessage(aiHTML, "ai", true);
+    return;
   }
 
-  document.getElementById("assist-diagnosis-summary").innerHTML = `
-    <strong>Identified Category:</strong> ${ticket.aiClassification.category}<br>
-    <strong>Core Anomaly Detected:</strong> "${ticket.subject}"<br>
-    <strong>Analysis Context:</strong> The description reveals anomalies in ${ticket.category}. Primary severity is marked as ${ticket.severity}.
-  `;
-
-  document.getElementById("assist-resolution-body").textContent = ticket.suggestedResolution;
-
-  // Render Troubleshoot Checklist
-  const troubleshootContainer = document.getElementById("assist-troubleshoot-list");
-  troubleshootContainer.innerHTML = "";
-
-  // Split resolution suggestions into list items
-  const steps = [
-    `Locate reference indicators for category "${ticket.category}"`,
-    `Trace logs to identify primary fault points`,
-    `Deploy recommended fix: "${ticket.suggestedResolution.slice(0, 50)}..."`,
-    `Test communication lines and verify response payload`,
-    `Close support ticket TKT-${ticket.id.slice(-4)}`
-  ];
-
-  steps.forEach((stepText, idx) => {
-    const li = document.createElement("li");
-    li.style.cssText = "display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary);";
-    li.innerHTML = `
-      <input type="checkbox" id="chk-step-${idx}" style="cursor: pointer; width: 16px; height: 16px;">
-      <label for="chk-step-${idx}" style="cursor: pointer; user-select: none;">${stepText}</label>
-    `;
-    troubleshootContainer.appendChild(li);
-  });
+  // Default response
+  appendMessage("I can help you plan your trip! Just tell me where you are starting from and where you want to go. For example: 'Plan a trip from New York to London'.", "ai");
 }
 
-function copyAssistantResolution() {
-  const content = document.getElementById("assist-resolution-body").textContent;
-  navigator.clipboard.writeText(content).then(() => {
-    showToast("Copied to Clipboard", "AI resolution guidelines copied successfully.", "success");
-  }).catch(() => {
-    showToast("Copy Failed", "Failed to access clipboard. Copy text manually.", "error");
-  });
-}
-
-function regenerateAssistantResolution() {
-  const ticketSelect = document.getElementById("assistant-ticket-select");
-  const ticketId = ticketSelect.value;
-  if (!ticketId) return;
-
-  const contentBox = document.getElementById("assist-resolution-body");
-  contentBox.style.opacity = "0.5";
-  showToast("Regenerating Response", "Querying vector indices for context...", "info");
-
-  setTimeout(() => {
-    contentBox.style.opacity = "1";
-    const baseText = contentBox.textContent;
-    contentBox.textContent = `[REGENERATED CORE GUIDANCE - ${new Date().toLocaleTimeString()}]\n\n${baseText}\n\nAdditional Checkpoints:\n1. Audit infrastructure routing configurations.\n2. Confirm security firewall assertions are signed properly.`;
-    showToast("Regeneration Completed", "Response updated with deep-scan credentials context.", "success");
-  }, 1200);
-}
-
-// Expose model globally
-window.TicketNovaAssistant = {
-  init: initAssistantModule,
-  populateDropdown: populateAssistantTicketDropdown,
-  loadTicket: loadAssistantTicketData
+// Global hook
+window.SupportPilotAssistant = {
+  init: initAssistantModule
 };
