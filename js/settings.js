@@ -13,7 +13,7 @@ function initSettingsModule() {
       localStorage.removeItem("nova-logged-in");
       document.getElementById("app-container").style.display = "none";
       document.getElementById("login-screen").classList.add("active");
-      showToast("Logged Out", "Signed out of TicketNova session.", "info");
+      showToast("Logged Out", "Signed out of SupportPilot session.", "info");
     });
   }
 
@@ -58,8 +58,8 @@ function initSettingsModule() {
   }
 
   // Sync profile details initially
-  const storedName = localStorage.getItem("nova-user-name") || "Pranjal Choudhary";
-  const storedEmail = localStorage.getItem("nova-user-email") || "pranjal.choudhary@ticketnova.ai";
+  const storedName = localStorage.getItem("nova-user-name") || "Pranjal kumar";
+  const storedEmail = localStorage.getItem("nova-user-email") || "pranjal.kumar@supportpilot.ai";
 
   document.getElementById("settings-fullname").value = storedName;
   document.getElementById("settings-email").value = storedEmail;
@@ -196,7 +196,7 @@ function saveProfileSettings() {
 }
 
 // Expose settings module
-window.TicketNovaSettings = {
+window.SupportPilotSettings = {
   init: initSettingsModule,
   applyAvatarColor: applyAvatarColor,
   applyProfileImage: applyProfileImage,

@@ -4,59 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TicketNova - AI Ticket Resolution Platform</title>
+  <title>SupportPilot - AI Ticket Resolution Platform</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<!-- Login Screen Overlay -->
-<div id="login-screen" class="active">
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="logo-icon">N</div>
-      <span>TicketNova</span>
-    </div>
-    <h2 style="font-weight: 800; font-size: 22px; letter-spacing: -0.5px;">Welcome back</h2>
-    <p class="login-subtitle">Sign in to your enterprise AI resolution platform.</p>
-
-    <form id="login-form">
-      <div class="form-group">
-        <label for="login-email">Work Email</label>
-        <input type="email" id="login-email" class="form-control" required placeholder="name@company.com"
-          value="pranjal.choudhary@ticketnova.ai">
-      </div>
-
-      <div class="form-group" style="margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <label for="login-password">Password</label>
-          <a href="#" style="font-size: 11px; color: var(--accent-primary);"
-            onclick="showToast('Password Reset', 'Password recovery instructions sent to email.', 'info')">Forgot
-            password?</a>
-        </div>
-        <input type="password" id="login-password" class="form-control" required placeholder="••••••••"
-          value="password123">
-      </div>
-
-      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;"
-        id="btn-login-submit">
-        <span>Sign In</span>
-      </button>
-    </form>
-  </div>
-</div>
-
-<div id="app-container" style="display: none;">
+<body>
+<div id="app-container" style="display: flex;">
 
   <!-- Left Sidebar Menu -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo-container">
         <div class="logo-icon">N</div>
-        <span class="logo-text">TicketNova</span>
+        <span class="logo-text">SupportPilot</span>
       </div>
-      <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
-        <svg viewBox="0 0 24 24" width="20" height="20">
-          <path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
+      
     </div>
 
     <nav class="sidebar-nav">
@@ -83,20 +44,8 @@
         </svg>
         <span class="nav-label">AI Assistant</span>
       </div>
-      <div class="nav-item" data-target="kb">
-        <svg viewBox="0 0 24 24">
-          <path
-            d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1M20 17V2H6.5"
-            stroke="currentColor" />
-        </svg>
-        <span class="nav-label">Knowledge Base</span>
-      </div>
-      <div class="nav-item" data-target="workflow">
-        <svg viewBox="0 0 24 24">
-          <path d="M20 7h-9m0 0l4-4m-4 4l4 4M4 17h9m0 0l-4-4m4 4l-4 4" stroke="currentColor" />
-        </svg>
-        <span class="nav-label">Agent Workflow</span>
-      </div>
+      
+      
       <div class="nav-item" data-target="analytics">
         <svg viewBox="0 0 24 24">
           <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" />
@@ -135,7 +84,7 @@
         <span id="sidebar-avatar-txt">PC</span>
       </div>
       <div class="user-info" style="display: flex; flex-direction: column;">
-        <span class="user-name" id="sidebar-user-name">Pranjal Choudhary</span>
+        <span class="user-name" id="sidebar-user-name">Pranjal kumar</span>
         <span class="user-role">Administrator</span>
       </div>
       <button id="sidebar-logout-btn" class="nav-action-btn"
@@ -154,18 +103,21 @@
 
     <!-- Top Sticky Navbar -->
     <header class="navbar">
+      <button class="nav-action-btn" id="navbar-sidebar-toggle" aria-label="Toggle Sidebar" style="margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
       <div class="search-container">
         <svg class="search-icon" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" stroke="currentColor" />
         </svg>
-        <input type="text" class="search-input" id="global-search" placeholder="Search tickets, knowledge base...">
+        <input type="text" class="search-input" id="global-search" placeholder="Search tickets...">
       </div>
 
       <div class="navbar-actions">
         <div class="ai-status-badge">
           <span class="ai-indicator-dot"></span>
-          <span>Nova Engine Active</span>
+          <span>SupportPilot Engine Active</span>
         </div>
 
         <button class="nav-action-btn" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
@@ -204,7 +156,7 @@
     <section class="view-section active-view" id="dashboard-view">
       <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Overview</h1>
       <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and
-        resolution telemetry for TicketNova.</p>
+        resolution telemetry for SupportPilot.</p>
 
       <!-- KPI Metrics Grid -->
       <div class="kpi-container">
@@ -316,12 +268,7 @@
               </svg>
               <span>Create New Ticket</span>
             </button>
-            <button class="quick-action-btn" id="dash-action-run-wf">
-              <svg viewBox="0 0 24 24">
-                <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
-              </svg>
-              <span>Simulate Agent Workflow</span>
-            </button>
+            
             <button class="quick-action-btn" id="dash-action-assistant">
               <svg viewBox="0 0 24 24">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" />
@@ -427,150 +374,22 @@
 
     <!-- VIEW 3: AI ASSISTANT -->
     <section class="view-section" id="assistant-view">
-      <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Nova AI Assistant</h1>
-      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Instant resolution generation,
-        confidence assessments, and troubleshooting procedures.</p>
-
-      <div class="dashboard-grid">
-        <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="card-title">Select Active Reference Ticket</div>
-          <select class="table-filter-select" id="assistant-ticket-select" style="width: 100%;">
-            <!-- Populated dynamically -->
-          </select>
-
-          <div class="meta-grid">
-            <div class="meta-item">
-              <span class="meta-label">AI Confidence Score</span>
-              <span class="meta-value" id="assist-confidence" style="color: var(--accent-primary);">97%</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">Escalation Threat</span>
-              <span class="meta-value" id="assist-escalation" style="color: #ef4444;">Low Risk</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>AI Diagnosis Summary</label>
-            <div id="assist-diagnosis-summary"
-              style="font-size: 14px; line-height: 1.6; color: var(--text-secondary); background-color: var(--bg-app); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-              <!-- Dynamic text -->
-            </div>
+        <div class="view-header">
+          <div>
+            <h2>Smart AI Chatbox</h2>
+            <p>Plan your trip from location to destination, compare ticket prices, and book seamlessly.</p>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-title">Suggested Resolution Template</div>
-          <div
-            style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-            <pre id="assist-resolution-body"
-              style="font-family: monospace; font-size: 13px; white-space: pre-wrap; line-height: 1.6; color: var(--text-secondary);">
-                <!-- Resolution body dynamic -->
-              </pre>
-          </div>
-
-          <div class="card-title" style="font-size: 14px;">Step-by-Step Troubleshooting Procedure</div>
-          <ul id="assist-troubleshoot-list"
-            style="list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
-            <!-- Troubleshooting checkboxes dynamic -->
-          </ul>
-
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary" id="btn-assist-copy">
-              <span>Copy Instructions</span>
-            </button>
-            <button class="btn btn-secondary" id="btn-assist-regenerate">
-              <span>Regenerate Solution</span>
-            </button>
-          </div>
+        <div id="chat-messages" style="flex-grow: 1; overflow-y: auto; padding: 16px; background-color: var(--bg-primary); border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;">
+          <!-- Messages go here -->
         </div>
-      </div>
-    </section>
-
-    <!-- VIEW 4: KNOWLEDGE BASE -->
-    <section class="view-section" id="kb-view">
-      <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Knowledge Base</h1>
-      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Browse system documentation
-        templates and execute dynamic AI vector checks.</p>
-
-      <div class="kb-grid">
-        <!-- Categories & Navigation -->
-        <div class="kb-sidebar-nav">
-          <div class="card" style="padding: 16px;">
-            <input type="text" class="table-filter-select" id="kb-search-bar" placeholder="Search documentation..."
-              style="width: 100%; margin-bottom: 12px;">
-
-            <div class="kb-list" id="kb-category-list">
-              <div class="kb-item active" data-category="All">
-                <span>All Documents</span>
-              </div>
-              <div class="kb-item" data-category="Authentication">
-                <span>Authentication</span>
-              </div>
-              <div class="kb-item" data-category="Billing">
-                <span>Billing & Payments</span>
-              </div>
-              <div class="kb-item" data-category="Database">
-                <span>Database Operations</span>
-              </div>
-              <div class="kb-item" data-category="API">
-                <span>API Integration</span>
-              </div>
-            </div>
-          </div>
+        <div style="display: flex; gap: 12px; align-items: center; padding: 16px; background-color: var(--bg-sidebar); border-radius: 8px; border: 1px solid var(--border-color);">
+          <input type="text" id="chat-input" class="form-control" style="flex-grow: 1;" placeholder="E.g., I need a trip plan from New York to London next week...">
+          <button id="btn-send-message" class="btn btn-primary" style="padding: 10px 24px;">Send</button>
         </div>
+      </section>
+      
 
-        <!-- Documentation and Generated Articles -->
-        <div class="kb-content-area">
-          <div class="kb-solution-box" id="kb-ai-solution-panel" style="display: none;">
-            <div class="kb-solution-header">
-              <svg viewBox="0 0 24 24" width="20" height="20">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor" stroke-width="2" />
-              </svg>
-              <span>AI Generated Real-Time Solution</span>
-            </div>
-            <p id="kb-ai-content" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);"></p>
-          </div>
-
-          <div class="card" id="kb-docs-card">
-            <h2 id="kb-doc-title" style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">OAuth Endpoint
-              Signature Troubleshooting</h2>
-            <div id="kb-doc-body" style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);">
-              Select an article or query search term.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW 5: MULTI-AGENT WORKFLOW -->
-    <section class="view-section" id="workflow-view">
-      <div class="workflow-control-bar">
-        <div>
-          <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Multi-Agent AI Pipeline</h1>
-          <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Watch specialized AI agents
-            coordinate diagnostics and resolutions sequentially.</p>
-        </div>
-        <button class="btn btn-primary" id="btn-trigger-workflow">
-          <svg viewBox="0 0 24 24">
-            <path d="M5 3l14 9-14 9V3z" fill="currentColor" />
-          </svg>
-          <span>Simulate Ticket Flow</span>
-        </button>
-      </div>
-
-      <div class="workflow-pipeline" id="workflow-pipeline-container">
-        <!-- Rendered dynamically by workflow.js -->
-      </div>
-
-      <div class="card" style="margin-top: 24px;">
-        <div class="card-title">Active Resolution Sequence Logs</div>
-        <div id="workflow-overall-logs"
-          style="font-family: monospace; font-size: 12px; background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; height: 180px; overflow-y: auto; line-height: 1.7;">
-          <!-- Logs populated during simulator execution -->
-          Waiting to execute pipeline simulation. Select "Simulate Ticket Flow" above.
-        </div>
-      </div>
-    </section>
 
     <!-- VIEW 6: ANALYTICS -->
     <section class="view-section" id="analytics-view">
@@ -683,7 +502,7 @@
         style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Integrations</h1>
-          <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Connect TicketNova with your
+          <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Connect SupportPilot with your
             essential tools and workflows.</p>
         </div>
         <button class="btn btn-primary" id="btn-request-integration"
@@ -711,7 +530,7 @@
               </div>
               <p
                 style="color: var(--text-secondary); font-size: 13px; margin-top: 4px; line-height: 1.5; max-width: 650px;">
-                Two-way sync between TicketNova tickets and Jira issues. Automatically create bugs from user reports and
+                Two-way sync between SupportPilot tickets and Jira issues. Automatically create bugs from user reports and
                 track engineering progress without leaving the dashboard.
               </p>
             </div>
@@ -816,7 +635,7 @@
             </div>
             <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Zendesk Migration</h4>
             <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Import historical tickets,
-              users, and macros from Zendesk to TicketNova seamlessly.</p>
+              users, and macros from Zendesk to SupportPilot seamlessly.</p>
           </div>
           <button class="btn btn-secondary" style="width: 100%; font-size: 12px;"
             onclick="showToast('Zendesk Settings', 'Synchronizing historic database logs...', 'info')">Configure</button>
@@ -835,7 +654,7 @@
             </div>
             <h4 style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Email (SMTP/IMAP)</h4>
             <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5;">Connect custom email domains to
-              route support inquiries directly into your TicketNova resolution queues.</p>
+              route support inquiries directly into your SupportPilot resolution queues.</p>
           </div>
           <button class="btn btn-secondary" style="width: 100%; font-size: 12px;"
             onclick="showToast('Email Settings', 'Opening mail server credentials dialog...', 'info')">Configure</button>
@@ -920,7 +739,7 @@
 
           <div class="form-group">
             <label for="settings-email">Email Address</label>
-            <input type="email" class="form-control" id="settings-email" value="pranjal.kumar@ticketnova.ai">
+            <input type="email" class="form-control" id="settings-email" value="pranjal.kumar@supportpilot.ai">
           </div>
 
           <div class="form-group">
@@ -936,7 +755,7 @@
           style="display: flex; flex-direction: column; gap: 16px; border-color: rgba(239, 68, 68, 0.2);">
           <div class="card-title" style="color: #ef4444;">Session Management</div>
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-            Sign out of your active TicketNova workspace session. You will need to enter your email and password to log
+            Sign out of your active SupportPilot workspace session. You will need to enter your email and password to log
             in again.
           </p>
           <button class="btn" id="btn-settings-logout"
@@ -1127,7 +946,7 @@
         <div id="ai-loading-container"
           style="display: none; align-items: center; justify-content: center; gap: 12px; margin-top: 16px;">
           <div class="loader-spinner"></div>
-          <span style="font-size: 13px; font-weight: 600; color: var(--accent-primary);">Analyzing with TicketNova
+          <span style="font-size: 13px; font-weight: 600; color: var(--accent-primary);">Analyzing with SupportPilot
             Core...</span>
         </div>
 

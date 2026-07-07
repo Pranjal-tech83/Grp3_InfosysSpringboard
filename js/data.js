@@ -1,4 +1,4 @@
-// data.js - Mock Data Layer for TicketNova Platform
+// data.js - Mock Data Layer for SupportPilot Platform
 
 const initialTickets = [
   {
@@ -204,7 +204,7 @@ const initialTickets = [
 const mockEmails = [
   {
     id: "EML-101",
-    recipient: "support@ticketnova.ai",
+    recipient: "support@supportpilot.ai",
     sender: "david.miller@acme.com",
     subject: "RE: [TKT-1024] API Authentication failing in Production",
     preview: "Thanks for the response. Synchronizing our local time settings indeed solved the issue.",
@@ -217,7 +217,7 @@ const mockEmails = [
   },
   {
     id: "EML-102",
-    recipient: "billing@ticketnova.ai",
+    recipient: "billing@supportpilot.ai",
     sender: "emily@pixeltech.io",
     subject: "RE: [TKT-1025] Double-charged for monthly enterprise subscription",
     preview: "Please let me know once the charge back transaction has been processed.",
@@ -229,7 +229,7 @@ const mockEmails = [
   },
   {
     id: "EML-103",
-    recipient: "api@ticketnova.ai",
+    recipient: "api@supportpilot.ai",
     sender: "jtaylor@cloudscale.net",
     subject: "RE: [TKT-1027] Webhook delivery failure to target servers",
     preview: "Perfect! We have whitelisted the IP ranges. Thanks for resolving so quickly.",
@@ -241,7 +241,7 @@ const mockEmails = [
   },
   {
     id: "EML-104",
-    recipient: "support@ticketnova.ai",
+    recipient: "support@supportpilot.ai",
     sender: "brian.o@fastdrive.org",
     subject: "Urgent check required: Custom SSO Integration failing validation step",
     preview: "We uploaded our metadata XML but the assertion signature cannot be matched.",
@@ -345,7 +345,7 @@ const agentSteps = [
 ];
 
 // Expose models to window context
-window.TicketNovaData = {
+window.SupportPilotData = {
   initialTickets,
   mockEmails,
   categories,

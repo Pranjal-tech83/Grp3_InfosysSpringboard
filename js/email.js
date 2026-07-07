@@ -3,7 +3,7 @@
 let currentEmails = [];
 
 function initEmailModule() {
-  currentEmails = [...window.TicketNovaData.mockEmails];
+  currentEmails = [...window.SupportPilotData.mockEmails];
   
   renderEmailInboxList();
 
@@ -90,10 +90,10 @@ function loadEmailDetails(emailId) {
 function addAutomatedEmail(ticket) {
   const newEmail = {
     id: `EML-${100 + currentEmails.length + 1}`,
-    recipient: "support@ticketnova.ai",
+    recipient: "support@supportpilot.ai",
     sender: ticket.user.email,
     subject: `RESOLVED: [${ticket.id}] ${ticket.subject}`,
-    preview: `Dear Customer, our AI Engine has resolved your support ticket request.\n\nProposed Action Steps:\n${ticket.suggestedResolution}\n\nAssigned Agent: ${ticket.assignedAgent || 'Nova AI System'}.\nTicketNova Resolution Platform.`,
+    preview: `Dear Customer, our AI Engine has resolved your support ticket request.\n\nProposed Action Steps:\n${ticket.suggestedResolution}\n\nAssigned Agent: ${ticket.assignedAgent || 'Nova AI System'}.\nSupportPilot Resolution Platform.`,
     status: "Delivered",
     history: [
       { date: new Date().toISOString(), status: "Received", details: "Ticket resolution registered in core system." },
@@ -117,7 +117,7 @@ function formatEmailTime(isoString) {
 }
 
 // Expose model globally
-window.TicketNovaEmail = {
+window.SupportPilotEmail = {
   init: initEmailModule,
   addEmail: addAutomatedEmail,
   refreshInbox: renderEmailInboxList

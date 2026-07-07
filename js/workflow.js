@@ -8,7 +8,7 @@ function initWorkflowModule() {
   // Button simulator actions
   document.getElementById("btn-trigger-workflow").addEventListener("click", () => {
     // Pick the first ticket as example context
-    const tickets = window.TicketNovaTickets.getTickets();
+    const tickets = window.SupportPilotTickets.getTickets();
     const refTicket = tickets.length > 0 ? tickets[0] : null;
     runWorkflowSimulation(refTicket);
   });
@@ -18,7 +18,7 @@ function initWorkflowModule() {
     const wfNav = document.querySelector('[data-target="workflow"]');
     if (wfNav) wfNav.click();
     setTimeout(() => {
-      const tickets = window.TicketNovaTickets.getTickets();
+      const tickets = window.SupportPilotTickets.getTickets();
       const refTicket = tickets.length > 0 ? tickets[0] : null;
       runWorkflowSimulation(refTicket);
     }, 500);
@@ -29,7 +29,7 @@ function renderAgentPipeline() {
   const container = document.getElementById("workflow-pipeline-container");
   container.innerHTML = "";
 
-  const steps = window.TicketNovaData.agentSteps;
+  const steps = window.SupportPilotData.agentSteps;
 
   steps.forEach((step, idx) => {
     const card = document.createElement("div");
@@ -89,7 +89,7 @@ async function runWorkflowSimulation(ticket = null) {
     appendOverallLog(`Loaded context ticket: ${ticket.id} - "${ticket.subject}"`);
   }
 
-  const steps = window.TicketNovaData.agentSteps;
+  const steps = window.SupportPilotData.agentSteps;
 
   // Reset agent visual states
   steps.forEach(step => {
@@ -193,7 +193,7 @@ function appendOverallLog(message) {
 }
 
 // Expose simulation capability
-window.TicketNovaWorkflow = {
+window.SupportPilotWorkflow = {
   init: initWorkflowModule,
   simulate: runWorkflowSimulation
 };
