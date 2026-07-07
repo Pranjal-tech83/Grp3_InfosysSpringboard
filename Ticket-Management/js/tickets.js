@@ -1,4 +1,4 @@
-// tickets.js - Full Working Tickets View, Table Sorting, Pagination, Drawer & Form Modal Controller
+// tickets.js - Tickets View, Table Sorting, Pagination, Drawer & Form Modal Controller
 
 // State for Tickets Page
 let currentTickets = [];
@@ -18,23 +18,14 @@ let aiPredictingState = false;
 
 // Initialize the Tickets manager
 function initTicketsModule() {
-  // Load initial tickets from data layer securely
-  if (window.TicketNovaData && window.TicketNovaData.initialTickets) {
-    currentTickets = [...window.TicketNovaData.initialTickets];
-  }
+  // Load initial tickets from mock database
+  currentTickets = [...window.SupportPilotData.initialTickets];
 
-  // Setup DOM Event Listeners safely
-  const searchBar = document.getElementById("tkt-search-bar");
-  if (searchBar) searchBar.addEventListener("input", handleSearch);
-
-  const filterDept = document.getElementById("filter-dept");
-  if (filterDept) filterDept.addEventListener("change", handleFilterChange);
-
-  const filterPriority = document.getElementById("filter-priority");
-  if (filterPriority) filterPriority.addEventListener("change", handleFilterChange);
-
-  const filterStatus = document.getElementById("filter-status");
-  if (filterStatus) filterStatus.addEventListener("change", handleFilterChange);
+  // Setup DOM Event Listeners
+  document.getElementById("tkt-search-bar").addEventListener("input", handleSearch);
+  document.getElementById("filter-dept").addEventListener("change", handleFilterChange);
+  document.getElementById("filter-priority").addEventListener("change", handleFilterChange);
+  document.getElementById("filter-status").addEventListener("change", handleFilterChange);
 
   // Table header clicks for sorting
   const headers = document.querySelectorAll("#main-tickets-table th");
@@ -45,54 +36,34 @@ function initTicketsModule() {
     });
   });
 
-  // Modal open/close actions binding safely
-  const createBtn = document.getElementById("btn-create-ticket-modal");
-  if (createBtn) createBtn.addEventListener("click", openNewTicketModal);
-  
-  const dashNewBtn = document.getElementById("dash-action-new-tkt");
-  if (dashNewBtn) dashNewBtn.addEventListener("click", openNewTicketModal);
-  
-  const closeBtn = document.getElementById("modal-close-btn");
-  if (closeBtn) closeBtn.addEventListener("click", closeNewTicketModal);
-
-  const cancelBtn = document.getElementById("btn-modal-cancel");
-  if (cancelBtn) cancelBtn.addEventListener("click", closeNewTicketModal);
-
-  const ticketForm = document.getElementById("new-ticket-form");
-  if (ticketForm) ticketForm.addEventListener("submit", handleNewTicketSubmit);
+  // Modal open/close actions
+  document.getElementById("btn-create-ticket-modal").addEventListener("click", openNewTicketModal);
+  document.getElementById("dash-action-new-tkt").addEventListener("click", openNewTicketModal);
+  document.getElementById("modal-close-btn").addEventListener("click", closeNewTicketModal);
+  document.getElementById("btn-modal-cancel").addEventListener("click", closeNewTicketModal);
+  document.getElementById("new-ticket-form").addEventListener("submit", handleNewTicketSubmit);
 
   // Details drawer closing actions
-  const drawerClose = document.getElementById("drawer-close-btn");
-  if (drawerClose) drawerClose.addEventListener("click", closeDetailsDrawer);
-
-  const backdrop = document.getElementById("ticket-drawer-backdrop");
-  if (backdrop) {
-    backdrop.addEventListener("click", (e) => {
-      if (e.target.id === "ticket-drawer-backdrop") closeDetailsDrawer();
-    });
-  }
+  document.getElementById("drawer-close-btn").addEventListener("click", closeDetailsDrawer);
+  document.getElementById("ticket-drawer-backdrop").addEventListener("click", (e) => {
+    if (e.target.id === "ticket-drawer-backdrop") closeDetailsDrawer();
+  });
 
   // Drawer buttons
-  const resolveBtn = document.getElementById("btn-drawer-resolve");
-  if (resolveBtn) resolveBtn.addEventListener("click", handleDrawerResolve);
+  document.getElementById("btn-drawer-resolve").addEventListener("click", handleDrawerResolve);
+  document.getElementById("btn-drawer-escalate").addEventListener("click", handleDrawerEscalate);
+  document.getElementById("btn-drawer-assign").addEventListener("click", handleDrawerAssign);
 
-  const escalateBtn = document.getElementById("btn-drawer-escalate");
-  if (escalateBtn) escalateBtn.addEventListener("click", handleDrawerEscalate);
+  // Export CSV mock trigger
+  document.getElementById("btn-export-ui").addEventListener("click", handleExportCSV);
 
-  const assignBtn = document.getElementById("btn-drawer-assign");
-  if (assignBtn) assignBtn.addEventListener("click", handleDrawerAssign);
-
-  const exportBtn = document.getElementById("btn-export-ui");
-  if (exportBtn) exportBtn.addEventListener("click", handleExportCSV);
-
-  // Initial table render execution
+  // First rendering of tickets table
   renderTicketsTable();
 }
 
 // Render the Ticket Table
 function renderTicketsTable() {
   const tbody = document.getElementById("tickets-tbody");
-  if (!tbody) return;
   tbody.innerHTML = "";
 
   // Apply filters
@@ -113,6 +84,7 @@ function renderTicketsTable() {
     let valA = a[tableState.sortColumn];
     let valB = b[tableState.sortColumn];
 
+    // Handle nested object parameters (e.g. user.name)
     if (tableState.sortColumn === "user") {
       valA = a.user.name;
       valB = b.user.name;
@@ -141,7 +113,7 @@ function renderTicketsTable() {
       <tr>
         <td colspan="8">
           <div class="empty-state">
-            <svg viewBox="0 0 24 24" width="48" height="48"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <h3>No matching tickets found</h3>
             <p>Try refining your search query or adjust your filters.</p>
           </div>
@@ -151,14 +123,6 @@ function renderTicketsTable() {
   } else {
     paginatedTickets.forEach(t => {
       const tr = document.createElement("tr");
-      
-      // Normalize priority classes to match styles.css definitions perfectly
-      let pClass = t.priority.toLowerCase();
-      if (pClass === "high") pClass = "high";
-      if (pClass === "medium") pClass = "medium";
-      if (pClass === "low") pClass = "low";
-      if (pClass === "urgent" || pClass === "critical") pClass = "urgent";
-
       tr.innerHTML = `
         <td><strong style="color: var(--accent-primary); font-family: monospace;">${t.id}</strong></td>
         <td>
@@ -170,7 +134,7 @@ function renderTicketsTable() {
         <td>${t.department}</td>
         <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.subject}">${t.subject}</td>
         <td><span style="font-size: 12px; color: var(--text-secondary);">${t.category}</span></td>
-        <td><span class="badge badge-priority-${pClass}">${t.priority}</span></td>
+        <td><span class="badge badge-priority-${t.priority.toLowerCase()}">${t.priority}</span></td>
         <td><span class="badge badge-status-${t.status.toLowerCase()}">${t.status}</span></td>
         <td style="color: var(--text-secondary);">${formatShortDate(t.createdDate)}</td>
       `;
@@ -181,19 +145,27 @@ function renderTicketsTable() {
 
   // Update pagination info label
   const infoLabel = document.getElementById("pagination-info");
-  if (infoLabel) {
-    infoLabel.textContent = totalEntries > 0 ? `Showing ${startIdx + 1} to ${endIdx} of ${totalEntries} entries` : "Showing 0 entries";
+  if (totalEntries > 0) {
+    infoLabel.textContent = `Showing ${startIdx + 1} to ${endIdx} of ${totalEntries} entries`;
+  } else {
+    infoLabel.textContent = "Showing 0 entries";
   }
 
   // Update pagination button controls
   renderPaginationControls(totalPages);
+
+  // Sync dashboard active table if rendered
+  if (typeof updateDashboardViews === "function") {
+    updateDashboardViews(currentTickets);
+  }
 }
 
+// Render pagination numeric controls
 function renderPaginationControls(totalPages) {
   const container = document.getElementById("pagination-controls");
-  if (!container) return;
   container.innerHTML = "";
 
+  // Prev Button
   const prevBtn = document.createElement("button");
   prevBtn.className = "page-btn";
   prevBtn.innerHTML = "&larr;";
@@ -204,6 +176,7 @@ function renderPaginationControls(totalPages) {
   });
   container.appendChild(prevBtn);
 
+  // Page Numbers
   for (let i = 1; i <= totalPages; i++) {
     const numBtn = document.createElement("button");
     numBtn.className = `page-btn ${tableState.currentPage === i ? "active" : ""}`;
@@ -215,6 +188,7 @@ function renderPaginationControls(totalPages) {
     container.appendChild(numBtn);
   }
 
+  // Next Button
   const nextBtn = document.createElement("button");
   nextBtn.className = "page-btn";
   nextBtn.innerHTML = "&rarr;";
@@ -226,12 +200,14 @@ function renderPaginationControls(totalPages) {
   container.appendChild(nextBtn);
 }
 
+// Handling Search Input
 function handleSearch(e) {
   tableState.searchQuery = e.target.value;
   tableState.currentPage = 1;
   renderTicketsTable();
 }
 
+// Handling Filter Selection Changes
 function handleFilterChange() {
   tableState.deptFilter = document.getElementById("filter-dept").value;
   tableState.priorityFilter = document.getElementById("filter-priority").value;
@@ -240,6 +216,7 @@ function handleFilterChange() {
   renderTicketsTable();
 }
 
+// Handling Column Header Clicks for Table Sorting
 function handleSort(column) {
   if (tableState.sortColumn === column) {
     tableState.sortAsc = !tableState.sortAsc;
@@ -250,6 +227,7 @@ function handleSort(column) {
   renderTicketsTable();
 }
 
+// Open Details Drawer from Table Row Click
 let activeDrawerTicketId = null;
 
 function openDetailsDrawer(ticketId) {
@@ -258,37 +236,44 @@ function openDetailsDrawer(ticketId) {
 
   activeDrawerTicketId = ticketId;
 
+  // Set values inside Drawer Elements
   document.getElementById("drawer-ticket-id").textContent = ticket.id;
   document.getElementById("drawer-subject").textContent = ticket.subject;
   document.getElementById("drawer-desc").textContent = ticket.description;
   
-  let pClass = ticket.priority.toLowerCase();
-  if (pClass === "urgent" || pClass === "critical") pClass = "urgent";
-
+  // Set priority and status badges
   const badgeContainer = document.getElementById("drawer-badges");
   badgeContainer.innerHTML = `
-    <span class="badge badge-priority-${pClass}">${ticket.priority}</span>
+    <span class="badge badge-priority-${ticket.priority.toLowerCase()}">${ticket.priority}</span>
     <span class="badge badge-status-${ticket.status.toLowerCase()}">${ticket.status}</span>
   `;
 
+  // AI Classification mapping
   document.getElementById("drawer-ai-confidence").textContent = `${ticket.confidenceScore}% Confident`;
   document.getElementById("drawer-ai-category").textContent = ticket.aiClassification.category;
   document.getElementById("drawer-ai-dept").textContent = ticket.aiClassification.suggestedDept;
+
+  // Resolution suggestion body
   document.getElementById("drawer-resolution-text").textContent = ticket.suggestedResolution;
 
+  // Render attachment lists
   const attachmentList = document.getElementById("drawer-attachments-list");
   attachmentList.innerHTML = "";
-  if (!ticket.attachments || ticket.attachments.length === 0) {
+  if (ticket.attachments.length === 0) {
     attachmentList.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">No attachments provided.</span>`;
   } else {
     ticket.attachments.forEach(file => {
       const fileTag = document.createElement("span");
       fileTag.style.cssText = "font-size: 11px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-app); cursor: pointer;";
       fileTag.textContent = file;
+      fileTag.addEventListener("click", () => {
+        showToast("Attachment Download", `Downloading ${file} locally...`, "info");
+      });
       attachmentList.appendChild(fileTag);
     });
   }
 
+  // Render history timeline nodes
   const timelineFlow = document.getElementById("drawer-timeline-flow");
   timelineFlow.innerHTML = "";
   ticket.timeline.forEach(event => {
@@ -301,6 +286,7 @@ function openDetailsDrawer(ticketId) {
     timelineFlow.appendChild(node);
   });
 
+  // Toggle visible drawers
   document.getElementById("ticket-drawer-backdrop").classList.add("active");
 }
 
@@ -309,16 +295,26 @@ function closeDetailsDrawer() {
   activeDrawerTicketId = null;
 }
 
+// Action Buttons within the Drawer
 function handleDrawerResolve() {
   if (!activeDrawerTicketId) return;
+
   const ticket = currentTickets.find(t => t.id === activeDrawerTicketId);
   if (ticket) {
     ticket.status = "Resolved";
-    ticket.timeline.push({ time: new Date().toISOString(), title: "Ticket Resolved", user: "Staff Operator", type: "agent" });
-    if (window.TicketNovaEmail && typeof window.TicketNovaEmail.addEmail === "function") {
-      window.TicketNovaEmail.addEmail(ticket);
+    ticket.timeline.push({
+      time: new Date().toISOString(),
+      title: "Ticket Resolved",
+      user: "Staff Operator",
+      type: "agent"
+    });
+    
+    // Create automated email outbox dispatch
+    if (typeof addAutomatedEmail === "function") {
+      addAutomatedEmail(ticket);
     }
-    showToast("Ticket Resolved", `Ticket ${ticket.id} marked as Resolved.`, "success");
+
+    showToast("Ticket Resolved", `Ticket ${ticket.id} marked as Resolved successfully.`, "success");
     closeDetailsDrawer();
     renderTicketsTable();
   }
@@ -328,12 +324,28 @@ function handleDrawerEscalate() {
   if (!activeDrawerTicketId) return;
   const ticket = currentTickets.find(t => t.id === activeDrawerTicketId);
   if (ticket) {
+    // Escalate changes priority to Urgent and assigns to Engineering
     ticket.priority = "Urgent";
     ticket.department = "Engineering";
-    ticket.timeline.push({ time: new Date().toISOString(), title: "Escalated to Engineering", user: "Nova Engine System", type: "ai" });
-    showToast("Ticket Escalated", `Ticket ${ticket.id} escalated to Engineering.`, "warning");
+    ticket.timeline.push({
+      time: new Date().toISOString(),
+      title: "Escalated to Engineering",
+      user: "Nova Engine System",
+      type: "ai"
+    });
+
+    showToast("Ticket Escalated", `Ticket ${ticket.id} was escalated to Engineering support queues.`, "warning");
     closeDetailsDrawer();
     renderTicketsTable();
+
+    // Open Workflow tab for them to see pipeline simulation
+    setTimeout(() => {
+      const wfNav = document.querySelector('[data-target="workflow"]');
+      if (wfNav) wfNav.click();
+      if (typeof runWorkflowSimulation === "function") {
+        runWorkflowSimulation(ticket);
+      }
+    }, 1000);
   }
 }
 
@@ -341,32 +353,30 @@ function handleDrawerAssign() {
   if (!activeDrawerTicketId) return;
   const ticket = currentTickets.find(t => t.id === activeDrawerTicketId);
   if (ticket) {
-    const randomAgent = ["Sarah Connor", "Alex Mercer", "Emma Stone"][Math.floor(Math.random() * 3)];
+    const agents = ["Sarah Connor", "Alex Mercer", "Emma Stone"];
+    const randomAgent = agents[Math.floor(Math.random() * agents.length)];
     ticket.assignedAgent = randomAgent;
-    ticket.timeline.push({ time: new Date().toISOString(), title: `Assigned to ${randomAgent}`, user: "Staff Admin", type: "agent" });
-    showToast("Agent Assigned", `Ticket ${ticket.id} allocated to ${randomAgent}.`, "info");
+    ticket.timeline.push({
+      time: new Date().toISOString(),
+      title: `Assigned to ${randomAgent}`,
+      user: "Staff Admin",
+      type: "agent"
+    });
+
+    showToast("Agent Assigned", `Ticket ${ticket.id} assigned to ${randomAgent}.`, "info");
     closeDetailsDrawer();
     renderTicketsTable();
   }
 }
 
+// Modal management for Creating Tickets
 function openNewTicketModal() {
+  // Clear any existing forms
   document.getElementById("new-ticket-form").reset();
-  
-  const card = document.getElementById("ai-prediction-card");
-  if (card) card.style.display = "none";
-  
-  const loader = document.getElementById("ai-loading-container");
-  if (loader) loader.style.display = "none";
-
+  document.getElementById("ai-prediction-card").style.display = "none";
+  document.getElementById("ai-loading-container").style.display = "none";
   aiPredictingState = false;
-  
-  const submitBtn = document.getElementById("btn-modal-submit");
-  if (submitBtn) {
-    submitBtn.innerHTML = "Submit Ticket";
-    submitBtn.disabled = false;
-  }
-  
+
   document.getElementById("new-ticket-modal-backdrop").classList.add("active");
 }
 
@@ -374,154 +384,160 @@ function closeNewTicketModal() {
   document.getElementById("new-ticket-modal-backdrop").classList.remove("active");
 }
 
+// Form Submission handling (Predictive AI Phase and Insertion Phase)
 function handleNewTicketSubmit(e) {
   e.preventDefault();
 
   const subject = document.getElementById("tkt-subject").value;
   const description = document.getElementById("tkt-desc").value;
   const dept = document.getElementById("tkt-dept").value;
+  const category = document.getElementById("tkt-category").value;
+  const priority = document.getElementById("tkt-priority").value;
   const fileInput = document.getElementById("tkt-file");
-  const submitBtn = document.getElementById("btn-modal-submit");
 
   if (!aiPredictingState) {
-    const loader = document.getElementById("ai-loading-container");
-    if (loader) loader.style.display = "flex";
-    if (submitBtn) submitBtn.disabled = true;
+    // Phase 1: Simulate AI Engine parsing text content
+    document.getElementById("ai-loading-container").style.display = "flex";
+    document.getElementById("btn-modal-submit").disabled = true;
 
-    fetch("http://127.0.0.1:8000/api/triage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: subject, description: description })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (loader) loader.style.display = "none";
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = "Confirm & Insert Ticket";
-        }
+    setTimeout(() => {
+      document.getElementById("ai-loading-container").style.display = "none";
+      document.getElementById("btn-modal-submit").disabled = false;
 
-        // Robust parsing schema setup to defend against NaN evaluations
-        const rawConfidence = data.confidence_score !== undefined ? data.confidence_score : (data.confidence || 0.95);
-        const parsedConfidence = parseFloat(rawConfidence);
-        const displayConfidence = isNaN(parsedConfidence) ? 95 : Math.round(parsedConfidence * 100);
+      // Predict values based on descriptions/subject content
+      let predictedDept = dept;
+      let predictedPriority = priority;
+      let confidence = Math.floor(Math.random() * 15) + 84; // 84% - 98%
 
-        const categoryVal = data.category || "General";
-        const severityVal = data.severity || "Medium";
-        const reasoningText = data.reasoning_summary || data.reasoning || "Triage processing complete.";
+      if (subject.toLowerCase().includes("billing") || subject.toLowerCase().includes("invoice") || subject.toLowerCase().includes("charge")) {
+        predictedDept = "Billing";
+        predictedPriority = "High";
+      } else if (subject.toLowerCase().includes("latency") || subject.toLowerCase().includes("auth") || subject.toLowerCase().includes("crash") || subject.toLowerCase().includes("api")) {
+        predictedDept = "Engineering";
+        predictedPriority = "Urgent";
+      }
 
-        // Bind data parameters explicitly onto target card text layouts
-        document.getElementById("ai-pred-priority").textContent = severityVal;
-        document.getElementById("ai-pred-dept").textContent = dept; 
-        document.getElementById("ai-pred-category").textContent = categoryVal;
-        document.getElementById("ai-pred-confidence").textContent = `${displayConfidence}% confidence`;
+      // Populate predictive UI card
+      document.getElementById("ai-pred-priority").textContent = predictedPriority;
+      document.getElementById("ai-pred-dept").textContent = predictedDept;
+      document.getElementById("ai-pred-category").textContent = category;
+      document.getElementById("ai-pred-confidence").textContent = `${confidence}% confidence`;
 
-        const predCard = document.getElementById("ai-prediction-card");
-        if (predCard) {
-          predCard.setAttribute("data-reasoning", reasoningText);
-          predCard.style.display = "block";
-        }
-        
-        aiPredictingState = true;
-    })
-    .catch(err => {
-        console.error("Inference link drop:", err);
-        if (loader) loader.style.display = "none";
-        if (submitBtn) submitBtn.disabled = false;
-        alert("Local AI API Offline. Verify uvicorn is active inside the subfolder!");
-    });
+      document.getElementById("ai-prediction-card").style.display = "block";
+      
+      // Upgrade state to allow final submit next click
+      aiPredictingState = true;
+      document.getElementById("btn-modal-submit").innerHTML = "Confirm & Insert Ticket";
+    }, 1500);
 
   } else {
-    const pDept = document.getElementById("ai-pred-dept").textContent;
-    const pPriority = document.getElementById("ai-pred-priority").textContent;
-    const pCategory = document.getElementById("ai-pred-category").textContent;
-    const rawConf = document.getElementById("ai-pred-confidence").textContent;
-    const confVal = parseInt(rawConf.replace(/[^0-9]/g, ''), 10) || 95;
-    const reasoning = document.getElementById("ai-prediction-card").getAttribute("data-reasoning") || "Processed via local LLM rules lookup.";
+    // Phase 2: User confirmed predictions, append item to table
+    const predictedDept = document.getElementById("ai-pred-dept").textContent;
+    const predictedPriority = document.getElementById("ai-pred-priority").textContent;
+    const confidenceVal = parseInt(document.getElementById("ai-pred-confidence").textContent);
 
     const attachmentsList = [];
-    if (fileInput && fileInput.files.length > 0) {
+    if (fileInput.files.length > 0) {
       attachmentsList.push(fileInput.files[0].name);
     }
 
     const newId = `TKT-${1024 + currentTickets.length}`;
     const newTkt = {
       id: newId,
-      user: { name: "Pranjal Choudhary", email: "pranj@choudhary.com", company: "Local Workspace" },
-      department: pDept,
+      user: { name: "Pranjal kumar", email: "pranj@choudhary.com", company: "Local Workspace" },
+      department: predictedDept,
       subject: subject,
-      category: pCategory, 
-      priority: pPriority,
-      severity: pPriority === "Urgent" || pPriority === "High" ? "Critical" : "Minor",
+      category: category,
+      priority: predictedPriority,
+      severity: predictedPriority === "Urgent" ? "Critical" : (predictedPriority === "High" ? "Major" : "Minor"),
       status: "Open",
       assignedAgent: "Unassigned",
       createdDate: new Date().toISOString(),
-      confidenceScore: confVal,
+      confidenceScore: confidenceVal,
       description: description,
-      aiClassification: { category: pCategory, priority: pPriority, severity: pPriority === "Urgent" || pPriority === "High" ? "Critical" : "Minor", confidence: confVal, suggestedDept: pDept },
-      suggestedResolution: reasoning,
+      aiClassification: {
+        category: category,
+        priority: predictedPriority,
+        severity: predictedPriority === "Urgent" ? "Critical" : "Minor",
+        confidence: confidenceVal,
+        suggestedDept: predictedDept
+      },
+      suggestedResolution: `Review the log trace patterns for context related to "${subject}". If issues persist, verify routing and whitelisting.`,
       escalationHistory: [],
       timeline: [
-        { time: new Date().toISOString(), title: "Ticket Opened", user: "Pranjal Choudhary", type: "system" },
+        { time: new Date().toISOString(), title: "Ticket Opened", user: "Pranjal kumar", type: "system" },
         { time: new Date().toISOString(), title: "Nova AI Classification Run", user: "Diagnosis Agent", type: "ai" }
       ],
       attachments: attachmentsList
     };
 
+    // Prepend to ticket lists
     currentTickets.unshift(newTkt);
-    showToast("Ticket Opened", `New ticket ${newId} added to active queue.`, "success");
+    showToast("Ticket Opened", `New ticket ${newId} created successfully.`, "success");
     
     closeNewTicketModal();
     renderTicketsTable();
+
+    // Trigger dynamic sidebar metrics updates in-app
+    if (typeof refreshDynamicViewElements === "function") {
+      refreshDynamicViewElements();
+    }
   }
 }
 
+// Export Table contents mock handler
 function handleExportCSV() {
-  showToast("CSV Export Started", "Formatting tickets dataset.", "info");
-  setTimeout(() => { showToast("CSV Downloaded", "Tickets directory list saved.", "success"); }, 1200);
+  if (currentTickets.length === 0) {
+    showToast("Export Failed", "No tickets available to export.", "warning");
+    return;
+  }
+  
+  showToast("CSV Export Started", "Formatting tickets dataset...", "info");
+  
+  const headers = ["Ticket ID", "User", "Company", "Department", "Subject", "Category", "Priority", "Status", "Created Date"];
+  const rows = currentTickets.map(t => {
+    return [
+      t.id,
+      `"${t.user.name}"`,
+      `"${t.user.company}"`,
+      `"${t.department}"`,
+      `"${t.subject.replace(/"/g, '""')}"`,
+      `"${t.category}"`,
+      t.priority,
+      t.status,
+      t.createdDate
+    ].join(",");
+  });
+  
+  const csvContent = headers.join(",") + "\\n" + rows.join("\\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "supportpilot_tickets.csv");
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast("CSV Downloaded", "Tickets list saved successfully.", "success");
 }
 
+// Helper date utilities
 function formatShortDate(isoString) {
-  return new Date(isoString).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const d = new Date(isoString);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 function formatTime(isoString) {
-  return new Date(isoString).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const d = new Date(isoString);
+  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-// Global scope registration mapping
-window.TicketNovaTickets = {
+// Expose functionality globally
+window.SupportPilotTickets = {
   init: initTicketsModule,
   render: renderTicketsTable,
   getTickets: () => currentTickets,
   openDrawer: openDetailsDrawer
-};
-
-// Global dashboard recent activity renderer sync override setup
-window.refreshDynamicViewElements = function() {
-  const tickets = window.TicketNovaTickets.getTickets();
-  const tbody = document.getElementById("dash-activity-tbody");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-  const previewList = tickets.slice(0, 5);
-  
-  previewList.forEach(t => {
-    const tr = document.createElement("tr");
-    const priorityClass = (t.priority || "Low").toLowerCase();
-    const statusClass = (t.status || "Open").toLowerCase();
-    
-    tr.innerHTML = `
-      <td><strong style="color: var(--accent-primary); font-family: monospace;">${t.id}</strong></td>
-      <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.subject}</td>
-      <td><span class="badge badge-priority-${priorityClass}">${t.priority}</span></td>
-      <td><span style="color: var(--text-secondary);">${t.category}</span></td>
-      <td><span class="badge badge-status-${statusClass}">${t.status}</span></td>
-    `;
-    
-    tr.addEventListener("click", () => {
-      window.TicketNovaTickets.openDrawer(t.id);
-    });
-    tbody.appendChild(tr);
-  });
 };
