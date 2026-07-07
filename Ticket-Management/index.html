@@ -6,6 +6,8 @@
   <title>SupportPilot - AI Ticket Resolution Platform</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
+<body>
+
   <!-- Login Screen Overlay -->
   <div id="login-screen" class="active">
     <div class="login-card">
@@ -68,7 +70,6 @@
           <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1M20 17V2H6.5" stroke="currentColor"/></svg>
           <span class="nav-label">Knowledge Base</span>
         </div>
-        
         <div class="nav-item" data-target="analytics">
           <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor"/></svg>
           <span class="nav-label">Analytics</span>
@@ -86,8 +87,6 @@
           <span class="nav-label">Settings</span>
         </div>
       </nav>
-
-      
     </aside>
 
     <!-- Main Section Content Area -->
@@ -125,14 +124,11 @@
         </div>
       </header>
 
-      <!-- View Containers -->
-
       <!-- VIEW 1: DASHBOARD -->
       <section class="view-section active-view" id="dashboard-view">
         <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Overview</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and resolution telemetry for SupportPilot.</p>
 
-        <!-- KPI Metrics Grid -->
         <div class="kpi-container">
           <div class="card kpi-card">
             <div class="kpi-header">
@@ -141,10 +137,8 @@
                 <svg viewBox="0 0 24 24"><path d="M20 12V8H4v4m16 0v8H4v-8m16 0H4" stroke="currentColor"/></svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-total">1,248</div>
-            <div class="kpi-trend trend-up">
-              <span>+12.4%</span> vs last week
-            </div>
+            <div class="kpi-value" id="kpi-total">7</div>
+            <div class="kpi-trend trend-up"><span>+12.4%</span> vs last week</div>
           </div>
           <div class="card kpi-card">
             <div class="kpi-header">
@@ -153,10 +147,8 @@
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke="currentColor"/></svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-open" style="color: var(--badge-open-text);">52</div>
-            <div class="kpi-trend trend-down">
-              <span>-3.1%</span> vs last week
-            </div>
+            <div class="kpi-value" id="kpi-open" style="color: var(--badge-open-text);">5</div>
+            <div class="kpi-trend trend-down"><span>-3.1%</span> vs last week</div>
           </div>
           <div class="card kpi-card">
             <div class="kpi-header">
@@ -165,10 +157,8 @@
                 <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor"/></svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-resolved" style="color: var(--badge-resolved-text);">1,196</div>
-            <div class="kpi-trend trend-up">
-              <span>+15.3%</span> vs last week
-            </div>
+            <div class="kpi-value" id="kpi-resolved" style="color: var(--badge-resolved-text);">2</div>
+            <div class="kpi-trend trend-up"><span>+15.3%</span> vs last week</div>
           </div>
           <div class="card kpi-card">
             <div class="kpi-header">
@@ -177,50 +167,25 @@
                 <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor"/></svg>
               </div>
             </div>
-            <div class="kpi-value" id="kpi-ai-rate">86.4%</div>
-            <div class="kpi-trend trend-up">
-              <span>+1.8%</span> target > 85%
-            </div>
+            <div class="kpi-value" id="kpi-ai-rate">94.2%</div>
+            <div class="kpi-trend trend-up"><span>+1.8%</span> target > 85%</div>
           </div>
         </div>
 
-        <!-- Dashboard Grid (CSS Charts & Quick Actions) -->
         <div class="dashboard-grid">
           <div class="card">
             <div class="card-title">
               <span>AI Resolution Performance</span>
               <div style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Weekly SLA Targets</div>
             </div>
-            <!-- Custom CSS Chart -->
             <div class="chart-container-box" id="dashboard-bar-chart">
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 60%;" data-value="60%"></div>
-                <span class="bar-label">Mon</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 75%;" data-value="75%"></div>
-                <span class="bar-label">Tue</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 85%;" data-value="85%"></div>
-                <span class="bar-label">Wed</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 94%;" data-value="94%"></div>
-                <span class="bar-label">Thu</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 80%;" data-value="80%"></div>
-                <span class="bar-label">Fri</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 98%;" data-value="98%"></div>
-                <span class="bar-label">Sat</span>
-              </div>
-              <div class="bar-column">
-                <div class="bar-fill" style="height: 92%;" data-value="92%"></div>
-                <span class="bar-label">Sun</span>
-              </div>
+              <div class="bar-column"><div class="bar-fill" style="height: 60%;" data-value="60%"></div><span class="bar-label">Mon</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 75%;" data-value="75%"></div><span class="bar-label">Tue</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 85%;" data-value="85%"></div><span class="bar-label">Wed</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 94%;" data-value="94%"></div><span class="bar-label">Thu</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 80%;" data-value="80%"></div><span class="bar-label">Fri</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 98%;" data-value="98%"></div><span class="bar-label">Sat</span></div>
+              <div class="bar-column"><div class="bar-fill" style="height: 92%;" data-value="92%"></div><span class="bar-label">Sun</span></div>
             </div>
           </div>
 
@@ -243,7 +208,6 @@
           </div>
         </div>
 
-        <!-- Latest Tickets Panel -->
         <div class="card" style="margin-bottom: 24px;">
           <div class="card-title">Recent System Activity</div>
           <div class="table-container" style="border: none;">
@@ -257,9 +221,7 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody id="dash-activity-tbody">
-                <!-- Populated dynamically via JS -->
-              </tbody>
+              <tbody id="dash-activity-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -317,34 +279,57 @@
                 <th data-sort="createdDate">Created Date ↕</th>
               </tr>
             </thead>
-            <tbody id="tickets-tbody">
-              <!-- Populated dynamically via JS -->
-            </tbody>
+            <tbody id="tickets-tbody"></tbody>
           </table>
-          
           <div class="table-pagination">
-            <span id="pagination-info">Showing 1 to 5 of 12 entries</span>
-            <div class="pagination-btn-group" id="pagination-controls">
-              <!-- Rendered dynamically -->
-            </div>
+            <span id="pagination-info">Showing 1 to 5 of 7 entries</span>
+            <div class="pagination-btn-group" id="pagination-controls"></div>
           </div>
         </div>
       </section>
 
       <!-- VIEW 3: AI ASSISTANT -->
       <section class="view-section" id="assistant-view">
-        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Smart AI Chatbox</h1>
-        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Plan your trip, compare ticket prices for possible routes, and book your complete journey with one click.</p>
+        <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Smart AI Assistant</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Select an active ticket log to run semantic diagnosis steps and resolution drafting.</p>
 
-        <div class="chatbox-container" style="display: flex; flex-direction: column; height: 60vh; background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-          <div id="chat-messages" style="flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;">
-            <div class="chat-message ai" style="align-self: flex-start; background-color: var(--bg-sidebar); padding: 12px 16px; border-radius: 8px; max-width: 80%; border: 1px solid var(--border-color);">
-              <p style="margin: 0; font-size: 14px;">Hello! I am your AI SupportPilot. Please tell me your starting location and destination to get started.</p>
+        <div class="form-group" style="max-width: 400px; margin-bottom: 20px;">
+          <label for="assistant-ticket-select">Active Context Target</label>
+          <select class="form-control" id="assistant-ticket-select"></select>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="card" style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="card-title">Nova Engine Diagnostics</div>
+            <div style="display: flex; gap: 20px;">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">CONFIDENCE SCORE</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--accent-primary);" id="assist-confidence">--</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">RISK EVALUATION</div>
+                <div style="font-size: 24px; font-weight: 800;" id="assist-escalation">--</div>
+              </div>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <div class="drawer-section-title">Classification Matrix Metadata</div>
+              <p id="assist-diagnosis-summary" style="font-size: 13px; line-height: 1.5; color: var(--text-secondary);"></p>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <div class="drawer-section-title">Recommended Action Steps</div>
+              <ul id="assist-troubleshoot-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 6px;"></ul>
             </div>
           </div>
-          <div style="display: flex; padding: 12px; border-top: 1px solid var(--border-color); background-color: var(--bg-sidebar); gap: 8px;">
-            <input type="text" id="chat-input" class="form-control" placeholder="E.g., I want to travel from New York to London..." style="flex-grow: 1;">
-            <button class="btn btn-primary" id="btn-send-message">Send</button>
+
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div class="card-title">Drafted Customer Resolution Reply</div>
+              <div id="assist-resolution-body" style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.6; color: var(--text-secondary); height: 260px; overflow-y: auto;"></div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 14px;">
+              <button class="btn btn-primary" id="btn-assist-copy" style="flex-grow: 1;">Copy Resolution</button>
+              <button class="btn btn-secondary" id="btn-assist-regenerate">Deep Re-Scan</button>
+            </div>
           </div>
         </div>
       </section>
@@ -353,34 +338,19 @@
       <section class="view-section" id="kb-view">
         <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Knowledge Base</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Browse system documentation templates and execute dynamic AI vector checks.</p>
-
         <div class="kb-grid">
-          <!-- Categories & Navigation -->
           <div class="kb-sidebar-nav">
             <div class="card" style="padding: 16px;">
               <input type="text" class="table-filter-select" id="kb-search-bar" placeholder="Search documentation..." style="width: 100%; margin-bottom: 12px;">
-              
               <div class="kb-list" id="kb-category-list">
-                <div class="kb-item active" data-category="All">
-                  <span>All Documents</span>
-                </div>
-                <div class="kb-item" data-category="Authentication">
-                  <span>Authentication</span>
-                </div>
-                <div class="kb-item" data-category="Billing">
-                  <span>Billing & Payments</span>
-                </div>
-                <div class="kb-item" data-category="Database">
-                  <span>Database Operations</span>
-                </div>
-                <div class="kb-item" data-category="API">
-                  <span>API Integration</span>
-                </div>
+                <div class="kb-item active" data-category="All"><span>All Documents</span></div>
+                <div class="kb-item" data-category="Authentication"><span>Authentication</span></div>
+                <div class="kb-item" data-category="Billing"><span>Billing & Payments</span></div>
+                <div class="kb-item" data-category="Database"><span>Database Operations</span></div>
+                <div class="kb-item" data-category="API"><span>API Integration</span></div>
               </div>
             </div>
           </div>
-
-          <!-- Documentation and Generated Articles -->
           <div class="kb-content-area">
             <div class="kb-solution-box" id="kb-ai-solution-panel" style="display: none;">
               <div class="kb-solution-header">
@@ -389,18 +359,32 @@
               </div>
               <p id="kb-ai-content" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);"></p>
             </div>
-
             <div class="card" id="kb-docs-card">
               <h2 id="kb-doc-title" style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">OAuth Endpoint Signature Troubleshooting</h2>
-              <div id="kb-doc-body" style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);">
-                Select an article or query search term.
-              </div>
+              <div id="kb-doc-body" style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);">Select an article or query search term.</div>
             </div>
           </div>
         </div>
       </section>
 
-      
+      <!-- VIEW 5: MULTI-AGENT WORKFLOW -->
+      <section class="view-section" id="workflow-view">
+        <div class="workflow-control-bar">
+          <div>
+            <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Multi-Agent Resolution Pipeline</h1>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Simulate hierarchical execution pipelines running structural analysis vectors.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-trigger-workflow">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg>
+            <span>Simulate Ticket Flow</span>
+          </button>
+        </div>
+        <div class="workflow-pipeline" id="workflow-pipeline-container" style="margin-top: 16px; margin-bottom: 24px;"></div>
+        <div class="card">
+          <div class="card-title">Live System Orchestrator Activity Logs</div>
+          <pre id="workflow-overall-logs" style="background-color: var(--bg-app); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; font-family: monospace; font-size: 12px; color: var(--text-secondary); height: 180px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6;">Click 'Simulate Ticket Flow' to trigger agent runtime execution metrics loop...</pre>
+        </div>
+      </section>
 
       <!-- VIEW 6: ANALYTICS -->
       <section class="view-section" id="analytics-view">
@@ -414,14 +398,10 @@
             <button class="btn btn-secondary" id="btn-report-monthly">Monthly Report</button>
           </div>
         </div>
-
-        <!-- Analytics widget rows -->
         <div class="dashboard-grid">
           <div class="card">
             <div class="card-title">Daily Ticket Volumes</div>
-            <div class="chart-container-box" id="analytics-chart-vol">
-              <!-- Rendered via JS -->
-            </div>
+            <div class="chart-container-box" id="analytics-chart-vol"></div>
           </div>
           <div class="card">
             <div class="card-title">SLA Performance Target</div>
@@ -435,26 +415,19 @@
             </div>
           </div>
         </div>
-
         <div class="kpi-container">
           <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>AVG RESOLUTION TIME</span>
-            </div>
+            <div class="kpi-header"><span>AVG RESOLUTION TIME</span></div>
             <div class="kpi-value" style="font-size: 22px;">4m 32s</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Target < 10 minutes</span>
+            <span style="font-size: 11px; color: var(--text-muted);">Target &lt; 10 minutes</span>
           </div>
           <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>CUSTOMER SATISFACTION</span>
-            </div>
+            <div class="kpi-header"><span>CUSTOMER SATISFACTION</span></div>
             <div class="kpi-value" style="font-size: 22px;">4.92 / 5.0</div>
             <span style="font-size: 11px; color: #10b981;">Excellent (98.4% favorable)</span>
           </div>
           <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>INTEGRATION STATUS</span>
-            </div>
+            <div class="kpi-header"><span>INTEGRATION STATUS</span></div>
             <div class="kpi-value" style="font-size: 22px; color: #10b981;">100% Online</div>
             <span style="font-size: 11px; color: var(--text-muted);">9 webhook nodes active</span>
           </div>
@@ -465,34 +438,22 @@
       <section class="view-section" id="email-view">
         <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Email Outbox & Delivery Status</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Audit automated responses sent to customers containing AI suggested resolutions.</p>
-
         <div class="email-grid">
-          <!-- Email previews -->
-          <div class="card email-list-panel" id="email-list-container" style="padding: 0;">
-            <!-- Populated via email.js -->
-          </div>
-
-          <!-- Email Delivery timeline details -->
+          <div class="card email-list-panel" id="email-list-container" style="padding: 0;"></div>
           <div class="card email-detail-panel">
             <div id="email-detail-empty" class="empty-state">
               <svg viewBox="0 0 24 24"><path d="M4 4h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm0 0l8 7 8-7" stroke="currentColor"/></svg>
               <h3>No Email Selected</h3>
               <p>Select an automated dispatch item from the inbox pane to audit compliance histories.</p>
             </div>
-            
             <div id="email-detail-content" style="display: none;">
               <h2 id="email-view-subject" style="font-size: 18px; font-weight: 700; margin-bottom: 4px;"></h2>
               <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
                 From: <span id="email-view-from" style="font-weight: 600;"></span> &rarr; To: <span id="email-view-to" style="font-weight: 600;"></span>
               </div>
-              
-              <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 20px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text-secondary);" id="email-view-body">
-              </div>
-
+              <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 20px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text-secondary);" id="email-view-body"></div>
               <div class="drawer-section-title">Delivery Audit Trail</div>
-              <div class="delivery-timeline" id="email-delivery-timeline">
-                <!-- Dynamic timeline items -->
-              </div>
+              <div class="delivery-timeline" id="email-delivery-timeline"></div>
             </div>
           </div>
         </div>
@@ -511,7 +472,6 @@
           </button>
         </div>
 
-        <!-- Jira Featured Integration Card -->
         <div class="card" style="margin-bottom: 24px; padding: 24px; background-color: var(--bg-sidebar);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
             <div style="display: flex; gap: 16px; align-items: center;">
@@ -532,8 +492,7 @@
             <div>
               <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Sync Status</div>
               <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>
-                Active (Real-time)
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>Active (Real-time)
               </div>
             </div>
             <div>
@@ -547,7 +506,6 @@
           </div>
         </div>
 
-        <!-- Filter tabs -->
         <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; padding-bottom: 8px;">
           <span class="integration-tab active" data-type="all" style="cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 8px; margin-bottom: -10px;">All Integrations</span>
           <span class="integration-tab" data-type="communication" style="cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-bottom: 8px;">Communication</span>
@@ -555,9 +513,7 @@
           <span class="integration-tab" data-type="dev" style="cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-bottom: 8px;">Developer Tools</span>
         </div>
 
-        <!-- Integrations Grid -->
         <div class="kpi-container" id="integrations-list-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-          <!-- Slack -->
           <div class="card integration-card-item" data-category="communication" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -570,7 +526,6 @@
             <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Slack Configuration', 'Opening Slack webhook mapping settings...', 'info')">Configure</button>
           </div>
 
-          <!-- Salesforce -->
           <div class="card integration-card-item" data-category="crm" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -583,7 +538,6 @@
             <button class="btn btn-primary" style="width: 100%; font-size: 12px;" onclick="showToast('Connecting Salesforce', 'Redirecting to Salesforce OAuth page...', 'info')">Connect</button>
           </div>
 
-          <!-- Zendesk Migration -->
           <div class="card integration-card-item" data-category="crm" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -596,7 +550,6 @@
             <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Zendesk Settings', 'Synchronizing historic database logs...', 'info')">Configure</button>
           </div>
 
-          <!-- Email -->
           <div class="card integration-card-item" data-category="communication" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -609,7 +562,6 @@
             <button class="btn btn-secondary" style="width: 100%; font-size: 12px;" onclick="showToast('Email Settings', 'Opening mail server credentials dialog...', 'info')">Configure</button>
           </div>
 
-          <!-- Custom Webhooks -->
           <div class="card integration-card-item" data-category="dev" style="display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background-color: var(--bg-sidebar);">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -628,12 +580,9 @@
       <section class="view-section" id="settings-view">
         <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Settings</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Manage corporate profile configuration preferences and safety filters.</p>
-
         <div class="dashboard-grid">
           <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
             <div class="card-title">User Profile Details</div>
-
-            <!-- Profile Picture Section -->
             <div class="form-group" style="margin-bottom: 20px;">
               <label>Profile Picture</label>
               <div style="display: flex; align-items: center; gap: 16px; margin-top: 6px;">
@@ -648,7 +597,6 @@
                 </div>
               </div>
             </div>
-
             <div class="form-group">
               <label>Select Profile Theme Color</label>
               <div id="avatar-color-selector" style="display: flex; gap: 10px; margin-top: 6px; margin-bottom: 12px;">
@@ -659,39 +607,27 @@
                 <div class="avatar-color-choice" data-color="#7c3aed" style="width: 32px; height: 32px; border-radius: 50%; background-color: #7c3aed; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;"></div>
               </div>
             </div>
-            
             <div class="form-group">
               <label for="settings-fullname">Full Name</label>
               <input type="text" class="form-control" id="settings-fullname" value="Pranjal Kumar">
             </div>
-
             <div class="form-group">
               <label for="settings-email">Email Address</label>
               <input type="email" class="form-control" id="settings-email" value="pranjal.kumar@supportpilot.ai">
             </div>
-
             <div class="form-group">
               <label for="settings-role">Platform Role</label>
               <input type="text" class="form-control" id="settings-role" value="Administrator" disabled style="opacity: 0.7;">
             </div>
-
             <button class="btn btn-primary" id="btn-save-settings">Save Profile changes</button>
           </div>
-
-          <!-- Log Out Section in Settings -->
           <div class="card" style="display: flex; flex-direction: column; gap: 16px; border-color: rgba(239, 68, 68, 0.2);">
             <div class="card-title" style="color: #ef4444;">Session Management</div>
-            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-              Sign out of your active SupportPilot workspace session. You will need to enter your email and password to log in again.
-            </p>
-            <button class="btn" id="btn-settings-logout" style="background-color: #ef4444; color: white; border: none; font-weight: 700; width: fit-content; cursor: pointer;">
-              Log Out of Account
-            </button>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">Sign out of your active SupportPilot workspace session.</p>
+            <button class="btn" id="btn-settings-logout" style="background-color: #ef4444; color: white; border: none; font-weight: 700; width: fit-content; cursor: pointer;">Log Out of Account</button>
           </div>
-
           <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
             <div class="card-title">System Preferences</div>
-            
             <div class="form-group">
               <label for="settings-theme">Active UI Theme</label>
               <select class="form-control" id="settings-theme-select">
@@ -699,7 +635,6 @@
                 <option value="dark">Dark Theme Mode</option>
               </select>
             </div>
-
             <div class="form-group">
               <label for="settings-language">Interface Language</label>
               <select class="form-control" id="settings-lang-select">
@@ -708,18 +643,14 @@
                 <option value="de">Deutsch (DE)</option>
               </select>
             </div>
-
             <div class="form-group">
               <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; margin-top: 8px;">
-                <input type="checkbox" id="settings-notif-checkbox" checked style="width: 16px; height: 16px;">
-                <span>Enable System Sound Alerts</span>
+                <input type="checkbox" id="settings-notif-checkbox" checked style="width: 16px; height: 16px;"><span>Enable System Sound Alerts</span>
               </label>
             </div>
-            
             <div class="form-group">
               <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500;">
-                <input type="checkbox" id="settings-auto-chk" checked style="width: 16px; height: 16px;">
-                <span>Auto-allocate tickets with confidence score > 95%</span>
+                <input type="checkbox" id="settings-auto-chk" checked style="width: 16px; height: 16px;"><span>Auto-allocate tickets with confidence score > 95%</span>
               </label>
             </div>
           </div>
@@ -738,7 +669,6 @@
           <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
-      
       <div class="drawer-content">
         <div>
           <h2 id="drawer-subject" style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">API Authentication failing in Production</h2>
@@ -747,14 +677,10 @@
             <span class="badge badge-status-open">Open</span>
           </div>
         </div>
-
         <div>
           <div class="drawer-section-title">Description</div>
-          <p id="drawer-desc" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);">
-            Details.
-          </p>
+          <p id="drawer-desc" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);">Details.</p>
         </div>
-
         <div>
           <div class="drawer-section-title">AI Engine Classification</div>
           <div class="ai-recommendation-box">
@@ -765,29 +691,19 @@
             </div>
           </div>
         </div>
-
         <div>
           <div class="drawer-section-title">Suggested AI Response</div>
-          <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: var(--text-secondary);" id="drawer-resolution-text">
-            Solution content.
-          </div>
+          <div style="background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: var(--text-secondary);" id="drawer-resolution-text">Solution content.</div>
         </div>
-
         <div>
           <div class="drawer-section-title">History timeline</div>
-          <div class="timeline-flow" id="drawer-timeline-flow">
-            <!-- Rendered dynamically -->
-          </div>
+          <div class="timeline-flow" id="drawer-timeline-flow"></div>
         </div>
-
         <div>
           <div class="drawer-section-title">Attachments</div>
-          <div id="drawer-attachments-list" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <!-- Rendered dynamically -->
-          </div>
+          <div id="drawer-attachments-list" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
         </div>
       </div>
-
       <div class="drawer-actions">
         <button class="btn btn-primary" id="btn-drawer-resolve" style="flex-grow: 1;">Resolve Ticket</button>
         <button class="btn btn-secondary" id="btn-drawer-escalate">Escalate</button>
@@ -829,12 +745,11 @@
             <div class="form-group">
               <label for="tkt-category">Incident Category</label>
               <select class="form-control" id="tkt-category" required>
-                <option value="Authentication">Authentication</option>
-                <option value="Payment Issues">Payment Issues</option>
-                <option value="Workspace Settings">Workspace Settings</option>
-                <option value="Webhooks">Webhooks</option>
-                <option value="Database Performance">Database Performance</option>
-                <option value="User Experience">User Experience</option>
+                <option value="Network">Network</option>
+                <option value="Password Reset">Password Reset</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Software">Software</option>
+                <option value="Email">Email</option>
               </select>
             </div>
           </div>
@@ -898,9 +813,7 @@
   </div>
 
   <!-- Toast Notification Stack -->
-  <div class="toast-container" id="toast-stack-container">
-    <!-- Rendered dynamically -->
-  </div>
+  <div class="toast-container" id="toast-stack-container"></div>
 
   <!-- Javascript Modules Load -->
   <script src="js/data.js"></script>
@@ -912,6 +825,5 @@
   <script src="js/email.js"></script>
   <script src="js/settings.js"></script>
   <script src="js/app.js"></script>
-
 </body>
 </html>
