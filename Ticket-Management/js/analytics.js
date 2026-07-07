@@ -24,7 +24,7 @@ function initAnalyticsModule() {
 }
 
 function refreshAnalyticsData() {
-  const tickets = window.TicketNovaTickets.getTickets();
+  const tickets = window.SupportPilotTickets.getTickets();
   
   // 1. Calculate KPI Values
   const total = tickets.length;
@@ -116,7 +116,7 @@ function renderSLADonutChart(resolved, total) {
 }
 
 // Expose model globally
-window.TicketNovaAnalytics = {
+window.SupportPilotAnalytics = {
   init: initAnalyticsModule,
   refresh: refreshAnalyticsData
 };
