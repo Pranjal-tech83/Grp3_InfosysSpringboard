@@ -14,19 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
   initNotificationBadge();
 
   // 5. Initialize Sub-modules
-  window.TicketNovaTickets.init();
-  window.TicketNovaAssistant.init();
-  window.TicketNovaKB.init();
-  
-  window.TicketNovaAnalytics.init();
-  window.TicketNovaEmail.init();
-  window.TicketNovaSettings.init();
+  window.SupportPilotTickets.init();
+  window.SupportPilotAssistant.init();
+  window.SupportPilotAnalytics.init();
+  window.SupportPilotEmail.init();
+  window.SupportPilotSettings.init();
 
   // 6. Update Dashboard Views with live data
   refreshDynamicViewElements();
 
   // 7. Initialize Auth & Profile Redirection Engines
-  initAuthEngine();
   initProfileNavigation();
 
   // 8. Initialize Integrations Filter Tabs
@@ -107,20 +104,30 @@ function initNavigationRouter() {
         
         // Custom triggers depending on view target
         if (targetView === "assistant") {
-          window.TicketNovaAssistant.populateDropdown();
+          // No longer needed
         } else if (targetView === "email") {
-          window.TicketNovaEmail.refreshInbox();
+          window.SupportPilotEmail.refreshInbox();
         } else if (targetView === "analytics") {
-          window.TicketNovaAnalytics.refresh();
+          window.SupportPilotAnalytics.refresh();
         }
+
       }
     });
   });
+
+  const askAIBtn = document.getElementById("dash-action-assistant");
+  if (askAIBtn) {
+    askAIBtn.addEventListener("click", () => {
+      const targetNav = document.querySelector('[data-target="assistant"]');
+      if (targetNav) targetNav.click();
+    });
+  }
 }
+
 
 // --- Sidebar Collapse Action ---
 function initSidebarToggles() {
-  const toggleBtn = document.getElementById("sidebar-toggle");
+  const toggleBtn = document.getElementById("navbar-sidebar-toggle");
   
   toggleBtn.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-collapsed");
@@ -194,11 +201,11 @@ function showToast(title, description, type = "info") {
 
 // --- Global Dynamic Views Refresh (KPI Syncs & Recent Activity table) ---
 function refreshDynamicViewElements() {
-  const tickets = window.TicketNovaTickets.getTickets();
+  const tickets = window.SupportPilotTickets.getTickets();
   
   // 1. Sync Analytics metrics counters
-  if (window.TicketNovaAnalytics && typeof window.TicketNovaAnalytics.refresh === "function") {
-    window.TicketNovaAnalytics.refresh();
+  if (window.SupportPilotAnalytics && typeof window.SupportPilotAnalytics.refresh === "function") {
+    window.SupportPilotAnalytics.refresh();
   }
 
   // 2. Render Dashboard recent activity list (show top 5 items)
@@ -225,77 +232,11 @@ function refreshDynamicViewElements() {
       if (targetNav) targetNav.click();
       
       setTimeout(() => {
-        window.TicketNovaTickets.openDrawer(t.id);
+        window.SupportPilotTickets.openDrawer(t.id);
       }, 300);
     });
 
     tbody.appendChild(tr);
-  });
-}
-
-// --- Authentication & Login/Logout System ---
-function initAuthEngine() {
-  const loginScreen = document.getElementById("login-screen");
-  const appContainer = document.getElementById("app-container");
-  const loginForm = document.getElementById("login-form");
-  const logoutBtn = document.getElementById("btn-settings-logout");
-  const loginSubmitBtn = document.getElementById("btn-login-submit");
-
-  // Check login state
-  const isLoggedIn = localStorage.getItem("nova-logged-in") === "true";
-  
-  if (isLoggedIn) {
-    loginScreen.classList.remove("active");
-    appContainer.style.display = "flex";
-  } else {
-    loginScreen.classList.add("active");
-    appContainer.style.display = "none";
-  }
-
-  // Form Submit Handler
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    loginSubmitBtn.disabled = true;
-    loginSubmitBtn.innerHTML = `<span>Verifying credentials...</span>`;
-
-    setTimeout(() => {
-      // Simulate successful login
-      localStorage.setItem("nova-logged-in", "true");
-      
-      // Update UI panels with user initials
-      const storedName = localStorage.getItem("nova-user-name") || "Pranjal Choudhary";
-      
-      
-      if (window.TicketNovaSettings) {
-        window.TicketNovaSettings.updateUIInitials(storedName);
-        window.TicketNovaSettings.applyAvatarColor(localStorage.getItem("nova-avatar-bg") || "#2563eb");
-        window.TicketNovaSettings.applyProfileImage(localStorage.getItem("nova-profile-img"));
-      }
-
-      // Hide login overlay, show main platform
-      loginScreen.classList.remove("active");
-      appContainer.style.display = "flex";
-      
-      // Reset button
-      loginSubmitBtn.disabled = false;
-      loginSubmitBtn.innerHTML = `<span>Sign In</span>`;
-
-      showToast("Sign In Successful", "Welcome to SupportPilot Dashboard.", "success");
-    }, 1000);
-  });
-
-  // Logout Handler
-  logoutBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation(); // prevent bubbling up to trigger settings tab click
-
-    localStorage.removeItem("nova-logged-in");
-    
-    // Hide dashboard, open login
-    appContainer.style.display = "none";
-    loginScreen.classList.add("active");
-    
-    showToast("Logged Out", "Signed out of SupportPilot session.", "info");
   });
 }
 
@@ -366,3 +307,4 @@ function initIntegrationsModule() {
 // Expose toast factory globally
 window.showToast = showToast;
 window.refreshDynamicViewElements = refreshDynamicViewElements;
+
