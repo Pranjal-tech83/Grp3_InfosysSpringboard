@@ -7,11 +7,10 @@ function initAssistantModule() {
 
   if (!sendBtn || !chatInput) return;
 
-  // Initialize welcome layout if screen is clear
+  // Initialize welcome layout when the chat screen is clear
   if (chatMessages && chatMessages.children.length <= 1) {
     chatMessages.innerHTML = "";
-    appendMessage("Hello! I am your SupportPilot IT Assistant. Ask me anything about local system diagnostics, common network connectivity failures, or password management guides.", "ai");
-  }
+    appendMessage("Hello! I'm your SupportPilot IT Assistant. Ask me about VPN issues, network connectivity, printer troubleshooting, or password management.", "ai");
 
   sendBtn.addEventListener("click", handleSendMessage);
   chatInput.addEventListener("keypress", (e) => {
