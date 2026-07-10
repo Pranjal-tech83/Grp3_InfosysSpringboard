@@ -14,10 +14,15 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo-container">
-        <div class="logo-icon">N</div>
+        <img src="img/logo.png" alt="ED Logo" class="logo-icon" style="object-fit: contain; background: transparent; box-shadow: none; border-radius: 0;" onerror="this.outerHTML='<div class=\'logo-icon\' style=\'background:#0f172a; color:#fff\'>ED</div>'" />
         <span class="logo-text">SupportPilot</span>
       </div>
-      
+      <!-- Mobile Close Button -->
+      <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu" style="display:none;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
 
     <nav class="sidebar-nav">
@@ -46,25 +51,14 @@
       </div>
       
       
-      <div class="nav-item" data-target="analytics">
-        <svg viewBox="0 0 24 24">
-          <path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" />
-        </svg>
-        <span class="nav-label">Analytics</span>
-      </div>
+
       <div class="nav-item" data-target="email">
         <svg viewBox="0 0 24 24">
           <path d="M4 4h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm0 0l8 7 8-7" stroke="currentColor" />
         </svg>
         <span class="nav-label">Email Automation</span>
       </div>
-      <div class="nav-item" data-target="integrations">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2">
-          <path
-            d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10" />
-        </svg>
-        <span class="nav-label">Integrations</span>
-      </div>
+
       <div class="nav-item" data-target="settings">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3" />
@@ -76,27 +70,10 @@
       </div>
     </nav>
 
-    <div class="sidebar-footer" id="sidebar-profile-box"
-      style="cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%;">
-      <div class="user-avatar" id="sidebar-avatar"
-        style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
-        <img id="sidebar-avatar-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-        <span id="sidebar-avatar-txt">PC</span>
-      </div>
-      <div class="user-info" style="display: flex; flex-direction: column;">
-        <span class="user-name" id="sidebar-user-name">Pranjal kumar</span>
-        <span class="user-role">Administrator</span>
-      </div>
-      <button id="sidebar-logout-btn" class="nav-action-btn"
-        style="margin-left: auto; width: 28px; height: 28px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;"
-        aria-label="Sign Out">
-        <svg viewBox="0 0 24 24" width="16" height="16"
-          style="stroke: var(--text-secondary); fill: none; stroke-width: 2;">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" />
-        </svg>
-      </button>
-    </div>
   </aside>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
 
   <!-- Main Section Content Area -->
   <main id="main-content">
@@ -106,13 +83,7 @@
       <button class="nav-action-btn" id="navbar-sidebar-toggle" aria-label="Toggle Sidebar" style="margin-right: 12px; display: flex; align-items: center; justify-content: center;">
         <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <div class="search-container">
-        <svg class="search-icon" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" stroke="currentColor" />
-        </svg>
-        <input type="text" class="search-input" id="global-search" placeholder="Search tickets...">
-      </div>
+      
 
       <div class="navbar-actions">
         <div class="ai-status-badge">
@@ -154,6 +125,8 @@
 
     <!-- VIEW 1: DASHBOARD -->
     <section class="view-section active-view" id="dashboard-view">
+      <div id="dashboard-react-root"></div>
+      <div style="display: none;" id="legacy-dashboard-hide">
       <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Overview</h1>
       <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and
         resolution telemetry for SupportPilot.</p>
@@ -299,6 +272,7 @@
           </table>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- VIEW 2: TICKETS TABLE -->
@@ -348,14 +322,14 @@
         <table id="main-tickets-table">
           <thead>
             <tr>
-              <th data-sort="id">Ticket ID ↕</th>
-              <th data-sort="user">User ↕</th>
-              <th data-sort="department">Department ↕</th>
-              <th data-sort="subject">Subject ↕</th>
-              <th data-sort="category">Category ↕</th>
-              <th data-sort="priority">Priority ↕</th>
-              <th data-sort="status">Status ↕</th>
-              <th data-sort="createdDate">Created Date ↕</th>
+              <th data-sort="id">Ticket ID â†•</th>
+              <th data-sort="user">User â†•</th>
+              <th data-sort="department">Department â†•</th>
+              <th data-sort="subject">Subject â†•</th>
+              <th data-sort="category">Category â†•</th>
+              <th data-sort="priority">Priority â†•</th>
+              <th data-sort="status">Status â†•</th>
+              <th data-sort="createdDate">Created Date â†•</th>
             </tr>
           </thead>
           <tbody id="tickets-tbody">
@@ -376,15 +350,15 @@
     <section class="view-section" id="assistant-view">
         <div class="view-header">
           <div>
-            <h2>Smart AI Chatbox</h2>
-            <p>Plan your trip from location to destination, compare ticket prices, and book seamlessly.</p>
+            <h2>Smart IT Helpdesk Assistant</h2>
+            <p>Ask our local AI model for immediate troubleshooting guides, server status checkups, or policy rules lookup.</p>
           </div>
         </div>
         <div id="chat-messages" style="flex-grow: 1; overflow-y: auto; padding: 16px; background-color: var(--bg-primary); border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;">
           <!-- Messages go here -->
         </div>
         <div style="display: flex; gap: 12px; align-items: center; padding: 16px; background-color: var(--bg-sidebar); border-radius: 8px; border: 1px solid var(--border-color);">
-          <input type="text" id="chat-input" class="form-control" style="flex-grow: 1;" placeholder="E.g., I need a trip plan from New York to London next week...">
+          <input type="text" id="chat-input" class="form-control" style="flex-grow: 1;" placeholder="E.g., How do I map the corporate network printer to my local workstation?...">
           <button id="btn-send-message" class="btn btn-primary" style="padding: 10px 24px;">Send</button>
         </div>
       </section>
@@ -681,124 +655,34 @@
       </div>
     </section>
 
-    <!-- VIEW 8: SETTINGS -->
+    <!-- VIEW 8: SETTINGS (React-powered) -->
     <section class="view-section" id="settings-view">
       <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Settings</h1>
-      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Manage corporate profile
-        configuration preferences and safety filters.</p>
+      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">
+        Manage your profile, theme color, and account session preferences.
+      </p>
 
-      <div class="dashboard-grid">
-        <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="card-title">User Profile Details</div>
+      <!-- React Settings Panel mounts here -->
+      <div id="settings-react-root"></div>
 
-          <!-- Profile Picture Section -->
-          <div class="form-group" style="margin-bottom: 20px;">
-            <label>Profile Picture</label>
-            <div style="display: flex; align-items: center; gap: 16px; margin-top: 6px;">
-              <div id="settings-avatar-preview"
-                style="width: 54px; height: 54px; border-radius: 50%; background-color: var(--accent-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; overflow: hidden; position: relative; transition: background-color var(--transition-speed);">
-                <img id="settings-avatar-preview-img" src=""
-                  style="display: none; width: 100%; height: 100%; object-fit: cover;">
-                <span id="settings-avatar-preview-txt">PC</span>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <button type="button" class="btn btn-secondary" id="btn-upload-photo"
-                  style="padding: 6px 12px; font-size: 12px; cursor: pointer;">Upload Photo</button>
-                <button type="button" class="btn btn-secondary" id="btn-remove-photo"
-                  style="padding: 6px 12px; font-size: 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.2); cursor: pointer;">Remove</button>
-                <input type="file" id="settings-photo-input" accept="image/*" style="display: none;">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Select Profile Theme Color</label>
-            <div id="avatar-color-selector" style="display: flex; gap: 10px; margin-top: 6px; margin-bottom: 12px;">
-              <div class="avatar-color-choice selected" data-color="#2563eb"
-                style="width: 32px; height: 32px; border-radius: 50%; background-color: #2563eb; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;">
-              </div>
-              <div class="avatar-color-choice" data-color="#10b981"
-                style="width: 32px; height: 32px; border-radius: 50%; background-color: #10b981; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;">
-              </div>
-              <div class="avatar-color-choice" data-color="#4f46e5"
-                style="width: 32px; height: 32px; border-radius: 50%; background-color: #4f46e5; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;">
-              </div>
-              <div class="avatar-color-choice" data-color="#d97706"
-                style="width: 32px; height: 32px; border-radius: 50%; background-color: #d97706; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;">
-              </div>
-              <div class="avatar-color-choice" data-color="#7c3aed"
-                style="width: 32px; height: 32px; border-radius: 50%; background-color: #7c3aed; cursor: pointer; border: 2.5px solid transparent; box-shadow: var(--shadow-sm); transition: all 0.2s;">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="settings-fullname">Full Name</label>
-            <input type="text" class="form-control" id="settings-fullname" value="Pranjal kumar">
-          </div>
-
-          <div class="form-group">
-            <label for="settings-email">Email Address</label>
-            <input type="email" class="form-control" id="settings-email" value="pranjal.kumar@supportpilot.ai">
-          </div>
-
-          <div class="form-group">
-            <label for="settings-role">Platform Role</label>
-            <input type="text" class="form-control" id="settings-role" value="user id" disabled style="opacity: 0.7;">
-          </div>
-
-          <button class="btn btn-primary" id="btn-save-settings">Save Profile changes</button>
+      <!-- Hidden legacy IDs needed by settings.js bridge (kept for sidebar/navbar sync) -->
+      <div style="display:none" aria-hidden="true">
+        <div id="settings-avatar-preview">
+          <img id="settings-avatar-preview-img" src="" alt="" />
+          <span id="settings-avatar-preview-txt">PC</span>
         </div>
-
-        <!-- Log Out Section in Settings -->
-        <div class="card"
-          style="display: flex; flex-direction: column; gap: 16px; border-color: rgba(239, 68, 68, 0.2);">
-          <div class="card-title" style="color: #ef4444;">Session Management</div>
-          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
-            Sign out of your active SupportPilot workspace session. You will need to enter your email and password to log
-            in again.
-          </p>
-          <button class="btn" id="btn-settings-logout"
-            style="background-color: #ef4444; color: white; border: none; font-weight: 700; width: fit-content; cursor: pointer;">
-            Log Out of Account
-          </button>
-        </div>
-
-        <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
-          <div class="card-title">System Preferences</div>
-
-          <div class="form-group">
-            <label for="settings-theme">Active UI Theme</label>
-            <select class="form-control" id="settings-theme-select">
-              <option value="light">Light Theme Mode</option>
-              <option value="dark">Dark Theme Mode</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="settings-language">Interface Language</label>
-            <select class="form-control" id="settings-lang-select">
-              <option value="en">English (US)</option>
-              <option value="es">Español (ES)</option>
-              <option value="de">Deutsch (DE)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label
-              style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; margin-top: 8px;">
-              <input type="checkbox" id="settings-notif-checkbox" checked style="width: 16px; height: 16px;">
-              <span>Enable System Sound Alerts</span>
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500;">
-              <input type="checkbox" id="settings-auto-chk" checked style="width: 16px; height: 16px;">
-              <span>Auto-allocate tickets with confidence score > 95%</span>
-            </label>
-          </div>
-        </div>
+        <input id="settings-fullname" type="text" />
+        <input id="settings-email" type="email" />
+        <input id="btn-upload-photo" type="button" />
+        <input id="btn-remove-photo" type="button" />
+        <input id="settings-photo-input" type="file" accept="image/*" />
+        <select id="settings-theme-select"><option value="light">Light</option><option value="dark">Dark</option></select>
+        <select id="settings-lang-select"><option value="en">English</option></select>
+        <input id="settings-notif-checkbox" type="checkbox" />
+        <input id="settings-auto-chk" type="checkbox" />
+        <button id="btn-save-settings"></button>
+        <button id="btn-settings-logout"></button>
+        <div id="avatar-color-selector"></div>
       </div>
     </section>
 
@@ -995,15 +879,170 @@
   <!-- Rendered dynamically -->
 </div>
 
+<!-- React 18 + ReactDOM CDN -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
 <!-- Javascript Modules Load -->
-<script src="js/data.js"></script>
-<script src="js/tickets.js"></script>
-<script src="js/assistant.js"></script>
-<script src="js/workflow.js"></script>
-<script src="js/analytics.js"></script>
-<script src="js/email.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/app.js"></script>
+<script src="js/dashboard-react.js?v=7"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/tickets.js?v=2"></script>
+<script src="js/assistant.js?v=2"></script>
+<script src="js/workflow.js?v=2"></script>
+<script src="js/email.js?v=2"></script>
+<script src="js/settings.js?v=2"></script>
+<script src="js/app.js?v=2"></script>
+
+<!-- React Settings Panel Component (pure JS, no Babel needed) -->
+<script src="js/settings-react.js"></script>
+
+
+<!-- Vanilla fallback: ensures Settings nav click mounts React panel
+     even when app.js throws due to broken sibling files. -->
+<script>
+(function() {
+  function patchSettingsNav() {
+    const settingsNavItems = document.querySelectorAll('[data-target="settings"]');
+    if (!settingsNavItems.length) { setTimeout(patchSettingsNav, 300); return; }
+
+    settingsNavItems.forEach(function(navEl) {
+      navEl.addEventListener('click', function() {
+        /* Ensure active-view is set even if app.js router crashed */
+        var all = document.querySelectorAll('.view-section');
+        all.forEach(function(s){ s.classList.remove('active-view'); });
+        var sv = document.getElementById('settings-view');
+        if (sv) sv.classList.add('active-view');
+
+        /* Trigger React mount (Babel script sets this ~1-2s after load) */
+        var attempts = 0;
+        (function tryMount() {
+          if (typeof window.__mountSettingsPanel === 'function') {
+            window.__mountSettingsPanel();
+          } else if (attempts++ < 20) {
+            setTimeout(tryMount, 200);
+          }
+        })();
+      });
+    });
+  }
+
+  /* Also patch sidebar nav highlight */
+  function patchNavHighlight() {
+    document.querySelectorAll('.nav-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(function(e){ e.classList.remove('active'); });
+        el.classList.add('active');
+      });
+    });
+  }
+
+  function patchProfileNav() {
+    var profileBtn = document.getElementById('navbar-profile-btn');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', function() {
+        var settingsNav = document.querySelector('[data-target="settings"]');
+        if (settingsNav) settingsNav.click();
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      patchSettingsNav();
+      patchNavHighlight();
+      patchProfileNav();
+      if (window.SupportPilotReactDashboard && typeof ReactDOM !== 'undefined') {
+        ReactDOM.createRoot(document.getElementById('dashboard-react-root')).render(React.createElement(window.SupportPilotReactDashboard));
+      }
+    });
+  } else {
+    patchSettingsNav();
+    patchNavHighlight();
+    patchProfileNav();
+    if (window.SupportPilotReactDashboard && typeof ReactDOM !== 'undefined') {
+      ReactDOM.createRoot(document.getElementById('dashboard-react-root')).render(React.createElement(window.SupportPilotReactDashboard));
+    }
+  }
+})();
+</script>
+<!-- Mobile Sidebar Menu Logic -->
+<script>
+(function() {
+  function isMobile() {
+    return window.innerWidth <= 768;
+  }
+
+  function openMobileSidebar() {
+    document.body.classList.add('mobile-menu-open');
+    var overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) {
+      overlay.style.display = 'block';
+      // Small delay so CSS transition fires
+      requestAnimationFrame(function() {
+        overlay.classList.add('active');
+      });
+    }
+  }
+
+  function closeMobileSidebar() {
+    document.body.classList.remove('mobile-menu-open');
+    var overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      setTimeout(function() {
+        overlay.style.display = 'none';
+      }, 300);
+    }
+  }
+
+  function patchMobileSidebar() {
+    // Hamburger button in the navbar
+    var hamburger = document.getElementById('navbar-sidebar-toggle');
+    if (hamburger) {
+      hamburger.addEventListener('click', function() {
+        if (isMobile()) {
+          if (document.body.classList.contains('mobile-menu-open')) {
+            closeMobileSidebar();
+          } else {
+            openMobileSidebar();
+          }
+        }
+      });
+    }
+
+    // ✕ Close button inside the sidebar
+    var closeBtn = document.getElementById('sidebar-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        closeMobileSidebar();
+      });
+    }
+
+    // Clicking the dark overlay closes the sidebar
+    var overlay = document.getElementById('mobile-sidebar-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', function() {
+        closeMobileSidebar();
+      });
+    }
+
+    // Clicking a nav item on mobile closes the sidebar automatically
+    document.querySelectorAll('.nav-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        if (isMobile()) {
+          closeMobileSidebar();
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchMobileSidebar);
+  } else {
+    patchMobileSidebar();
+  }
+})();
+</script>
 
 </body>
 

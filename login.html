@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupportPilot – Login</title>
+  <meta name="description" content="Sign in to SupportPilot, the AI-powered ticket resolution platform. Access your account, create a new one, or reset your password." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- React 18 via CDN (no build step) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for JSX transform in-browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS – mirrors SupportPilot palette
+    ============================================================ */
+    :root {
+      --bg-app: #f0f4ff;
+      --bg-card: rgba(255, 255, 255, 0.82);
+      --bg-input: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: rgba(37, 99, 235, 0.12);
+      --accent-glow: rgba(37, 99, 235, 0.22);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.12);
+      --border: rgba(226, 232, 240, 0.9);
+      --shadow-card: 0 20px 60px -10px rgba(37,99,235,0.14), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-btn: 0 4px 14px rgba(37,99,235,0.35);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-app: #060b18;
+      --bg-card: rgba(15, 23, 42, 0.78);
+      --bg-input: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: rgba(59, 130, 246, 0.15);
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      --border: rgba(51, 65, 85, 0.8);
+      --shadow-card: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body, #root {
+      height: 100%;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .bg-wrapper {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 40%, #ede9fe 100%);
+      transition: background var(--transition);
+    }
+    [data-theme="dark"] .bg-wrapper {
+      background: linear-gradient(135deg, #060b18 0%, #0d1526 50%, #0c0e1e 100%);
+    }
+
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.45; animation: float 8s ease-in-out infinite; }
+    .orb-1 { width: 520px; height: 520px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); top: -180px; left: -120px; animation-delay: 0s; }
+    .orb-2 { width: 420px; height: 420px; background: radial-gradient(circle, #8b5cf6 0%, transparent 70%); bottom: -150px; right: -100px; animation-delay: -3s; }
+    .orb-3 { width: 280px; height: 280px; background: radial-gradient(circle, #06b6d4 0%, transparent 70%); top: 40%; left: 55%; animation-delay: -5s; }
+    [data-theme="dark"] .orb { opacity: 0.25; }
+
+    @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.04); } }
+
+    .page-layout { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+    .auth-panel { width: 100%; max-width: 440px; }
+
+    .brand { display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 32px; animation: fadeDown 0.5s ease both; }
+    .brand-icon { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #7c3aed); display: grid; place-items: center; font-size: 20px; font-weight: 800; color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.4); letter-spacing: -1px; }
+    .brand-name { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: var(--shadow-card); padding: 36px 36px 32px; animation: fadeUp 0.45s ease both; }
+    @media (max-width: 480px) { .card { padding: 28px 20px 24px; } }
+
+    .card-inner { animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .card-header { margin-bottom: 28px; }
+    .card-title { font-size: 22px; font-weight: 800; color: var(--text-primary); line-height: 1.2; margin-bottom: 6px; }
+    .card-subtitle { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    .form-group { margin-bottom: 18px; position: relative; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; letter-spacing: 0.02em; }
+    .input-wrapper { position: relative; display: flex; align-items: center; }
+    .input-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; transition: color var(--transition); display: flex; }
+    .form-input { width: 100%; padding: 12px 14px 12px 42px; font-size: 14px; font-family: inherit; font-weight: 500; background: var(--bg-input); color: var(--text-primary); border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; transition: border-color var(--transition), box-shadow var(--transition), background var(--transition); caret-color: var(--accent); }
+    .form-input::placeholder { color: var(--text-muted); font-weight: 400; }
+    .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light), 0 1px 4px rgba(0,0,0,0.06); }
+    .input-wrapper:focus-within .input-icon { color: var(--accent); }
+
+    .pw-toggle { position: absolute; right: 14px; background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; padding: 0; transition: color var(--transition); }
+    .pw-toggle:hover { color: var(--accent); }
+
+    .msg { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; margin-bottom: 18px; animation: fadeUp 0.25s ease both; }
+    .msg-error { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .msg-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+
+    .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 20px; font-size: 14px; font-family: inherit; font-weight: 700; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: transform var(--transition), box-shadow var(--transition), background var(--transition), opacity var(--transition); letter-spacing: 0.02em; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; box-shadow: var(--shadow-btn); margin-top: 6px; }
+    .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--accent-hover), #6d28d9); box-shadow: 0 6px 22px rgba(37,99,235,0.45); transform: translateY(-1px); }
+    .btn-secondary { background: var(--accent-light); color: var(--accent); border: 1.5px solid rgba(37,99,235,0.25); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.3); }
+    .btn-danger:hover:not(:disabled) { box-shadow: 0 6px 22px rgba(239,68,68,0.45); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: rgba(37,99,235,0.3); }
+
+    .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner-dark { border-color: rgba(37,99,235,0.25); border-top-color: var(--accent); }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: var(--text-muted); font-size: 12px; font-weight: 500; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .link-btn { background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; transition: color var(--transition); text-decoration: underline; text-underline-offset: 3px; font-family: inherit; }
+    .link-btn:hover { color: var(--accent-hover); }
+
+    .check-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); font-weight: 500; cursor: pointer; user-select: none; }
+    .check-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+    .strength-bar { display: flex; gap: 4px; margin-top: 8px; }
+    .strength-seg { flex: 1; height: 4px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
+    .strength-seg.active-weak   { background: #ef4444; }
+    .strength-seg.active-fair   { background: #f59e0b; }
+    .strength-seg.active-good   { background: #3b82f6; }
+    .strength-seg.active-strong { background: #10b981; }
+    .strength-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .logout-icon { width: 64px; height: 64px; border-radius: 18px; background: var(--danger-light); display: grid; place-items: center; margin: 0 auto 20px; }
+    .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--success-light); display: grid; place-items: center; margin: 0 auto 20px; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+    .theme-toggle { position: fixed; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-card); backdrop-filter: blur(12px); cursor: pointer; display: grid; place-items: center; color: var(--text-secondary); transition: all var(--transition); box-shadow: var(--shadow-card); z-index: 100; }
+    .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+    .nav-tabs { display: flex; background: var(--bg-input); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 28px; border: 1px solid var(--border); }
+    .nav-tab { flex: 1; padding: 9px 8px; font-size: 13px; font-weight: 600; font-family: inherit; border: none; border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-muted); transition: all var(--transition); }
+    .nav-tab.active { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+    .nav-tab:not(.active):hover { color: var(--accent); background: var(--accent-light); }
+
+    .footer-note { margin-top: 24px; text-align: center; font-size: 12px; color: var(--text-muted); animation: fadeUp 0.6s 0.2s ease both; }
+    .text-center { text-align: center; }
+    .text-muted-sm { font-size: 13px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  /* ── Icons (inline SVG) ─────────────────────────────────── */
+  const Icon = ({ d, size = 18, stroke = 'currentColor', strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke={stroke} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} />
+    </svg>
+  );
+
+  const IC = {
+    mail:   'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm16 2l-8 5-8-5',
+    lock:   'M19 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2zm-7-4a4 4 0 014 4H8a4 4 0 014-4z',
+    user:   'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z',
+    eye:    'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 100 6 3 3 0 000-6z',
+    eyeOff: 'M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22',
+    sun:    'M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 5a7 7 0 000 14A7 7 0 0012 5z',
+    moon:   'M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z',
+    check:  'M20 6L9 17l-5-5',
+    alert:  'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 8v4M12 16h.01',
+    logout: 'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',
+    back:   'M19 12H5M12 19l-7-7 7-7',
+    phone:  'M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.14 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z',
+  };
+
+  /* ── Helpers ─────────────────────────────────────────────── */
+  function getStrength(pw) {
+    let s = 0;
+    if (pw.length >= 8) s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return s;
+  }
+  const slabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const scls    = ['', 'active-weak', 'active-fair', 'active-good', 'active-strong'];
+
+  function StrengthMeter({ pw }) {
+    const s = pw ? getStrength(pw) : 0;
+    return (
+      <div>
+        <div className="strength-bar">
+          {[1,2,3,4].map(i => <div key={i} className={`strength-seg ${i <= s ? scls[s] : ''}`} />)}
+        </div>
+        {pw && <div className="strength-label">{slabels[s]}</div>}
+      </div>
+    );
+  }
+
+  function Field({ label, id, type='text', icon, value, onChange, placeholder, required, children, autoComplete }) {
+    const [show, setShow] = useState(false);
+    const isPw = type === 'password';
+    return (
+      <div className="form-group">
+        {label && <label className="form-label" htmlFor={id}>{label}</label>}
+        <div className="input-wrapper">
+          <span className="input-icon"><Icon d={IC[icon]} size={16} /></span>
+          <input id={id} className="form-input"
+            type={isPw ? (show ? 'text' : 'password') : type}
+            value={value} onChange={onChange} placeholder={placeholder}
+            required={required} autoComplete={autoComplete}
+            style={{ paddingRight: isPw ? '42px' : '14px' }} />
+          {isPw && (
+            <button type="button" className="pw-toggle" onClick={() => setShow(s => !s)} tabIndex={-1}>
+              <Icon d={show ? IC.eyeOff : IC.eye} size={16} />
+            </button>
+          )}
+        </div>
+        {children}
+      </div>
+    );
+  }
+
+  function Spinner({ dark = false }) {
+    return <div className={`spinner ${dark ? 'spinner-dark' : ''}`} />;
+  }
+
+  function Msg({ type, text }) {
+    if (!text) return null;
+    return (
+      <div className={`msg msg-${type}`} role="alert">
+        <Icon d={type === 'error' ? IC.alert : IC.check} size={15} />
+        <span>{text}</span>
+      </div>
+    );
+  }
+
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem('sp_users') || '[]'); } catch { return []; }
+  }
+  function saveUsers(u) { localStorage.setItem('sp_users', JSON.stringify(u)); }
+
+  /* ─── Login View ────────────────────────────────────────── */
+  function LoginView({ onNav, onLoggedIn }) {
+    const [email, setEmail] = useState('');
+    const [pw, setPw] = useState('');
+    const [remember, setRemember] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    function submit(e) {
+      e.preventDefault(); setError('');
+      if (!email || !pw) { setError('Please fill in all fields.'); return; }
+      setLoading(true);
+      setTimeout(() => {
+        const u = getUsers().find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === pw);
+        if (u) { if (remember) localStorage.setItem('sp_session', JSON.stringify(u)); onLoggedIn(u); }
+        else { setError('Invalid email or password. Please try again.'); setLoading(false); }
+      }, 900);
+    }
+
+    return (
+      <div className="card-inner">
+        <div className="card-header">
+          <div className="card-title">Welcome back 👋</div>
+          <div className="card-subtitle">Sign in to your SupportPilot account</div>
+        </div>
+        <Msg type="error" text={error} />
+        <form onSubmit={submit} noValidate>
+          <Field id="login-email" label="Email address" icon="mail" type="email"
+                 value={email} onChange={e => setEmail(e.target.value)}
+                 placeholder="you@company.com" autoComplete="email" required />
+          <Field id="login-password" label="Password" icon="lock" type="password"
+                 value={pw} onChange={e => setPw(e.target.value)}
+                 placeholder="Enter your password" autoComplete="current-password" required />
+          <div className="check-row">
+            <label className="check-label">
+              <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
+              Remember me
+            </label>
+            <button type="button" className="link-btn" onClick={() => onNav('forgot')}>Forgot password?</button>
+          </div>
+          <button id="login-submit" type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? <Spinner /> : 'Sign In'}
+          </button>
+        </form>
+        <div className="divider">or</div>
+        <div className="text-center text-muted-sm">
+          Don't have an account?{' '}
+          <button className="link-btn" onClick={() => onNav('register')}>Create account</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Register View ─────────────────────────────────────── */
+  function RegisterView({ onNav }) {
+    const [f, setF] = useState({ name:'', email:'', phone:'', pw:'', confirm:'' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [done, setDone] = useState(false);
+    const set = k => e => setF(p => ({ ...p, [k]: e.target.value }));
+
+    function submit(e) {
+      e.preventDefault(); setError('');
+      if (!f.name || !f.email || !f.pw || !f.confirm) { setError('All required fields must be filled.'); return; }
+      if (f.pw !== f.confirm) { setError('Passwords do not match.'); return; }
+      if (getStrength(f.pw) < 2) { setError('Please choose a stronger password.'); return; }
+      const users = getUsers();
+      if (users.find(u => u.email.toLowerCase() === f.email.toLowerCase())) { setError('An account with this email already exists.'); return; }
+      setLoading(true);
+      setTimeout(() => { saveUsers([...users, { name:f.name, email:f.email, phone:f.phone, password:f.pw }]); setLoading(false); setDone(true); }, 1000);
+    }
+
+    if (done) return (
+      <div className="card-inner" style={{ textAlign:'center', padding:'8px 0' }}>
+        <div className="success-icon"><Icon d={IC.check} size={28} stroke="#10b981" strokeWidth={2.5} /></div>
+        <div className="card-title" style={{ marginBottom:8 }}>Account created! 🎉</div>
+        <p className="card-subtitle" style={{ marginBottom:28 }}>Your account has been created successfully. You can now sign in.</p>
+        <button id="go-login" className="btn btn-primary" onClick={() => onNav('login')}>Go to Sign In</button>
+      </div>
+    );
+
+    return (
+      <div className="card-inner">
+        <div className="card-header">
+          <div className="card-title">Create account</div>
+          <div className="card-subtitle">Join SupportPilot and start resolving tickets smarter</div>
+        </div>
+        <Msg type="error" text={error} />
+        <form onSubmit={submit} noValidate>
+          <Field id="reg-name" label="Full name" icon="user" value={f.name} onChange={set('name')} placeholder="Jane Smith" autoComplete="name" required />
+          <Field id="reg-email" label="Email address" icon="mail" type="email" value={f.email} onChange={set('email')} placeholder="you@company.com" autoComplete="email" required />
+          <Field id="reg-phone" label="Phone (optional)" icon="phone" type="tel" value={f.phone} onChange={set('phone')} placeholder="+1 555 000 0000" autoComplete="tel" />
+          <Field id="reg-password" label="Password" icon="lock" type="password" value={f.pw} onChange={set('pw')} placeholder="Create a strong password" autoComplete="new-password" required>
+            <StrengthMeter pw={f.pw} />
+          </Field>
+          <Field id="reg-confirm" label="Confirm password" icon="lock" type="password" value={f.confirm} onChange={set('confirm')} placeholder="Re-enter password" autoComplete="new-password" required />
+          <button id="reg-submit" type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? <Spinner /> : 'Create Account'}
+          </button>
+        </form>
+        <div className="divider">already a member?</div>
+        <div className="text-center text-muted-sm">
+          <button className="link-btn" onClick={() => onNav('login')}>← Back to Sign In</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Forgot Password View ──────────────────────────────── */
+  function ForgotView({ onNav }) {
+    const [step, setStep] = useState(1);
+    const [email, setEmail] = useState('');
+    const [code, setCode] = useState('');
+    const [sentCode, setSentCode] = useState('');
+    const [newPw, setNewPw] = useState('');
+    const [confirmPw, setConfirmPw] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [done, setDone] = useState(false);
+
+    function sendCode(e) {
+      e.preventDefault(); setError('');
+      if (!email) { setError('Please enter your email address.'); return; }
+      if (!getUsers().find(u => u.email.toLowerCase() === email.toLowerCase())) { setError('No account found with that email address.'); return; }
+      setLoading(true);
+      const gen = String(Math.floor(100000 + Math.random() * 900000));
+      setTimeout(() => { setSentCode(gen); setLoading(false); setStep(2); alert(`[Demo] Your reset code is: ${gen}\n(In production this would be sent to your email.)`); }, 800);
+    }
+
+    function verifyCode(e) {
+      e.preventDefault(); setError('');
+      if (code !== sentCode) { setError('Invalid code. Please try again.'); return; }
+      setStep(3);
+    }
+
+    function resetPassword(e) {
+      e.preventDefault(); setError('');
+      if (!newPw || !confirmPw) { setError('Please fill in both fields.'); return; }
+      if (newPw !== confirmPw) { setError('Passwords do not match.'); return; }
+      if (getStrength(newPw) < 2) { setError('Please choose a stronger password.'); return; }
+      setLoading(true);
+      setTimeout(() => {
+        saveUsers(getUsers().map(u => u.email.toLowerCase() === email.toLowerCase() ? { ...u, password: newPw } : u));
+        setLoading(false); setDone(true);
+      }, 800);
+    }
+
+    if (done) return (
+      <div className="card-inner" style={{ textAlign:'center', padding:'8px 0' }}>
+        <div className="success-icon"><Icon d={IC.check} size={28} stroke="#10b981" strokeWidth={2.5} /></div>
+        <div className="card-title" style={{ marginBottom:8 }}>Password reset! ✅</div>
+        <p className="card-subtitle" style={{ marginBottom:28 }}>Your password has been updated. Sign in with your new credentials.</p>
+        <button id="reset-go-login" className="btn btn-primary" onClick={() => onNav('login')}>Sign In Now</button>
+      </div>
+    );
+
+    return (
+      <div className="card-inner">
+        <div className="card-header">
+          <div className="card-title">{['','Forgot password? 🔑','Enter your code','New password'][step]}</div>
+          <div className="card-subtitle">
+            {step === 1 && "Enter the email tied to your account and we'll send a reset code."}
+            {step === 2 && `A 6-digit code was sent to ${email}. Enter it below.`}
+            {step === 3 && 'Choose a strong new password for your account.'}
+          </div>
+        </div>
+        <div style={{ display:'flex', gap:6, marginBottom:24 }}>
+          {[1,2,3].map(s => <div key={s} style={{ flex:1, height:4, borderRadius:99, background: s <= step ? 'var(--accent)' : 'var(--border)', transition:'background 0.4s' }} />)}
+        </div>
+        <Msg type="error" text={error} />
+        {step === 1 && (
+          <form onSubmit={sendCode} noValidate>
+            <Field id="forgot-email" label="Email address" icon="mail" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@company.com" autoComplete="email" required />
+            <button id="forgot-send" type="submit" className="btn btn-primary" disabled={loading}>{loading ? <Spinner /> : 'Send Reset Code'}</button>
+          </form>
+        )}
+        {step === 2 && (
+          <form onSubmit={verifyCode} noValidate>
+            <Field id="forgot-code" label="Verification code" icon="lock" value={code} onChange={e => setCode(e.target.value)} placeholder="6-digit code" autoComplete="one-time-code" required />
+            <div style={{ display:'flex', gap:10 }}>
+              <button type="button" className="btn btn-ghost" style={{ flex:'0 0 auto', width:'auto', padding:'13px 16px' }} onClick={() => setStep(1)}><Icon d={IC.back} size={16} /></button>
+              <button id="forgot-verify" type="submit" className="btn btn-primary" disabled={loading}>{loading ? <Spinner /> : 'Verify Code'}</button>
+            </div>
+          </form>
+        )}
+        {step === 3 && (
+          <form onSubmit={resetPassword} noValidate>
+            <Field id="forgot-newpw" label="New password" icon="lock" type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="New strong password" autoComplete="new-password" required>
+              <StrengthMeter pw={newPw} />
+            </Field>
+            <Field id="forgot-confirmpw" label="Confirm new password" icon="lock" type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="Re-enter new password" autoComplete="new-password" required />
+            <button id="forgot-reset" type="submit" className="btn btn-primary" disabled={loading}>{loading ? <Spinner /> : 'Reset Password'}</button>
+          </form>
+        )}
+        <div className="text-center" style={{ marginTop:20 }}>
+          <button className="link-btn" onClick={() => onNav('login')}>← Back to Sign In</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Logout View ───────────────────────────────────────── */
+  function LogoutView({ user, onNav, onLoggedOut }) {
+    const [loading, setLoading] = useState(false);
+    function doLogout() {
+      setLoading(true);
+      setTimeout(() => { localStorage.removeItem('sp_session'); setLoading(false); onLoggedOut(); }, 700);
+    }
+    return (
+      <div className="card-inner" style={{ textAlign:'center' }}>
+        <div className="logout-icon"><Icon d={IC.logout} size={28} stroke="var(--danger)" strokeWidth={2} /></div>
+        <div className="card-title" style={{ marginBottom:8 }}>Sign out?</div>
+        <p className="card-subtitle" style={{ marginBottom:6 }}>You are signed in as <strong style={{ color:'var(--text-primary)' }}>{user?.name || user?.email}</strong>.</p>
+        <p className="card-subtitle" style={{ marginBottom:28 }}>Are you sure you want to sign out of SupportPilot?</p>
+        <div style={{ display:'flex', gap:10 }}>
+          <button id="logout-cancel" className="btn btn-ghost" onClick={() => onNav('dashboard')}>Cancel</button>
+          <button id="logout-confirm" className="btn btn-danger" onClick={doLogout} disabled={loading}>{loading ? <Spinner /> : 'Yes, Sign Out'}</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Dashboard (post-login) ────────────────────────────── */
+  function DashboardView({ user, onNav }) {
+    return (
+      <div className="card-inner" style={{ textAlign:'center' }}>
+        <div className="success-icon" style={{ background:'var(--accent-light)' }}>
+          <Icon d={IC.user} size={28} stroke="var(--accent)" strokeWidth={2} />
+        </div>
+        <div className="card-title" style={{ marginBottom:8 }}>Welcome, {user?.name?.split(' ')[0] || 'User'}! 🚀</div>
+        <p className="card-subtitle" style={{ marginBottom:28 }}>You're signed in as <strong style={{ color:'var(--text-primary)' }}>{user?.email}</strong>. Redirecting you to the main app…</p>
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          <a id="open-app" href="index.html" className="btn btn-primary" style={{ textDecoration:'none' }}>Open SupportPilot →</a>
+          <button id="logout-btn" className="btn btn-ghost" onClick={() => onNav('logout')}><Icon d={IC.logout} size={15} /> Sign Out</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── Root App ──────────────────────────────────────────── */
+  function App() {
+    const [view, setView] = useState('login');
+    const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const [user, setUser] = useState(null);
+    const [animKey, setAnimKey] = useState(0);
+
+    useEffect(() => {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }, [dark]);
+
+    useEffect(() => {
+      try {
+        const s = JSON.parse(localStorage.getItem('sp_session'));
+        if (s) { setUser(s); setView('dashboard'); }
+      } catch {}
+    }, []);
+
+    function onNav(target) { setAnimKey(k => k + 1); setView(target); }
+    function onLoggedIn(u) { setUser(u); setAnimKey(k => k + 1); setView('dashboard'); }
+    function onLoggedOut() { setUser(null); setAnimKey(k => k + 1); setView('login'); }
+
+    const showTabs = ['login','register'].includes(view);
+
+    const Views = {
+      login:     <LoginView    onNav={onNav} onLoggedIn={onLoggedIn} />,
+      register:  <RegisterView onNav={onNav} />,
+      forgot:    <ForgotView   onNav={onNav} />,
+      logout:    <LogoutView   user={user} onNav={onNav} onLoggedOut={onLoggedOut} />,
+      dashboard: <DashboardView user={user} onNav={onNav} />,
+    };
+
+    return (
+      <>
+        <div className="bg-wrapper" aria-hidden="true">
+          <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
+        </div>
+        <button id="theme-toggle" className="theme-toggle" onClick={() => setDark(d => !d)}
+                title={dark ? 'Switch to light mode' : 'Switch to dark mode'} aria-label="Toggle theme">
+          <Icon d={dark ? IC.sun : IC.moon} size={18} />
+        </button>
+        <div className="page-layout">
+          <div className="auth-panel">
+            <div className="brand">
+              <img src="img/logo.png" alt="ED Logo" className="brand-icon" style={{ objectFit: 'contain', background: 'transparent', boxShadow: 'none', borderRadius: 0 }} onError={(e) => e.target.outerHTML = '<div class="brand-icon" style="background:#0f172a; color:#fff">ED</div>'} />
+              <span className="brand-name">SupportPilot</span>
+            </div>
+            <div className="card">
+              {showTabs && (
+                <div className="nav-tabs" role="tablist">
+                  <button role="tab" id="tab-login" className={`nav-tab ${view === 'login' ? 'active' : ''}`} onClick={() => onNav('login')} aria-selected={view === 'login'}>Sign In</button>
+                  <button role="tab" id="tab-register" className={`nav-tab ${view === 'register' ? 'active' : ''}`} onClick={() => onNav('register')} aria-selected={view === 'register'}>Create Account</button>
+                </div>
+              )}
+              <div key={animKey}>
+                {Views[view] || Views['login']}
+              </div>
+            </div>
+            <p className="footer-note">© 2026 SupportPilot · AI-Powered Ticket Resolution</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

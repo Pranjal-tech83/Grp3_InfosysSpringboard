@@ -22,10 +22,16 @@ function initTicketsModule() {
   currentTickets = [...window.SupportPilotData.initialTickets];
 
   // Setup DOM Event Listeners
-  document.getElementById("tkt-search-bar").addEventListener("input", handleSearch);
-  document.getElementById("filter-dept").addEventListener("change", handleFilterChange);
-  document.getElementById("filter-priority").addEventListener("change", handleFilterChange);
-  document.getElementById("filter-status").addEventListener("change", handleFilterChange);
+  // Safe event binder
+  const bind = (id, event, handler) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(event, handler);
+  };
+
+  bind("tkt-search-bar", "input", handleSearch);
+  bind("filter-dept", "change", handleFilterChange);
+  bind("filter-priority", "change", handleFilterChange);
+  bind("filter-status", "change", handleFilterChange);
 
   // Table header clicks for sorting
   const headers = document.querySelectorAll("#main-tickets-table th");
@@ -37,25 +43,25 @@ function initTicketsModule() {
   });
 
   // Modal open/close actions
-  document.getElementById("btn-create-ticket-modal").addEventListener("click", openNewTicketModal);
-  document.getElementById("dash-action-new-tkt").addEventListener("click", openNewTicketModal);
-  document.getElementById("modal-close-btn").addEventListener("click", closeNewTicketModal);
-  document.getElementById("btn-modal-cancel").addEventListener("click", closeNewTicketModal);
-  document.getElementById("new-ticket-form").addEventListener("submit", handleNewTicketSubmit);
+  bind("btn-create-ticket-modal", "click", openNewTicketModal);
+  bind("dash-action-new-tkt", "click", openNewTicketModal);
+  bind("modal-close-btn", "click", closeNewTicketModal);
+  bind("btn-modal-cancel", "click", closeNewTicketModal);
+  bind("new-ticket-form", "submit", handleNewTicketSubmit);
 
   // Details drawer closing actions
-  document.getElementById("drawer-close-btn").addEventListener("click", closeDetailsDrawer);
-  document.getElementById("ticket-drawer-backdrop").addEventListener("click", (e) => {
+  bind("drawer-close-btn", "click", closeDetailsDrawer);
+  bind("ticket-drawer-backdrop", "click", (e) => {
     if (e.target.id === "ticket-drawer-backdrop") closeDetailsDrawer();
   });
 
   // Drawer buttons
-  document.getElementById("btn-drawer-resolve").addEventListener("click", handleDrawerResolve);
-  document.getElementById("btn-drawer-escalate").addEventListener("click", handleDrawerEscalate);
-  document.getElementById("btn-drawer-assign").addEventListener("click", handleDrawerAssign);
+  bind("btn-drawer-resolve", "click", handleDrawerResolve);
+  bind("btn-drawer-escalate", "click", handleDrawerEscalate);
+  bind("btn-drawer-assign", "click", handleDrawerAssign);
 
   // Export CSV mock trigger
-  document.getElementById("btn-export-ui").addEventListener("click", handleExportCSV);
+  bind("btn-export-ui", "click", handleExportCSV);
 
   // First rendering of tickets table
   renderTicketsTable();
