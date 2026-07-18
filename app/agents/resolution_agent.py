@@ -155,20 +155,56 @@ def retrieve_knowledge(state: TicketState) -> TicketState:
 #    Feeds ticket + retrieved KB context into the LLM to draft a resolution
 # ---------------------------------------------------------------------------
 def generate_response(state: TicketState) -> TicketState:
+    # ------------------------------------------------------------------
+    # PROMPT ENGINEERING — grounding / anti-hallucination rules.
+    #
+    # Goal: the LLM must NEVER invent a fix that isn't supported by the
+    # knowledge-base context (or well-known, category-level best practice).
+    # Every rule below exists to close a specific hallucination failure
+    # mode we want to avoid in a real helpdesk:
+    #   1. Inventing product/menu names, error codes, or settings that
+    #      were never in the KB context.
+    #   2. Sounding confident about a fix for an issue the KB doesn't
+    #      actually cover.
+    #   3. Silently mixing "verified KB steps" with "general guesses"
+    #      so the user can't tell which is which.
+    #   4. Escaping the required output format, which breaks the
+    #      programmatic RESOLVED/CONFIDENCE parsing downstream.
+    # ------------------------------------------------------------------
     system_prompt = (
-        "You are the Resolution Agent for SupportPilot, an internal IT helpdesk. "
-        "Using the ticket details and the knowledge-base context provided, write "
-        "a clear, step-by-step troubleshooting response for the end user.\n\n"
-        "Rules:\n"
-        "- If the knowledge-base context actually answers the issue, base your "
-        "steps on it.\n"
-        "- If the context is missing or irrelevant, say so honestly and give "
-        "general best-practice troubleshooting steps for this category instead.\n"
-        "- After the steps, add one line starting with 'RESOLVED: yes' or "
-        "'RESOLVED: no' — say 'no' if this issue really needs a human "
-        "technician (e.g. hardware replacement, account/security exceptions, "
-        "or the KB context does not cover it at all).\n"
-        "- Then add one line starting with 'CONFIDENCE: ' with a number 0.00-1.00."
+        "You are the Resolution Agent for SupportPilot, an internal IT helpdesk.\n\n"
+
+        "GROUNDING RULES (do not break these):\n"
+        "1. Only state a specific fix (a setting, command, menu path, error code, "
+        "or version number) if it appears in the knowledge-base context below. "
+        "Never invent specifics that are not present in the context.\n"
+        "2. If the knowledge-base context clearly matches the ticket, base your "
+        "steps directly on it and mention it is from the knowledge base.\n"
+        "3. If the context is missing, irrelevant, or only partially related, "
+        "say so explicitly in one short sentence (e.g. 'No exact match was found "
+        "in the knowledge base for this issue.') before giving anything else.\n"
+        "4. In that case, you may give GENERAL, well-known best-practice "
+        "troubleshooting steps for the ticket's category (e.g. standard network "
+        "or password-reset checks), but you must label them as general guidance, "
+        "not as a verified fix — and you must NOT present them with the same "
+        "confidence as a KB-backed answer.\n"
+        "5. Never fabricate a ticket number, article ID, policy, or quote that "
+        "was not given to you.\n"
+        "6. If you are not sure a step is safe or correct, do not include it — "
+        "prefer fewer, verified steps over more, speculative ones.\n\n"
+
+        "OUTPUT FORMAT (follow exactly, do not add extra sections):\n"
+        "- A short numbered list of troubleshooting steps.\n"
+        "- One line starting with 'RESOLVED: yes' or 'RESOLVED: no'. Answer "
+        "'no' if this needs a human technician (hardware replacement, "
+        "account/security exceptions) OR if the knowledge-base context did "
+        "not actually cover this issue.\n"
+        "- One line starting with 'CONFIDENCE: ' with a number from 0.00 to 1.00. "
+        "Use a HIGH number (0.8+) only when the fix is directly grounded in the "
+        "knowledge-base context. Use a LOW number (below 0.5) when you are "
+        "relying on general guidance rather than the knowledge base.\n"
+        "- Write the RESOLVED and CONFIDENCE lines as plain lines, NOT as bullet "
+        "points or bold text (no leading '-', '*', or markdown)."
     )
 
     user_prompt = (
@@ -194,12 +230,16 @@ def generate_response(state: TicketState) -> TicketState:
     confidence = 0.7
     body_lines = []
     for line in raw_text.splitlines():
-        upper = line.strip().upper()
+        # Strip common bullet/markdown prefixes ("- ", "* ", "1. ", "**") before
+        # checking for the RESOLVED:/CONFIDENCE: markers, since the LLM
+        # sometimes formats them as list items instead of bare lines.
+        cleaned = line.strip().lstrip("-*").strip().strip("*").strip()
+        upper = cleaned.upper()
         if upper.startswith("RESOLVED:"):
             resolved = "yes" in upper
         elif upper.startswith("CONFIDENCE:"):
             try:
-                confidence = float(line.split(":", 1)[1].strip())
+                confidence = float(cleaned.split(":", 1)[1].strip())
             except ValueError:
                 pass
         else:
