@@ -14,11 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initNotificationBadge();
 
   // 5. Initialize Sub-modules
-  window.SupportPilotTickets.init();
-  window.SupportPilotAssistant.init();
-  window.SupportPilotAnalytics.init();
-  window.SupportPilotEmail.init();
-  window.SupportPilotSettings.init();
+  if (window.SupportPilotTickets) window.SupportPilotTickets.init();
+  if (window.SupportPilotAssistant) window.SupportPilotAssistant.init();
+  if (window.SupportPilotAnalytics) window.SupportPilotAnalytics.init();
+  if (window.SupportPilotEmail) window.SupportPilotEmail.init();
+  if (window.SupportPilotSettings) window.SupportPilotSettings.init();
 
   // 6. Update Dashboard Views with live data
   refreshDynamicViewElements();
@@ -106,9 +106,9 @@ function initNavigationRouter() {
         if (targetView === "assistant") {
           // No longer needed
         } else if (targetView === "email") {
-          window.SupportPilotEmail.refreshInbox();
+          if (window.SupportPilotEmail) window.SupportPilotEmail.refreshInbox();
         } else if (targetView === "analytics") {
-          window.SupportPilotAnalytics.refresh();
+          if (window.SupportPilotAnalytics) window.SupportPilotAnalytics.refresh();
         }
 
       }
@@ -307,4 +307,3 @@ function initIntegrationsModule() {
 // Expose toast factory globally
 window.showToast = showToast;
 window.refreshDynamicViewElements = refreshDynamicViewElements;
-
