@@ -44,72 +44,67 @@
 
   /* ── Shared CSS-in-JS style objects ── */
   var S = {
-    card:     { display:'flex', flexDirection:'column', overflow:'hidden', borderRadius:12, background:'var(--bg-card, rgba(255,255,255,0.7))', border:'1px solid var(--border-color, rgba(226,232,240,.8))', boxShadow:'0 4px 16px rgba(0,0,0,.06)' },
-    banner:   { position:'relative', height:54, marginBottom:32, flexShrink:0 },
-    bannerGrd:{ position:'absolute', inset:0, background:'linear-gradient(135deg,#2563eb 0%,#7c3aed 50%,#06b6d4 100%)', borderRadius:'12px 12px 0 0', opacity:.88 },
-    avatarWrap:{ position:'absolute', bottom:-28, left:16, zIndex:2 },
-    avatar:   { width:56, height:56, borderRadius:'50%', border:'3px solid var(--bg-sidebar,#fff)', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', position:'relative', boxShadow:'0 4px 10px rgba(0,0,0,.15)', cursor:'crosshair' },
+    card:     { display:'flex', flexDirection:'column', borderRadius:8, background:'#fff', boxShadow:'0 1px 3px rgba(0,0,0,0.1)', flexGrow: 1, height: '100%' },
+    header:   { padding:'24px 32px', borderBottom:'1px solid #e2e8f0' },
+    hTitle:   { fontSize:20, fontWeight:700, color:'#1e293b', margin:0 },
+    layout:   { display:'flex', flexDirection:'row', minHeight:400, flexGrow: 1 },
+    sidebar:  { width:220, borderRight:'1px solid #e2e8f0', padding:'24px 0', flexShrink:0 },
+    navItem:  { display:'flex', alignItems:'center', gap:12, padding:'12px 24px', cursor:'pointer', fontSize:14, fontWeight:500, color:'#64748b', borderLeft:'3px solid transparent', transition:'all 0.2s' },
+    navItemAct: { display:'flex', alignItems:'center', gap:12, padding:'12px 24px', cursor:'pointer', fontSize:14, fontWeight:500, color:'#1d4ed8', borderLeft:'3px solid #1d4ed8', background:'#eff6ff', transition:'all 0.2s' },
+    content:  { flex:1, padding:32 },
+    
+    avatarRow:{ display:'flex', alignItems:'center', gap:24, marginBottom:32 },
+    avatarWrap:{ position:'relative', width:96, height:96, borderRadius:'50%', background:'#f1f5f9', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden', border:'1px solid #e2e8f0' },
     avatarImg:{ width:'100%', height:'100%', objectFit:'cover' },
-    avatarTxt:{ fontWeight:800, fontSize:18, color:'#fff', userSelect:'none' },
-    uploadFab:{ position:'absolute', bottom:0, right:0, width:20, height:20, borderRadius:'50%', background:'#2563eb', border:'2px solid white', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', padding:0, boxShadow:'0 2px 4px rgba(37,99,235,.4)' },
-    bannerName:{ position:'absolute', bottom:-30, left:82, display:'flex', flexDirection:'column', gap:0 },
-    bnDisp:   { fontWeight:800, fontSize:14, color:'var(--text-primary,#0f172a)' },
-    bnEmail:  { fontSize:10, color:'var(--text-secondary,#475569)' },
-    photoRow: { display:'flex', gap:6, padding:'0 16px', marginBottom:0 },
-    formGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, padding:'4px 16px 0' },
-    fg:       { display:'flex', flexDirection:'column', gap:2, padding:'0 16px' },
-    label:    { fontSize:10, fontWeight:700, color:'var(--text-secondary,#475569)', letterSpacing:.5, textTransform:'uppercase', marginBottom:0 },
-    iw:       { position:'relative', display:'flex', alignItems:'center' },
-    ii:       { position:'absolute', left:10, display:'flex', pointerEvents:'none' },
-    input:    { width:'100%', padding:'6px 10px 6px 32px', fontSize:12, fontFamily:'inherit', fontWeight:500, background:'var(--bg-input,#f8fafc)', color:'var(--text-primary,#0f172a)', border:'1.5px solid var(--border-color,rgba(226,232,240,.8))', borderRadius:6, outline:'none', caretColor:'#2563eb', boxSizing:'border-box' },
-    btnPri:   { display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'8px 16px', border:'none', borderRadius:6, cursor:'pointer', fontFamily:'inherit', fontWeight:700, fontSize:12, color:'#fff', boxShadow:'0 4px 10px rgba(37,99,235,.3)', width:'100%', transition:'all .2s' },
-    btnSec:   { display:'flex', alignItems:'center', gap:4, padding:'5px 10px', fontSize:11, fontWeight:600, fontFamily:'inherit', background:'rgba(37,99,235,.1)', color:'#2563eb', border:'1px solid rgba(37,99,235,.2)', borderRadius:6, cursor:'pointer', whiteSpace:'nowrap', transition:'all .2s' },
-    btnDanger:{ display:'flex', alignItems:'center', gap:4, padding:'6px 12px', fontSize:12, fontWeight:700, fontFamily:'inherit', background:'linear-gradient(135deg,#ef4444,#dc2626)', color:'#fff', border:'none', borderRadius:6, cursor:'pointer', boxShadow:'0 4px 10px rgba(239,68,68,.3)', whiteSpace:'nowrap', transition:'all .2s' },
-    logCard:  { display:'flex', flexDirection:'column', gap:6, padding:12, borderRadius:12, background:'var(--bg-card,rgba(255,255,255,.7))', border:'1px solid rgba(239,68,68,.2)', boxShadow:'0 4px 12px rgba(0,0,0,.06)' },
-    logHead:  { display:'flex', alignItems:'center', gap:8 },
-    logIcon:  { width:30, height:30, borderRadius:8, background:'rgba(239,68,68,.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
+    avatarTxt:{ fontSize:32, fontWeight:700, color:'#94a3b8' },
+    camIcon:  { position:'absolute', bottom:0, right:0, width:28, height:28, background:'#1d4ed8', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', border:'2px solid #fff', cursor:'pointer' },
+    btnBlue:  { background:'#1d4ed8', color:'#fff', padding:'10px 24px', borderRadius:4, fontWeight:500, fontSize:14, border:'none', cursor:'pointer', whiteSpace:'nowrap' },
+    btnGray:  { background:'#f1f5f9', color:'#475569', padding:'10px 24px', borderRadius:4, fontWeight:500, fontSize:14, border:'none', cursor:'pointer', whiteSpace:'nowrap' },
+    
+    formGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:24, marginBottom:32 },
+    fg:       { display:'flex', flexDirection:'column', gap:8 },
+    label:    { fontSize:13, fontWeight:600, color:'#334155' },
+    input:    { width:'100%', padding:'12px 14px', fontSize:14, color:'#1e293b', border:'1px solid #cbd5e1', borderRadius:4, outline:'none', boxSizing:'border-box', background:'#fff' },
+    
+    btnDanger:{ display:'flex', alignItems:'center', gap:8, padding:'10px 20px', fontSize:14, fontWeight:500, background:'transparent', color:'#ef4444', border:'none', borderRadius:4, cursor:'pointer', marginLeft:'-10px' },
   };
-
-  /* ── inject focus ring CSS once ── */
-  (function() {
-    var st = document.createElement('style');
-    st.textContent = '#sp-rn:focus,#sp-re:focus{border-color:#2563eb!important;box-shadow:0 0 0 3px rgba(37,99,235,.12)!important;}';
-    document.head.appendChild(st);
-  })();
 
   /* ══════════════════════════════════════════════════════════════
      SETTINGS PANEL COMPONENT
   ══════════════════════════════════════════════════════════════ */
   function SettingsPanel() {
-    var nameState  = useState(localStorage.getItem('nova-user-name')  || 'Pranjal kumar');
-    var emailState = useState(localStorage.getItem('nova-user-email') || 'pranjal.kumar@supportpilot.ai');
+    var storedName = localStorage.getItem('nova-user-name') || 'pranjal kumar';
+    var nameParts = storedName.split(' ');
+    var firstNameState = useState(nameParts[0] || '');
+    var lastNameState  = useState(nameParts.slice(1).join(' ') || '');
+    var emailState = useState(localStorage.getItem('nova-user-email') || 'examples@gmail.com');
+    var mobileState = useState(localStorage.getItem('nova-user-mobile') || '');
     var photoState = useState(localStorage.getItem('nova-profile-img') || null);
-    var colorState = useState(localStorage.getItem('nova-avatar-bg')   || '#2563eb');
+    
     var savedState = useState(false);
     var errState   = useState('');
-    var logState   = useState(false);
-    var dragState  = useState(false);
+    var tabState   = useState('profile');
     var fileRef    = useRef(null);
 
-    var name  = nameState[0],  setName  = nameState[1];
-    var email = emailState[0], setEmail = emailState[1];
-    var photo = photoState[0], setPhoto = photoState[1];
-    var color = colorState[0], setColor = colorState[1];
-    var saved      = savedState[0], setSaved      = savedState[1];
-    var photoErr   = errState[0],   setPhotoErr   = errState[1];
-    var showLogout = logState[0],   setShowLogout = logState[1];
-    var dragOver   = dragState[0],  setDragOver   = dragState[1];
+    var firstName = firstNameState[0], setFirstName = firstNameState[1];
+    var lastName  = lastNameState[0],  setLastName  = lastNameState[1];
+    var email     = emailState[0],     setEmail     = emailState[1];
+    var mobile    = mobileState[0],    setMobile    = mobileState[1];
+    var photo     = photoState[0],     setPhoto     = photoState[1];
+    var saved     = savedState[0],     setSaved     = savedState[1];
+    var photoErr  = errState[0],       setPhotoErr  = errState[1];
+    var activeTab = tabState[0],       setActiveTab = tabState[1];
 
     /* sync bridges */
     useEffect(function() {
+      var fullName = (firstName + ' ' + lastName).trim();
       if (window.SupportPilotSettings) {
-        window.SupportPilotSettings.applyAvatarColor(color);
         window.SupportPilotSettings.applyProfileImage(photo);
-        window.SupportPilotSettings.updateUIInitials(name);
+        window.SupportPilotSettings.updateUIInitials(fullName);
       }
       var sbn = document.getElementById('sidebar-user-name');
-      if (sbn) sbn.textContent = name;
-    }, [name, email, photo, color]);
+      if (sbn) sbn.textContent = fullName;
+    }, [firstName, lastName, email, photo]);
 
     function processFile(file) {
       setPhotoErr('');
@@ -127,174 +122,125 @@
 
     function removePhoto() { setPhoto(null); localStorage.removeItem('nova-profile-img'); }
 
-    function pickColor(c)  { setColor(c); localStorage.setItem('nova-avatar-bg', c); }
-
     function saveProfile() {
-      if (!name.trim() || !email.trim()) {
-        if (window.showToast) showToast('Save Failed', 'Name and email cannot be blank.', 'error');
+      if (!firstName.trim() || !email.trim()) {
+        if (window.showToast) showToast('Save Failed', 'First name and email cannot be blank.', 'error');
         return;
       }
-      localStorage.setItem('nova-user-name', name.trim());
+      var fullName = (firstName + ' ' + lastName).trim();
+      localStorage.setItem('nova-user-name', fullName);
       localStorage.setItem('nova-user-email', email.trim());
+      localStorage.setItem('nova-user-mobile', mobile.trim());
       setSaved(true);
-      if (window.showToast) showToast('Profile Saved', 'Account preferences saved successfully.', 'success');
+      if (window.showToast) showToast('Profile Saved', 'Account settings saved successfully.', 'success');
       setTimeout(function(){ setSaved(false); }, 2500);
     }
 
     function doLogout() {
       localStorage.removeItem('nova-logged-in');
       if (window.showToast) showToast('Logged Out', 'Signed out of SupportPilot.', 'info');
-      setShowLogout(false);
       setTimeout(function(){ window.location.href = 'login.html'; }, 600);
     }
 
-    var initials = getInitials(name);
+    var initials = getInitials((firstName + ' ' + lastName).trim());
 
-    /* ── render ── */
-    return h('div', { style:{ display:'flex', flexDirection:'column', gap:12, maxWidth:860 } },
-
-      /* ══ PROFILE CARD ══ */
-      h('div', { className:'card', style:S.card },
-
-        /* banner + avatar */
-        h('div', { style:S.banner },
-          h('div', { style:S.bannerGrd }),
-          h('div', { style:S.avatarWrap },
-            h('div', {
-              style: Object.assign({}, S.avatar, { backgroundColor: photo ? 'transparent' : color }),
-              onDragOver:  function(e){ e.preventDefault(); setDragOver(true); },
-              onDragLeave: function(){ setDragOver(false); },
-              onDrop:      function(e){ e.preventDefault(); setDragOver(false); processFile(e.dataTransfer.files[0]); },
-              title: 'Drag & drop a photo here'
-            },
-              photo
-                ? h('img', { src:photo, alt:'Profile', style:S.avatarImg })
-                : h('span', { style:S.avatarTxt }, initials),
-              dragOver && h('div', { style:{ position:'absolute', inset:0, background:'rgba(37,99,235,.65)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:12, fontWeight:700, borderRadius:'50%' } }, 'Drop!'),
-              h('button', {
-                onClick: function(){ fileRef.current.click(); },
-                style: S.uploadFab, title:'Upload photo'
-              }, ico('M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12', 13, '#fff'))
-            )
-          ),
-          h('div', { style:S.bannerName },
-            h('span', { style:S.bnDisp  }, name),
-            h('span', { style:S.bnEmail }, email)
-          )
-        ),
-
-        /* hidden file input */
-        h('input', { ref:fileRef, type:'file', accept:'image/*', style:{ display:'none' },
-                     onChange: function(e){ processFile(e.target.files[0]); } }),
-
-        /* photo action buttons */
-        h('div', { style:S.photoRow },
-          h('button', { onClick: function(){ fileRef.current.click(); }, style:S.btnSec },
-            ico('M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12', 13),
-            ' Upload Photo'
-          ),
-          photo && h('button', {
-            onClick: removePhoto,
-            style: Object.assign({}, S.btnSec, { color:'#ef4444', borderColor:'rgba(239,68,68,.25)' })
-          }, ico('M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6', 13, '#ef4444'), ' Remove')
-        ),
-        photoErr && h('p', { style:{ fontSize:12, color:'#ef4444', padding:'0 24px 4px' } }, photoErr),
-
-        /* name + email */
-        h('div', { style:S.formGrid },
-          h('div', { style:{ display:'flex', flexDirection:'column', gap:6 } },
-            h('label', { style:S.label, htmlFor:'sp-rn' }, 'Full Name'),
-            h('div', { style:S.iw },
-              h('span', { style:S.ii }, ico('M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z', 15, 'var(--text-muted,#94a3b8)')),
-              h('input', { id:'sp-rn', style:S.input, value:name, placeholder:'Your full name',
-                           onChange: function(e){ setName(e.target.value); } })
-            )
-          ),
-          h('div', { style:{ display:'flex', flexDirection:'column', gap:6 } },
-            h('label', { style:S.label, htmlFor:'sp-re' }, 'Email Address'),
-            h('div', { style:S.iw },
-              h('span', { style:S.ii }, ico('M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm16 2l-8 5-8-5', 15, 'var(--text-muted,#94a3b8)')),
-              h('input', { id:'sp-re', type:'email', style:S.input, value:email, placeholder:'your@email.com',
-                           onChange: function(e){ setEmail(e.target.value); } })
+    return h('div', { style:S.card },
+      
+      h('div', { style:S.header },
+        h('h1', { style:S.hTitle }, 'Account settings')
+      ),
+      
+      h('div', { style:S.layout },
+        
+        // Sidebar Navigation
+        h('div', { style:S.sidebar },
+          h('div', { onClick: function(){ setActiveTab('profile'); }, style: activeTab === 'profile' ? S.navItemAct : S.navItem }, ico('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 18), ' Profile Settings'),
+          h('div', { onClick: function(){ setActiveTab('password'); }, style: activeTab === 'password' ? S.navItemAct : S.navItem }, ico('M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', 18), ' Password'),
+          h('div', { style:{ padding:'32px 24px' } },
+            h('button', { onClick: doLogout, style:S.btnDanger }, 
+              ico('M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1', 18, 'currentColor'), 
+              'Log out'
             )
           )
         ),
 
-        /* theme color picker */
-        h('div', { style: Object.assign({}, S.fg, { marginTop:4 }) },
-          h('label', { style:S.label }, 'Profile Theme Color'),
-          h('div', { style:{ display:'flex', gap:6, flexWrap:'wrap', marginTop:2 } },
-            THEME_COLORS.map(function(c) {
-              var isSelected = color === c.value;
-              return h('button', {
-                key: c.value, title: c.label,
-                onClick: function(){ pickColor(c.value); },
-                style: {
-                  width:28, height:28, borderRadius:'50%',
-                  background:c.value, border:'none', cursor:'pointer',
-                  boxShadow: isSelected ? ('0 0 0 2px white, 0 0 0 4px ' + c.value) : '0 2px 4px rgba(0,0,0,.15)',
-                  transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                  transition:'all .2s',
-                  padding:0,
-                }
-              });
-            })
-          ),
-          h('p', { style:{ fontSize:10, color:'var(--text-muted,#94a3b8)', marginTop:4, marginBottom: 0 } },
-            'Selected: ',
-            h('strong', { style:{ color:color } },
-              (THEME_COLORS.find(function(c){ return c.value === color; }) || { label:color }).label
-            )
-          )
-        ),
+        // Main Content Area
+        h('div', { style:S.content },
+          activeTab === 'profile' ? h('div', null,
+            // Avatar Row
+            h('div', { style:S.avatarRow },
+              h('div', { style:S.avatarWrap },
+                photo
+                  ? h('img', { src:photo, alt:'Profile', style:S.avatarImg })
+                  : h('span', { style:S.avatarTxt }, initials),
+                h('div', { style:S.camIcon, title:'Upload photo', onClick: function(){ fileRef.current.click(); } }, ico('M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z', 14))
+              ),
+              h('button', { onClick: function(){ fileRef.current.click(); }, style:S.btnBlue }, 'Upload New'),
+              h('button', { onClick: removePhoto, style:S.btnGray }, 'Delete avatar'),
+              photoErr && h('p', { style:{ fontSize:12, color:'#ef4444', margin:0 } }, photoErr)
+            ),
 
-        /* save button */
-        h('div', { style:{ padding:'8px 16px 16px' } },
-          h('button', {
-            onClick: saveProfile,
-            style: Object.assign({}, S.btnPri, {
-              background: saved
-                ? 'linear-gradient(135deg,#10b981,#059669)'
-                : 'linear-gradient(135deg,#2563eb,#7c3aed)'
-            })
-          },
-            saved
-              ? [ico('M20 6L9 17l-5-5', 15, '#fff', 2.5), ' Saved!']
-              : [ico('M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2zM17 21v-8H7v8M7 3v5h8', 15, '#fff'), ' Save Profile']
-          )
-        )
-      ), // end profile card
+            h('input', { ref:fileRef, type:'file', accept:'image/*', style:{ display:'none' },
+                         onChange: function(e){ processFile(e.target.files[0]); } }),
 
-      /* ══ LOGOUT CARD ══ */
-      h('div', { style:S.logCard },
-        h('div', { style:S.logHead },
-          h('div', { style:S.logIcon },
-            ico('M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9', 20, '#ef4444')
-          ),
-          h('div', null,
-            h('div', { style:{ fontWeight:700, fontSize:15, color:'#ef4444' } }, 'Session Management'),
-            h('div', { style:{ fontSize:12, color:'var(--text-secondary,#475569)' } }, 'Sign out of your active workspace session')
-          )
-        ),
-        h('p', { style:{ fontSize:13, color:'var(--text-secondary,#475569)', lineHeight:1.6 } },
-          'You will be redirected to the sign-in page. Any unsaved changes will be lost.'
-        ),
-        !showLogout
-          ? h('button', { onClick: function(){ setShowLogout(true); }, style:S.btnDanger },
-              ico('M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9', 15, '#fff'),
-              ' Log Out of Account'
-            )
-          : h('div', { style:{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' } },
-              h('p', { style:{ fontSize:13, fontWeight:600, color:'#ef4444', flex:1 } }, 'Are you sure?'),
-              h('button', { onClick:function(){ setShowLogout(false); }, style:S.btnSec }, 'Cancel'),
-              h('button', { onClick:doLogout, style:S.btnDanger },
-                ico('M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9', 14, '#fff'),
-                ' Yes, Sign Out'
+            // Form Grid
+            h('div', { style:S.formGrid },
+              
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-fn' }, h('span',null,'First Name '), h('span',{style:{color:'#ef4444'}},'*')),
+                h('input', { id:'sp-fn', style:S.input, value:firstName, placeholder:'First name',
+                             onChange: function(e){ setFirstName(e.target.value); } })
+              ),
+              
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-ln' }, h('span',null,'Last Name '), h('span',{style:{color:'#ef4444'}},'*')),
+                h('input', { id:'sp-ln', style:S.input, value:lastName, placeholder:'Last name',
+                             onChange: function(e){ setLastName(e.target.value); } })
+              ),
+              
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-em' }, 'Email'),
+                h('input', { id:'sp-em', type:'email', style:S.input, value:email, placeholder:'examples@gmail.com',
+                             onChange: function(e){ setEmail(e.target.value); } })
+              ),
+              
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-mob' }, h('span',null,'Mobile Number '), h('span',{style:{color:'#ef4444'}},'*')),
+                h('input', { id:'sp-mob', type:'tel', style:S.input, value:mobile, placeholder:'0806 123 7890',
+                             onChange: function(e){ setMobile(e.target.value); } })
               )
-            )
-      ) // end logout card
 
-    ); // end root div
+            ),
+
+            // Save Changes
+            h('div', { style:{ marginTop: 16 } },
+              h('button', {
+                onClick: saveProfile,
+                style: Object.assign({}, S.btnBlue, { background: saved ? '#10b981' : '#1d4ed8' })
+              }, saved ? 'Saved!' : 'Save Changes')
+            )
+          ) : h('div', null,
+            // Password Section
+            h('h2', { style:{ fontSize:18, fontWeight:700, color:'#1e293b', marginBottom: 24, marginTop:0 } }, 'Change Password'),
+            h('div', { style:S.formGrid },
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-cp' }, 'Current Password'),
+                h('input', { id:'sp-cp', type:'password', style:S.input, placeholder:'Enter current password' })
+              ),
+              h('div', { style:S.fg },
+                h('label', { style:S.label, htmlFor:'sp-np' }, 'New Password'),
+                h('input', { id:'sp-np', type:'password', style:S.input, placeholder:'Enter new password' })
+              )
+            ),
+            h('div', { style:{ marginTop: 16 } },
+              h('button', { style: S.btnBlue }, 'Update Password')
+            )
+          )
+
+
+        ) // end content
+      ) // end layout
+    ); // end card
   } // end SettingsPanel
 
   /* ── Mount function ── */
