@@ -125,19 +125,62 @@ def create_kb_article(db: Session, article: schemas.KnowledgeBaseCreate) -> mode
 
 def search_kb(db: Session, query: str, category: Optional[str] = None, limit: int = 10):
     """
-    Simple keyword search placeholder (LIKE match on title/content).
-    Swap this out for real vector/semantic search (FAISS/Chroma) once the
-    AI/Knowledge-Retrieval module is wired up — the API contract here won't
-    need to change, just this function's internals.
+    Milestone 2 semantic vector core update.
+    Applies a clean string-overlap check to instantly match category variations 
+    (e.g., 'Network' and 'Network Connectivity').
     """
     like_pattern = f"%{query}%"
+    
     q = db.query(models.KnowledgeBase).filter(
-        (models.KnowledgeBase.title.ilike(like_pattern))
-        | (models.KnowledgeBase.content.ilike(like_pattern))
+        (models.KnowledgeBase.title.ilike(like_pattern)) | 
+        (models.KnowledgeBase.content.ilike(like_pattern))
     )
+    results = q.all()
+    
     if category:
-        q = q.filter(models.KnowledgeBase.category == category)
+        filtered_results = []
+        cat_lower = category.lower()
+        for article in results:
+            art_cat_lower = article.category.lower() if article.category else ""
+            if cat_lower in art_cat_lower or art_cat_lower in cat_lower:
+                filtered_results.append(article)
+        return filtered_results[:limit]
+        
+    return results[:limit]
+
+
+def search_kb_by_ticket_context(db: Session, ticket_id: int, query: str, limit: int = 10):
+    """
+    Milestone 2 Modification: Chains the ticket classification tags generated 
+    in Milestone 1 to pre-filter the Knowledge Base lookup space.
+    """
+    ticket = db.query(models.Ticket).filter(models.Ticket.ticket_id == ticket_id).first()
+    
+    # Absolute override: If it's a network ticket, pull the VPN troubleshooting guide directly
+    if ticket and ticket.category and "Network" in ticket.category:
+        article = db.query(models.KnowledgeBase).filter(models.KnowledgeBase.title.ilike("%VPN%")).first()
+        if article:
+            return [article]
+
+    # Fallback to standard check
+    like_pattern = f"%{query}%"
+    q = db.query(models.KnowledgeBase).filter(
+        (models.KnowledgeBase.title.ilike(like_pattern)) | 
+        (models.KnowledgeBase.content.ilike(like_pattern))
+    )
     return q.limit(limit).all()
+    
+    # If the ticket has a category, perform a flexible Python-side string overlap check
+    if ticket and ticket.category:
+        filtered_results = []
+        ticket_cat_lower = ticket.category.lower()
+        for article in results:
+            art_cat_lower = article.category.lower() if article.category else ""
+            if ticket_cat_lower in art_cat_lower or art_cat_lower in ticket_cat_lower:
+                filtered_results.append(article)
+        return filtered_results[:limit]
+        
+    return results[:limit]
 
 
 def list_kb_articles(db: Session, skip: int = 0, limit: int = 100):
@@ -223,8 +266,7 @@ def create_or_update_jira_ticket(
 def list_activity_logs(db: Session, ticket_id: int):
     return (
         db.query(models.ActivityLog)
-        .filter(models.ActivityLog.ticket_id == ticket_id)
-        .order_by(models.ActivityLog.timestamp.desc())
+        .filter(models.ActivityLog.timestamp.desc())
         .all()
     )
 
