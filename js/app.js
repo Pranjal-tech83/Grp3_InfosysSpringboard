@@ -17,11 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.SupportPilotTickets) window.SupportPilotTickets.init();
   if (window.SupportPilotAssistant) window.SupportPilotAssistant.init();
   if (window.SupportPilotAnalytics) window.SupportPilotAnalytics.init();
-  if (window.SupportPilotEmail) window.SupportPilotEmail.init();
   if (window.SupportPilotSettings) window.SupportPilotSettings.init();
+  // Milestone 3 modules
+  if (window.SupportPilotAgentPipeline) window.SupportPilotAgentPipeline.init();
+  if (window.SupportPilotEmailEnhanced) window.SupportPilotEmailEnhanced.init();
+  if (window.SupportPilotJira) window.SupportPilotJira.init();
 
   // 6. Update Dashboard Views with live data
   refreshDynamicViewElements();
+  document.addEventListener('ticketsUpdated', refreshDynamicViewElements);
 
   // 7. Initialize Auth & Profile Redirection Engines
   initProfileNavigation();
@@ -52,7 +56,7 @@ function initThemeEngine() {
     const currentTheme = root.getAttribute("data-theme") || "light";
     const nextTheme = currentTheme === "light" ? "dark" : "light";
     applyTheme(nextTheme);
-    
+
     // Sync theme settings select element if loaded
     const themeSelect = document.getElementById("settings-theme-select");
     if (themeSelect) {
@@ -97,18 +101,21 @@ function initNavigationRouter() {
       viewSections.forEach(section => {
         section.classList.remove("active-view");
       });
-      
+
       const activeSection = document.getElementById(`${targetView}-view`);
       if (activeSection) {
         activeSection.classList.add("active-view");
-        
+
         // Custom triggers depending on view target
         if (targetView === "assistant") {
           // No longer needed
         } else if (targetView === "email") {
-          if (window.SupportPilotEmail) window.SupportPilotEmail.refreshInbox();
+          // Use enhanced view
+          if (window.SupportPilotEmailEnhanced) window.SupportPilotEmailEnhanced.refresh();
         } else if (targetView === "analytics") {
           if (window.SupportPilotAnalytics) window.SupportPilotAnalytics.refresh();
+        } else if (targetView === "integrations") {
+          if (window.SupportPilotJira) window.SupportPilotJira.init();
         }
 
       }
@@ -128,7 +135,7 @@ function initNavigationRouter() {
 // --- Sidebar Collapse Action ---
 function initSidebarToggles() {
   const toggleBtn = document.getElementById("navbar-sidebar-toggle");
-  
+
   toggleBtn.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-collapsed");
   });
@@ -137,11 +144,11 @@ function initSidebarToggles() {
 // --- Notification Bell Alerts Trigger ---
 function initNotificationBadge() {
   const notifBtn = document.getElementById("notif-toggle");
-  
+
   notifBtn.addEventListener("click", () => {
     const badge = document.getElementById("notif-badge");
     let currentVal = parseInt(badge.textContent) || 0;
-    
+
     if (currentVal > 0) {
       showToast("System Notifications", `You have ${currentVal} active anomalies pending verification.`, "warning");
       badge.textContent = "0";
@@ -202,7 +209,7 @@ function showToast(title, description, type = "info") {
 // --- Global Dynamic Views Refresh (KPI Syncs & Recent Activity table) ---
 function refreshDynamicViewElements() {
   const tickets = window.SupportPilotTickets.getTickets();
-  
+
   // 1. Sync Analytics metrics counters
   if (window.SupportPilotAnalytics && typeof window.SupportPilotAnalytics.refresh === "function") {
     window.SupportPilotAnalytics.refresh();
@@ -224,13 +231,13 @@ function refreshDynamicViewElements() {
       <td><span style="color: var(--text-secondary);">${t.category}</span></td>
       <td><span class="badge badge-status-${t.status.toLowerCase()}">${t.status}</span></td>
     `;
-    
+
     // Clicking dashboard row opens tickets drawer directly
     tr.addEventListener("click", () => {
       // Toggle nav target active element
       const targetNav = document.querySelector('[data-target="tickets"]');
       if (targetNav) targetNav.click();
-      
+
       setTimeout(() => {
         window.SupportPilotTickets.openDrawer(t.id);
       }, 300);

@@ -21,6 +21,12 @@ function initTicketsModule() {
   // Load initial tickets from mock database
   currentTickets = [...window.SupportPilotData.initialTickets];
 
+  // Listen for real-time telemetry updates from data.js backend poll
+  document.addEventListener('ticketsUpdated', (e) => {
+    currentTickets = [...e.detail];
+    renderTicketsTable();
+  });
+
   // Setup DOM Event Listeners
   // Safe event binder
   const bind = (id, event, handler) => {
@@ -82,9 +88,9 @@ function renderTicketsTable() {
   // Apply filters
   let filtered = currentTickets.filter(t => {
     const matchesSearch = t.subject.toLowerCase().includes(tableState.searchQuery.toLowerCase()) ||
-                          t.user.name.toLowerCase().includes(tableState.searchQuery.toLowerCase()) ||
-                          t.id.toLowerCase().includes(tableState.searchQuery.toLowerCase());
-    
+      t.user.name.toLowerCase().includes(tableState.searchQuery.toLowerCase()) ||
+      t.id.toLowerCase().includes(tableState.searchQuery.toLowerCase());
+
     const matchesDept = tableState.deptFilter === "all" || t.department === tableState.deptFilter;
     const matchesPriority = tableState.priorityFilter === "all" || t.priority === tableState.priorityFilter;
     const matchesStatus = tableState.statusFilter === "all" || t.status === tableState.statusFilter;
@@ -111,7 +117,7 @@ function renderTicketsTable() {
   // Apply pagination
   const totalEntries = filtered.length;
   const totalPages = Math.ceil(totalEntries / tableState.pageSize) || 1;
-  
+
   if (tableState.currentPage > totalPages) {
     tableState.currentPage = totalPages;
   }
@@ -253,7 +259,7 @@ function openDetailsDrawer(ticketId) {
   document.getElementById("drawer-ticket-id").textContent = ticket.id;
   document.getElementById("drawer-subject").textContent = ticket.subject;
   document.getElementById("drawer-desc").textContent = ticket.description;
-  
+
   // Set priority and status badges
   const badgeContainer = document.getElementById("drawer-badges");
   badgeContainer.innerHTML = `
@@ -286,6 +292,25 @@ function openDetailsDrawer(ticketId) {
     });
   }
 
+  // Update Enterprise Integrations UI
+  const jiraId = ticket.id.replace('TKT', 'IT-2023');
+  const integJiraIdEl = document.getElementById("drawer-integ-jira-id");
+  if (integJiraIdEl) integJiraIdEl.textContent = jiraId;
+
+  const integJiraStatusEl = document.getElementById("drawer-integ-jira-status");
+  if (integJiraStatusEl) integJiraStatusEl.textContent = ticket.status;
+
+  const integJiraAssigneeEl = document.getElementById("drawer-integ-jira-assignee");
+  if (integJiraAssigneeEl) integJiraAssigneeEl.textContent = ticket.assignedAgent || "Unassigned";
+
+  const integJiraPriorityEl = document.getElementById("drawer-integ-jira-priority");
+  if (integJiraPriorityEl) integJiraPriorityEl.textContent = ticket.priority;
+
+  const integEmailBodyEl = document.getElementById("drawer-integ-email-body");
+  if (integEmailBodyEl) {
+    integEmailBodyEl.textContent = `Your support ticket #${ticket.id} has been received. We're working on resolving your ${ticket.subject} issue. Our AI system has identified potential solutions and assigned this to the ${ticket.assignedAgent || "Support Team"}. You'll receive updates as we progress.`;
+  }
+
   // Render history timeline nodes
   const timelineFlow = document.getElementById("drawer-timeline-flow");
   timelineFlow.innerHTML = "";
@@ -301,6 +326,14 @@ function openDetailsDrawer(ticketId) {
 
   // Toggle visible drawers
   document.getElementById("ticket-drawer-backdrop").classList.add("active");
+
+  // Reset to Details tab
+  if (typeof window._drawerTab === 'function') window._drawerTab('details');
+
+  // Trigger agent pipeline for this ticket
+  if (window.SupportPilotAgentPipeline) {
+    window.SupportPilotAgentPipeline.loadTicket(ticket);
+  }
 }
 
 function closeDetailsDrawer() {
@@ -321,10 +354,12 @@ function handleDrawerResolve() {
       user: "Staff Operator",
       type: "agent"
     });
-    
+
     // Create automated email outbox dispatch
-    if (typeof addAutomatedEmail === "function") {
-      addAutomatedEmail(ticket);
+    if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
+      window.SupportPilotEmailEnhanced.addEmail(ticket);
+    } else if (typeof addAutomatedEmail === "function") {
+      addAutomatedEmail(ticket); // Fallback for legacy
     }
 
     showToast("Ticket Resolved", `Ticket ${ticket.id} marked as Resolved successfully.`, "success");
@@ -359,6 +394,11 @@ function handleDrawerEscalate() {
         runWorkflowSimulation(ticket);
       }
     }, 1000);
+
+    // Auto-create Jira ticket if the integration is enabled
+    if (window.SupportPilotJira && typeof window.SupportPilotJira.addActivity === 'function') {
+      window.SupportPilotJira.addActivity(ticket);
+    }
   }
 }
 
@@ -437,7 +477,7 @@ function handleNewTicketSubmit(e) {
       document.getElementById("ai-pred-confidence").textContent = `${confidence}% confidence`;
 
       document.getElementById("ai-prediction-card").style.display = "block";
-      
+
       // Upgrade state to allow final submit next click
       aiPredictingState = true;
       document.getElementById("btn-modal-submit").innerHTML = "Confirm & Insert Ticket";
@@ -487,7 +527,7 @@ function handleNewTicketSubmit(e) {
     // Prepend to ticket lists
     currentTickets.unshift(newTkt);
     showToast("Ticket Opened", `New ticket ${newId} created successfully.`, "success");
-    
+
     closeNewTicketModal();
     renderTicketsTable();
 
@@ -504,9 +544,9 @@ function handleExportCSV() {
     showToast("Export Failed", "No tickets available to export.", "warning");
     return;
   }
-  
+
   showToast("CSV Export Started", "Formatting tickets dataset...", "info");
-  
+
   const headers = ["Ticket ID", "User", "Company", "Department", "Subject", "Category", "Priority", "Status", "Created Date"];
   const rows = currentTickets.map(t => {
     return [
@@ -521,7 +561,7 @@ function handleExportCSV() {
       t.createdDate
     ].join(",");
   });
-  
+
   const csvContent = headers.join(",") + "\\n" + rows.join("\\n");
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -532,7 +572,7 @@ function handleExportCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   showToast("CSV Downloaded", "Tickets list saved successfully.", "success");
 }
 

@@ -36,7 +36,7 @@ function handleSendMessage() {
     chatInput.disabled = false;
     sendBtn.disabled = false;
     chatInput.focus();
-  }, 1000); 
+  }, 1000);
 }
 
 function appendMessage(text, sender, isHTML = false) {
@@ -45,7 +45,7 @@ function appendMessage(text, sender, isHTML = false) {
 
   const msgDiv = document.createElement("div");
   msgDiv.className = `chat-message ${sender}`;
-  
+
   if (sender === "user") {
     msgDiv.style.cssText = "align-self: flex-end; background-color: var(--accent-primary); color: white; padding: 12px 16px; border-radius: 8px; max-width: 80%; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);";
   } else {
@@ -70,7 +70,7 @@ function appendMessage(text, sender, isHTML = false) {
 function generateAIResponse(userMessage) {
   if (!userMessage) return;
   const lowerMsg = userMessage.toLowerCase();
-  
+
   try {
     // SCENARIO 1: SPECIFIC VPN RESTART TARGET (HIGHEST PRIORITY)
     if (lowerMsg.includes("restart") && lowerMsg.includes("vpn")) {
