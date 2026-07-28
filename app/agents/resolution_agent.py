@@ -128,7 +128,14 @@ def fetch_ticket(state: TicketState) -> TicketState:
 # ---------------------------------------------------------------------------
 def retrieve_knowledge(state: TicketState) -> TicketState:
     query = f"{state['subject']} {state['description']}"
-    params = {"q": query, "limit": 3}
+    
+    # Milestone 2 Integration: Pass ticket_id to trigger database category filters
+    params = {
+        "q": query, 
+        "limit": 3,
+        "ticket_id": state["ticket_id"]  # Passes the active ticket scope safely
+    }
+
     if state.get("category"):
         params["category"] = state["category"]
 
@@ -140,12 +147,11 @@ def retrieve_knowledge(state: TicketState) -> TicketState:
         snippets = "\n\n".join(f"Article: {a['title']}\n{a['content']}" for a in articles)
         state["kb_context"] = snippets
         state["kb_article_ids"] = [a["article_id"] for a in articles]
-        _log(state, f"Retrieved {len(articles)} KB article(s): "
-                     f"{[a['title'] for a in articles]}")
+        _log(state, f"Retrieved {len(articles)} context-filtered KB article(s)")
     else:
         state["kb_context"] = "No matching knowledge-base articles were found."
         state["kb_article_ids"] = []
-        _log(state, "No KB articles matched this ticket.")
+        _log(state, "No KB articles matched this ticket branch boundary.")
 
     return state
 
@@ -319,7 +325,6 @@ def escalate_ticket(state: TicketState) -> TicketState:
         json={"assigned_team": assigned_team, "escalation_reason": reason},
         timeout=10,
     )
-    # create_escalation on the backend already flips status -> 'escalated'
     _log(state, f"Ticket escalated to '{assigned_team}'. Reason: {reason}")
     return state
 

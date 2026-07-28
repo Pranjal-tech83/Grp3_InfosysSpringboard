@@ -67,6 +67,13 @@ function initTicketsModule() {
   renderTicketsTable();
 }
 
+// Global listener to capture live backend data when the async fetch completes
+document.addEventListener('ticketsUpdated', (e) => {
+  console.log("Tickets event received inside tickets.js!", e.detail);
+  currentTickets = [...e.detail];
+  renderTicketsTable();
+});
+
 // Render the Ticket Table
 function renderTicketsTable() {
   const tbody = document.getElementById("tickets-tbody");

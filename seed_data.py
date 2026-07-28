@@ -31,7 +31,7 @@ try:
                 "Verify corporate firewall settings allow VPN traffic on ports 500 and 4500, check VPN "
                 "client configuration for correct server address and authentication method, restart the "
                 "VPN service, and clear cached credentials.",
-        category="Network Connectivity",
+        category="Network",  # Modified to align with the AI Engine taxonomy bounds
         embedding_id="emb_vpn_001",
     )
     kb2 = models.KnowledgeBase(
@@ -45,7 +45,7 @@ try:
         title="Password Reset Self-Service",
         content="How employees can reset their own passwords via the self-service portal, and escalation "
                 "steps if the portal is unavailable.",
-        category="Access Management",
+        category="Access",  # Modified to match taxonomy system strings
         embedding_id="emb_pwd_003",
     )
     db.add_all([kb1, kb2, kb3])
@@ -56,9 +56,9 @@ try:
         user_id=john.user_id,
         subject="VPN Connection Failing on Corporate Network",
         description='Unable to connect to VPN since this morning. Error message: "Connection timed out. '
-                     'Please check your network settings and try again." Tried restarting the client but '
-                     'issue persists.',
-        category="Network Connectivity",
+                    'Please check your network settings and try again." Tried restarting the client but '
+                    'issue persists.',
+        category="Network",  # Modified to mirror the exact live classification endpoint stream output
         sub_category="VPN Access",
         priority=models.TicketPriority.p1_critical.value,
         severity=models.TicketSeverity.high.value,
@@ -108,14 +108,14 @@ try:
     db.add(models.TicketResponse(
         ticket_id=t1.ticket_id,
         generated_response="1) Verify corporate firewall allows VPN traffic on ports 500/4500. "
-                            "2) Check VPN client server address and auth method. "
-                            "3) Restart the VPN service. 4) Clear cached credentials.",
+                           "2) Check VPN client server address and auth method. "
+                           "3) Restart the VPN service. 4) Clear cached credentials.",
         confidence_score=0.87,
     ))
     db.add(models.TicketResponse(
         ticket_id=t2.ticket_id,
         generated_response="Error 0x80070005 indicates a permissions issue — reinstall using an admin "
-                            "account or grant write access to the install directory.",
+                           "account or grant write access to the install directory.",
         confidence_score=0.91,
     ))
     db.commit()
@@ -138,7 +138,7 @@ try:
     db.add_all([
         models.ActivityLog(ticket_id=t1.ticket_id, action="Ticket submitted", performed_by=john.email),
         models.ActivityLog(ticket_id=t1.ticket_id, action="Classified as Network/VPN Access, P1-Critical",
-                            performed_by="AI Classification Engine"),
+                           performed_by="AI Classification Engine"),
         models.ActivityLog(ticket_id=t1.ticket_id, action="Escalated to Network Team", performed_by="Escalation Agent"),
     ])
     db.commit()

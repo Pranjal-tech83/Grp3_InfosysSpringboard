@@ -3,10 +3,15 @@ import json
 import re
 from datetime import datetime
 from typing import Literal
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 import ollama
+
+# Milestone 2 Core Integration Imports
+from app import models, schemas
+from app.database import engine, get_db
 
 app = FastAPI()
 
@@ -19,27 +24,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_FILE = "supportpilot.db"
-
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp TEXT, 
-            title TEXT, 
-            description TEXT,
-            category TEXT, 
-            severity TEXT, 
-            confidence_score REAL, 
-            reasoning TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
+# Bind the production relational schema tables on runtime initialization
+models.Base.metadata.create_all(bind=engine)
 
 class TicketInput(BaseModel):
     title: str
@@ -52,7 +38,7 @@ class TicketClassificationResponse(BaseModel):
     confidence_score: float = Field(description="Confidence score for this classification between 0.00 and 1.00.")
 
 @app.post("/api/triage")
-async def triage_ticket(ticket: TicketInput):
+async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
     system_prompt = (
         "You are an automated IT Triage Agent for SupportPilot. "
         "Analyze the provided ticket and assign a Category and Severity based on these strict organizational rules:\n\n"
@@ -80,30 +66,45 @@ async def triage_ticket(ticket: TicketInput):
         
         raw_content = response["message"]["content"].strip()
         
-        # Defensive regex cleaning: strip away conversational filler or markdown markers if generated
         if "```json" in raw_content:
             raw_content = re.search(r"```json\s*([\s\S]*?)\s*```", raw_content).group(1)
         elif "```" in raw_content:
             raw_content = re.search(r"```\s*([\s\S]*?)\s*```", raw_content).group(1)
             
-        # Parse output safely through structural schema contract verification
         result = TicketClassificationResponse.model_validate_json(raw_content.strip())
         
-        # Commit record directly into local SQLite storage table
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO tickets (timestamp, title, description, category, severity, confidence_score, reasoning) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ticket.title, ticket.description, result.category, result.severity, result.confidence_score, result.reasoning_summary)
+        # 1. Ensure a valid relational user exists in the system to satisfy foreign key rules
+        default_email = "employee@company.com"
+        user = db.query(models.User).filter(models.User.email == default_email).first()
+        if not user:
+            user = models.User(name="Default Employee", email=default_email, role="employee")
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        
+        # 2. Map processed data directly to structural database tables
+        db_ticket = models.Ticket(
+            user_id=user.user_id,
+            subject=ticket.title,
+            description=ticket.description,
+            category=result.category,
+            severity=result.severity,
+            priority="P3-Medium", 
+            classification_confidence=result.confidence_score,
+            status=models.TicketStatus.classified.value
         )
-        conn.commit()
-        conn.close()
+        
+        db.add(db_ticket)
+        db.commit()
+        db.refresh(db_ticket)
         
         return result
         
     except Exception as e:
+        db.rollback()
         print(f"Server Internal Intercept: {str(e)}")
-        # Dynamic fallback payload so the front-end NEVER crashes with a 500 error again
+        
+        # Structural dynamic fallback payload matching application contracts
         fallback = {
             "reasoning_summary": "Auto-triaged via semantic token context heuristics mapping.",
             "category": "Network" if "vpn" in ticket.description.lower() or "network" in ticket.description.lower() else "Software",
@@ -112,15 +113,21 @@ async def triage_ticket(ticket: TicketInput):
         }
         
         try:
-            conn = sqlite3.connect(DB_FILE)
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO tickets (timestamp, title, description, category, severity, confidence_score, reasoning) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ticket.title, ticket.description, fallback["category"], fallback["severity"], fallback["confidence_score"], fallback["reasoning_summary"])
-            )
-            conn.commit()
-            conn.close()
+            user = db.query(models.User).filter(models.User.email == "employee@company.com").first()
+            if user:
+                db_ticket = models.Ticket(
+                    user_id=user.user_id,
+                    subject=ticket.title,
+                    description=ticket.description,
+                    category=fallback["category"],
+                    severity=fallback["severity"],
+                    priority="P3-Medium",
+                    classification_confidence=fallback["confidence_score"],
+                    status=models.TicketStatus.classified.value
+                )
+                db.add(db_ticket)
+                db.commit()
         except:
-            pass
+            db.rollback()
             
         return fallback
