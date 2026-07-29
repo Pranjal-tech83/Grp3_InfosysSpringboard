@@ -7,7 +7,7 @@
   <title>SupportPilot - AI Ticket Resolution Platform</title>
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* Dock Menu - Left Side Collapsible */
+    
     .dock-menu {
       position: fixed;
       left: 12px;
@@ -28,13 +28,13 @@
       border-radius: 24px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.5);
-      width: 68px; /* Collapsed width */
+      width: 68px; 
       overflow: hidden;
       transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .dock-menu.expanded .dock-container {
-      width: 220px; /* Expanded width */
+      width: 220px; 
     }
 
     .dock-toggle-btn {
@@ -139,7 +139,7 @@
       transition: opacity 0.3s ease;
     }
 
-    /* Active State */
+    
     .dock-item.active .dock-icon {
       color: #3b82f6;
     }
@@ -169,7 +169,7 @@
 </head>
 <body>
 <div id="app-container" style="display: flex;">
-  <!-- Dock Menu[cite: 2] -->
+
   <nav class="dock-menu">
     <div class="dock-container">
       <button class="dock-toggle-btn" id="dock-toggle-btn" aria-label="Toggle Menu">
@@ -234,10 +234,10 @@
     </div>
   </nav>
 
-  <!-- Main Section Content Area[cite: 2] -->
+
   <main id="main-content">
 
-    <!-- Top Sticky Navbar[cite: 2] -->
+
     <header class="navbar">
       <button class="nav-action-btn" id="navbar-sidebar-toggle" aria-label="Toggle Sidebar" style="margin-right: 12px; display: none; align-items: center; justify-content: center;">
         <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -280,9 +280,6 @@
       </div>
     </header>
 
-    <!-- View Containers[cite: 2] -->
-
-    <!-- VIEW 1: DASHBOARD[cite: 2] -->
     <section class="view-section active-view" id="dashboard-view">
       <div id="dashboard-react-root"></div>
       <div style="display: none;" id="legacy-dashboard-hide">
@@ -290,7 +287,7 @@
       <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and
         resolution telemetry for SupportPilot.</p>
 
-      <!-- KPI Metrics Grid -->
+
       <div class="kpi-container">
         <div class="card kpi-card">
           <div class="kpi-header">
