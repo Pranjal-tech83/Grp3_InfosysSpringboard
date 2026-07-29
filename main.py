@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 import ollama
+import hashlib
 
 from app import models, schemas
 from app.database import engine, get_db
@@ -191,3 +192,102 @@ def send_email_notification(payload: EmailPayload):
     }
     email_logs_db.append(email_entry)
     return {"status": "success", "email": email_entry}
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    password: str
+    phone: str = ""
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+@app.post("/api/register")
+async def register_user(user_in: UserRegister, db: Session = Depends(get_db)):
+    # Check if exists
+    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    new_user = models.User(
+        name=user_in.name,
+        email=user_in.email,
+        password=hash_password(user_in.password),
+        role="employee"
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {
+        "user_id": new_user.user_id,
+        "name": new_user.name,
+        "email": new_user.email,
+        "role": new_user.role,
+        "department": new_user.department
+    }
+
+@app.post("/api/login")
+async def login_user(creds: UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == creds.email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Very basic auth
+    if user.password != hash_password(creds.password) and user.password != creds.password:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    return {
+        "user_id": user.user_id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role,
+        "department": user.department
+    }
+
+@app.get("/api/tickets")
+async def get_all_tickets(db: Session = Depends(get_db)):
+    # Pre-fetch related data to avoid N+1 querying issues
+    tickets = db.query(models.Ticket).all()
+    
+    result = []
+    for t in tickets:
+        # Determine suggested resolution if a response exists
+        resolution = None
+        if t.responses:
+            # Grab the content of the most recent response
+            resolution = t.responses[-1].response_content
+            
+        # Format logs
+        logs = []
+        for log in t.activity_logs:
+            logs.append({
+                "performed_by": log.performed_by,
+                "timestamp": log.created_at.isoformat() if log.created_at else None,
+                "action": log.action
+            })
+            
+        result.append({
+            "ticket_id": t.ticket_id,
+            "user": {
+                "name": t.user.name if t.user else "Unknown User",
+                "email": t.user.email if t.user else "",
+                "company": "Corporate Client"
+            },
+            "department": t.user.department if t.user and t.user.department else "Customer Support",
+            "subject": t.subject,
+            "category": t.category,
+            "priority": t.priority,
+            "status": t.status,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "description": t.description,
+            "confidence_score": t.classification_confidence,
+            "resolution_text": resolution,
+            "logs": logs
+        })
+        
+    return result

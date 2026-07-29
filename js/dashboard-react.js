@@ -4,17 +4,17 @@
 (function () {
   'use strict';
 
-  var R   = React;
-  var h   = R.createElement;
-  var useState  = R.useState;
+  var R = React;
+  var h = R.createElement;
+  var useState = R.useState;
   var useEffect = R.useEffect;
 
   /* ── SVG Icon helper ── */
   function ico(d, size, stroke, sw, fill) {
-    size   = size   || 20;
+    size = size || 20;
     stroke = stroke || 'currentColor';
-    sw     = sw     || 2;
-    fill   = fill   || 'none';
+    sw = sw || 2;
+    fill = fill || 'none';
     return h('svg', {
       width: size, height: size, viewBox: '0 0 24 24', fill: fill,
       stroke: stroke, strokeWidth: sw,
@@ -24,7 +24,7 @@
 
   var ICONS = {
     ticket: 'M20 12V8H4v4m16 0v8H4v-8m16 0H4',
-    open: h('g', null, h('circle', {cx: 12, cy: 12, r: 10}), h('path', {d: 'M12 6v6l4 2'})),
+    open: h('g', null, h('circle', { cx: 12, cy: 12, r: 10 }), h('path', { d: 'M12 6v6l4 2' })),
     resolved: 'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3',
     ai: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M19.07 19.07l-2.83-2.83M19.07 4.93l-2.83 2.83',
     plus: 'M12 5v14M5 12h14',
@@ -64,7 +64,7 @@
     },
     kpiHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' },
     kpiTitle: { fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.5px' },
-    kpiIconWrap: function(color, bg) { return { width: '32px', height: '32px', borderRadius: '8px', background: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }; },
+    kpiIconWrap: function (color, bg) { return { width: '32px', height: '32px', borderRadius: '8px', background: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }; },
     kpiValue: { fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 },
     kpiTrendUp: { fontSize: '11px', color: '#10b981', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' },
     kpiTrendDown: { fontSize: '11px', color: '#ef4444', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' },
@@ -112,7 +112,7 @@
       h('button', {
         id: 'dash-action-new-tkt-react', // Will be patched to modal later
         style: STYLES.btnPrimary,
-        onClick: function() {
+        onClick: function () {
           if (window.SupportPilotTickets && window.SupportPilotTickets.openNewTicketModal) {
             window.SupportPilotTickets.openNewTicketModal();
           } else {
@@ -122,11 +122,11 @@
           }
         }
       }, ico(ICONS.plus, 18), 'Create New Ticket'),
-      
+
       h('button', {
         id: 'dash-action-assistant-react',
         style: STYLES.btnSecondary,
-        onClick: function() {
+        onClick: function () {
           var nav = document.querySelector('[data-target="assistant"]');
           if (nav) nav.click();
         }
@@ -151,13 +151,13 @@
         h('div', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0 }) }, 'SLA Performance Trend'),
         h('button', {
           style: { background: 'var(--bg-hover)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' },
-          onClick: function() { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
+          onClick: function () { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
         }, viewMode === 'chart' ? 'Show Data' : 'Back')
       ),
       viewMode === 'chart' ? h('div', { style: { position: 'relative', height: '200px', width: '100%', marginTop: 'auto' } },
         h('svg', { viewBox: '0 -10 100 110', preserveAspectRatio: 'none', style: { width: '100%', height: '100%', overflow: 'visible' } },
           // Data bars
-          data.map(function(val, i) {
+          data.map(function (val, i) {
             var barWidth = 8;
             var spacing = (100 - barWidth) / (data.length - 1);
             var x = i * spacing;
@@ -165,21 +165,21 @@
             var y = 100 - hVal;
             var isActive = activeBar === i;
             var opacity = activeBar === null || isActive ? 1 : 0.3;
-            
-            return h('g', { key: i, style: { cursor: 'pointer' }, onClick: function() { setActiveBar(isActive ? null : i); } },
+
+            return h('g', { key: i, style: { cursor: 'pointer' }, onClick: function () { setActiveBar(isActive ? null : i); } },
               h('rect', { x: x, y: y, width: barWidth, height: hVal, rx: 3, fill: barColors[i % barColors.length], style: { opacity: opacity, transition: 'opacity 0.2s' } }),
-              isActive && h('text', { x: x + (barWidth/2), y: y - 3, fill: 'var(--text-primary)', fontSize: '7px', fontWeight: 'bold', textAnchor: 'middle' }, val)
+              isActive && h('text', { x: x + (barWidth / 2), y: y - 3, fill: 'var(--text-primary)', fontSize: '7px', fontWeight: 'bold', textAnchor: 'middle' }, val)
             );
           })
         ),
         // X Axis Labels
         h('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '12px' } },
-          labels.map(function(l, i) {
+          labels.map(function (l, i) {
             return h('span', { key: i, style: { fontSize: '12px', color: 'var(--text-muted)' } }, l);
           })
         )
       ) : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', flexGrow: 1, justifyContent: 'center' } },
-        data.map(function(val, i) {
+        data.map(function (val, i) {
           return h('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: '1px solid var(--border-color)' } },
             h('span', { style: { fontWeight: 500, color: 'var(--text-secondary)' } }, labels[i]),
             h('span', { style: { fontWeight: 600, color: 'var(--text-primary)' } }, val + '%')
@@ -205,7 +205,7 @@
       { color: '#8b5cf6', value: 4, display: '86.4%', label: 'AI RESOLUTION' },
       { color: '#f59e0b', value: 2, display: '52', label: 'Open TICKETS' }
     ];
-    
+
     // Circle math: r=15.9155 => circumference=100
     var cumValue = 0;
     return h('div', { style: Object.assign({}, STYLES.sectionCard, { display: 'flex', flexDirection: 'column' }) },
@@ -213,17 +213,17 @@
         h('div', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0 }) }, 'Ticket Categories'),
         h('button', {
           style: { background: 'var(--bg-hover)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' },
-          onClick: function() { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
+          onClick: function () { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
         }, viewMode === 'chart' ? 'Show Data' : 'Back')
       ),
       viewMode === 'chart' ? h('div', { style: { display: 'flex', alignItems: 'center', gap: '16px', marginTop: 'auto', marginBottom: 'auto', flexWrap: 'wrap', justifyContent: 'center' } },
         h('svg', { viewBox: '0 0 42 42', style: { width: '130px', height: '130px', flexShrink: 0 } },
-          slices.map(function(slice, i) {
+          slices.map(function (slice, i) {
             var offset = 100 - cumValue + 25; // +25 to start from top
             cumValue += slice.value;
             var isActive = activeSlice === i;
             var opacity = activeSlice === null || isActive ? 1 : 0.3;
-            
+
             return h('circle', {
               key: i,
               cx: '21', cy: '21', r: '15.9155',
@@ -233,7 +233,7 @@
               strokeDasharray: slice.value + ' ' + (100 - slice.value),
               strokeDashoffset: offset,
               style: { transition: 'all 0.3s ease-out', cursor: 'pointer', opacity: opacity },
-              onClick: function() { setActiveSlice(isActive ? null : i); }
+              onClick: function () { setActiveSlice(isActive ? null : i); }
             });
           }),
           h('circle', { cx: '21', cy: '21', r: '11', fill: 'var(--bg-card)', style: { pointerEvents: 'none' } }),
@@ -241,7 +241,7 @@
           activeSlice !== null && h('text', { x: '21', y: '26', textAnchor: 'middle', fontSize: '3px', fill: 'var(--text-secondary)', style: { pointerEvents: 'none' } }, slices[activeSlice].label.split(' ')[0])
         ),
         h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' } },
-          slices.map(function(slice, i) {
+          slices.map(function (slice, i) {
             return h('div', { key: i, style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' } },
               h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
                 h('span', { style: { width: '8px', height: '8px', borderRadius: '50%', background: slice.color } }),
@@ -252,7 +252,7 @@
           })
         )
       ) : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', flexGrow: 1, justifyContent: 'center' } },
-        slices.map(function(slice, i) {
+        slices.map(function (slice, i) {
           return h('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: '1px solid var(--border-color)' } },
             h('span', { style: { fontWeight: 500, color: 'var(--text-secondary)' } }, slice.label),
             h('span', { style: { fontWeight: 600, color: 'var(--text-primary)' } }, slice.display)
@@ -263,6 +263,14 @@
   }
 
   function DashboardComponent() {
+    var [tickets, setTickets] = useState(window.SupportPilotData ? window.SupportPilotData.initialTickets : []);
+
+    useEffect(function () {
+      var handleUpdate = function (e) { setTickets(e.detail || []); };
+      document.addEventListener('ticketsUpdated', handleUpdate);
+      return function () { document.removeEventListener('ticketsUpdated', handleUpdate); };
+    }, []);
+
     var date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     var hour = new Date().getHours();
     var greeting = "Good Morning!";
@@ -282,10 +290,10 @@
 
       /* KPI Grid */
       h('div', { style: STYLES.grid4 },
-        h(KPICard, { title: 'TOTAL TICKETS', value: '1,248', trend: 12.4, icon: ICONS.ticket, iconColor: '#3b82f6', iconBg: 'rgba(59,130,246,0.1)' }),
-        h(KPICard, { title: 'OPEN TICKETS', value: '52', trend: -3.1, icon: ICONS.open, iconColor: '#eab308', iconBg: 'rgba(234,179,8,0.1)' }),
-        h(KPICard, { title: 'RESOLVED', value: '1,196', trend: 15.3, icon: ICONS.resolved, iconColor: '#10b981', iconBg: 'rgba(16,185,129,0.1)' }),
-        h(KPICard, { title: 'AI RESOLUTION', value: '86.4%', trend: 1.8, icon: ICONS.ai, iconColor: '#8b5cf6', iconBg: 'rgba(139,92,246,0.1)' })
+        h(KPICard, { title: 'TOTAL TICKETS', value: tickets.length > 0 ? tickets.length.toString() : '1,248', trend: 12.4, icon: ICONS.ticket, iconColor: '#3b82f6', iconBg: 'rgba(59,130,246,0.1)' }),
+        h(KPICard, { title: 'OPEN TICKETS', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Open'; }).length.toString() : '52', trend: -3.1, icon: ICONS.open, iconColor: '#eab308', iconBg: 'rgba(234,179,8,0.1)' }),
+        h(KPICard, { title: 'RESOLVED', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Resolved'; }).length.toString() : '1,196', trend: 15.3, icon: ICONS.resolved, iconColor: '#10b981', iconBg: 'rgba(16,185,129,0.1)' }),
+        h(KPICard, { title: 'AI RESOLUTION', value: tickets.length > 0 ? Math.round((tickets.filter(function (t) { return t.aiClassification && t.aiClassification.category; }).length / tickets.length) * 100) + '%' : '86.4%', trend: 1.8, icon: ICONS.ai, iconColor: '#8b5cf6', iconBg: 'rgba(139,92,246,0.1)' })
       ),
 
       /* Main Content Grid */

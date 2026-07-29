@@ -35,7 +35,7 @@ function renderAgentPipeline() {
     const card = document.createElement("div");
     card.className = "agent-card";
     card.id = `agent-card-${step.id}`;
-    
+
     // Add connector arrow if not last item
     let arrowHtml = "";
     if (idx < steps.length - 1) {
@@ -84,7 +84,7 @@ async function runWorkflowSimulation(ticket = null) {
   const overallLogs = document.getElementById("workflow-overall-logs");
   overallLogs.textContent = "";
   appendOverallLog("Initializing Multi-Agent Resolution pipeline...");
-  
+
   if (ticket) {
     appendOverallLog(`Loaded context ticket: ${ticket.id} - "${ticket.subject}"`);
   }
@@ -95,7 +95,7 @@ async function runWorkflowSimulation(ticket = null) {
   steps.forEach(step => {
     const card = document.getElementById(`agent-card-${step.id}`);
     card.classList.remove("agent-active", "agent-completed");
-    
+
     const badge = document.getElementById(`agent-badge-${step.id}`);
     badge.textContent = "Pending";
     badge.className = "agent-badge agent-badge-pending";
@@ -115,7 +115,7 @@ async function runWorkflowSimulation(ticket = null) {
   workflowActive = false;
   btn.disabled = false;
   btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path d="M5 3l14 9-14 9V3z" fill="currentColor"/></svg><span>Simulate Ticket Flow</span>`;
-  
+
   appendOverallLog("Multi-Agent Simulation completed successfully. Resolution generated.");
   showToast("Simulation Completed", "All AI Agent nodes executed successfully.", "success");
 }
@@ -137,7 +137,7 @@ function simulateAgentStep(agent, ticket) {
 
     let progressVal = 0;
     let logIdx = 0;
-    
+
     // Fetch logs data (customize logs dynamically based on context ticket if available)
     let logLines = [...agent.logs];
     if (ticket && agent.id === "diagnose") {
@@ -168,17 +168,17 @@ function simulateAgentStep(agent, ticket) {
 
       if (progressVal >= 100) {
         clearInterval(timer);
-        
+
         // Finalize state
         card.classList.remove("agent-active");
         card.classList.add("agent-completed");
-        
+
         badge.textContent = "Completed";
         badge.className = "agent-badge agent-badge-completed";
-        
+
         timeLabel.textContent = agent.executionTime;
         appendOverallLog(`Agent ${agent.name} finished diagnostics. Status: Success. Duration: ${agent.executionTime}`);
-        
+
         resolve();
       }
     }, intervalTime);

@@ -5,20 +5,20 @@ window.SupportPilotData = {
     initialTickets: [],
 
     // Core function to load live tickets from the FastAPI backend
-    fetchLiveTickets: async function() {
+    fetchLiveTickets: async function () {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/tickets');
             if (!response.ok) throw new Error('Network response was not ok');
-            
+
             const backendTickets = await response.json();
-            
+
             // Map FastAPI backend models to match your frontend object layout
             this.initialTickets = backendTickets.map(tkt => ({
                 id: `TKT-${tkt.ticket_id}`,
-                user: { 
-                    name: tkt.user?.name || tkt.user_name || "Unknown User", 
-                    company: tkt.user?.company || "Corporate Client", 
-                    email: tkt.user?.email || tkt.requester_email || "" 
+                user: {
+                    name: tkt.user?.name || tkt.user_name || "Unknown User",
+                    company: tkt.user?.company || "Corporate Client",
+                    email: tkt.user?.email || tkt.requester_email || ""
                 },
                 department: tkt.department || "Customer Support",
                 subject: tkt.subject,
@@ -43,17 +43,41 @@ window.SupportPilotData = {
             }));
 
             console.log("Successfully synchronized UI with backend data state:", this.initialTickets);
-            
+
             // Trigger a custom event to tell tickets.js or dashboard-react.js to re-render
             document.dispatchEvent(new CustomEvent('ticketsUpdated', { detail: this.initialTickets }));
-            
+
             return this.initialTickets;
         } catch (error) {
             console.error('Failed to sync with dynamic backend context:', error);
             return this.initialTickets;
         }
+    },
+
+    telemetryTimer: null,
+
+    // Start polling the backend API for real-time telemetry updates
+    startTelemetry: function (intervalMs = 5000) {
+        if (this.telemetryTimer) return; // Already running
+
+        console.log(`Starting real-time telemetry updates (polling every ${intervalMs}ms)...`);
+        // Initial fetch
+        this.fetchLiveTickets();
+
+        // Setup recurring fetch
+        this.telemetryTimer = setInterval(async () => {
+            await this.fetchLiveTickets();
+        }, intervalMs);
+    },
+
+    stopTelemetry: function () {
+        if (this.telemetryTimer) {
+            clearInterval(this.telemetryTimer);
+            this.telemetryTimer = null;
+            console.log("Stopped real-time telemetry updates.");
+        }
     }
 };
 
-// Auto-fetch data when the script file executes in the page lifecycle
-window.SupportPilotData.fetchLiveTickets();
+// Start live data telemetry when the script file executes
+window.SupportPilotData.startTelemetry();

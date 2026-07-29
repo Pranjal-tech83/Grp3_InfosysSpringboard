@@ -147,7 +147,8 @@ a {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  padding-left: 100px; /* Space for the left-side dock menu */
+  padding-left: 100px;
+  /* Space for the left-side dock menu */
 }
 
 .view-section {
@@ -1884,13 +1885,20 @@ body.sidebar-collapsed .logo-text {
 
 /* React Dashboard Custom Styles */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .react-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .react-main-grid {
@@ -2169,20 +2177,38 @@ body.sidebar-collapsed .logo-text {
   opacity: 0;
   transform: translateY(20px);
 }
-#dashboard-view .kpi-card:nth-child(1) { animation-delay: 0.05s; }
-#dashboard-view .kpi-card:nth-child(2) { animation-delay: 0.15s; }
-#dashboard-view .kpi-card:nth-child(3) { animation-delay: 0.25s; }
-#dashboard-view .kpi-card:nth-child(4) { animation-delay: 0.35s; }
+
+#dashboard-view .kpi-card:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+#dashboard-view .kpi-card:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+#dashboard-view .kpi-card:nth-child(3) {
+  animation-delay: 0.25s;
+}
+
+#dashboard-view .kpi-card:nth-child(4) {
+  animation-delay: 0.35s;
+}
 
 #dashboard-view .dashboard-grid .card {
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   transform: translateY(20px);
 }
-#dashboard-view .dashboard-grid .card:nth-child(1) { animation-delay: 0.2s; }
-#dashboard-view .dashboard-grid .card:nth-child(2) { animation-delay: 0.3s; }
 
-#dashboard-view > .card {
+#dashboard-view .dashboard-grid .card:nth-child(1) {
+  animation-delay: 0.2s;
+}
+
+#dashboard-view .dashboard-grid .card:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+#dashboard-view>.card {
   animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
   transform: translateY(20px);
@@ -2190,8 +2216,13 @@ body.sidebar-collapsed .logo-text {
 }
 
 @keyframes barGrow {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
 }
 
 #dashboard-bar-chart .bar-fill {
@@ -2200,19 +2231,123 @@ body.sidebar-collapsed .logo-text {
   animation: barGrow 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-#dashboard-bar-chart .bar-column:nth-child(1) .bar-fill { animation-delay: 0.3s; }
-#dashboard-bar-chart .bar-column:nth-child(2) .bar-fill { animation-delay: 0.4s; }
-#dashboard-bar-chart .bar-column:nth-child(3) .bar-fill { animation-delay: 0.5s; }
-#dashboard-bar-chart .bar-column:nth-child(4) .bar-fill { animation-delay: 0.6s; }
-#dashboard-bar-chart .bar-column:nth-child(5) .bar-fill { animation-delay: 0.7s; }
-#dashboard-bar-chart .bar-column:nth-child(6) .bar-fill { animation-delay: 0.8s; }
-#dashboard-bar-chart .bar-column:nth-child(7) .bar-fill { animation-delay: 0.9s; }
+#dashboard-bar-chart .bar-column:nth-child(1) .bar-fill {
+  animation-delay: 0.3s;
+}
 
-#dashboard-view .kpi-card, #dashboard-view .dashboard-grid .card, #dashboard-view > .card {
+#dashboard-bar-chart .bar-column:nth-child(2) .bar-fill {
+  animation-delay: 0.4s;
+}
+
+#dashboard-bar-chart .bar-column:nth-child(3) .bar-fill {
+  animation-delay: 0.5s;
+}
+
+#dashboard-bar-chart .bar-column:nth-child(4) .bar-fill {
+  animation-delay: 0.6s;
+}
+
+#dashboard-bar-chart .bar-column:nth-child(5) .bar-fill {
+  animation-delay: 0.7s;
+}
+
+#dashboard-bar-chart .bar-column:nth-child(6) .bar-fill {
+  animation-delay: 0.8s;
+}
+
+#dashboard-bar-chart .bar-column:nth-child(7) .bar-fill {
+  animation-delay: 0.9s;
+}
+
+#dashboard-view .kpi-card,
+#dashboard-view .dashboard-grid .card,
+#dashboard-view>.card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-#dashboard-view .kpi-card:hover, #dashboard-view .dashboard-grid .card:hover, #dashboard-view > .card:hover {
+#dashboard-view .kpi-card:hover,
+#dashboard-view .dashboard-grid .card:hover,
+#dashboard-view>.card:hover {
   transform: translateY(-4px) !important;
-  box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Milestone 3: Shared utilities ───────────────────────────────────────── */
+
+/* Spinner (used by agent-pipeline.js and jira-integration.js) */
+.ap-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid var(--border-color);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: m3spin 0.7s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+@keyframes m3spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Status banners used by agent-pipeline.js */
+.ap-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.ap-banner-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.ap-banner-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* Jira status dot pulse */
+@keyframes jiraPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Slide-up for email modal */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ensure drawer-panel-details scrolls (drawer-content handles its own scroll already) */
+#drawer-panel-details {
+  overflow: hidden;
+}
+
+#drawer-panel-agent {
+  overflow: hidden;
 }

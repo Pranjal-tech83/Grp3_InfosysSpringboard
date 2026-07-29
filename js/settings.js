@@ -24,7 +24,7 @@ function initSettingsModule() {
 
   if (uploadBtn && photoInput) {
     uploadBtn.addEventListener("click", () => photoInput.click());
-    
+
     photoInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -37,10 +37,10 @@ function initSettingsModule() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const dataURL = event.target.result;
-        
+
         // Save image string to storage
         localStorage.setItem("nova-profile-img", dataURL);
-        
+
         // Apply image to elements
         applyProfileImage(dataURL);
         showToast("Photo Updated", "Your profile picture has been updated successfully.", "success");
@@ -74,26 +74,26 @@ function initSettingsModule() {
   // Sync avatar color initially
   const storedAvatarColor = localStorage.getItem("nova-avatar-bg") || "#2563eb";
   const avatarChoices = document.querySelectorAll(".avatar-color-choice");
-  
+
   avatarChoices.forEach(choice => {
     const color = choice.getAttribute("data-color");
-    
+
     // Set selection border active state
     if (color === storedAvatarColor) {
       choice.classList.add("selected");
     } else {
       choice.classList.remove("selected");
     }
-    
+
     // Add click handler
     choice.addEventListener("click", () => {
       // Toggle selection class
       avatarChoices.forEach(el => el.classList.remove("selected"));
       choice.classList.add("selected");
-      
+
       // Save color
       localStorage.setItem("nova-avatar-bg", color);
-      
+
       // Update active displays in UI
       applyAvatarColor(color);
       showToast("Profile Color Saved", "User avatar theme color updated in real-time.", "success");
@@ -125,7 +125,7 @@ function applyAvatarColor(color) {
   const sbAvatar = document.getElementById("sidebar-avatar");
   const navAvatar = document.getElementById("navbar-avatar");
   const previewAvatar = document.getElementById("settings-avatar-preview");
-  
+
   if (sbAvatar) sbAvatar.style.backgroundColor = color;
   if (navAvatar) navAvatar.style.backgroundColor = color;
   if (previewAvatar) previewAvatar.style.backgroundColor = color;
@@ -167,7 +167,7 @@ function updateUIInitials(nameString) {
   const sbTxt = document.getElementById("sidebar-avatar-txt");
   const navTxt = document.getElementById("navbar-avatar-txt");
   const previewTxt = document.getElementById("settings-avatar-preview-txt");
-  
+
   if (sbTxt) sbTxt.textContent = initials;
   if (navTxt) navTxt.textContent = initials;
   if (previewTxt) previewTxt.textContent = initials;
@@ -188,7 +188,7 @@ function saveProfileSettings() {
 
   // Update UI Elements dynamically
   document.getElementById("sidebar-user-name").textContent = nameInput;
-  
+
   // Update initials
   updateUIInitials(nameInput);
 
