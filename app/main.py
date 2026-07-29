@@ -21,6 +21,7 @@ from .routers import (
     escalations,
     jira_tickets,
     analytics,
+    email,
 )
 
 # Creates all tables that don't exist yet. Safe to call on every startup.
@@ -49,6 +50,8 @@ app.include_router(responses.router)
 app.include_router(escalations.router)
 app.include_router(jira_tickets.router)
 app.include_router(analytics.router)
+app.include_router(analytics.router)
+app.include_router(email.router, prefix="/api/email", tags=["email"])
 
 
 @app.get("/", tags=["Health"])
