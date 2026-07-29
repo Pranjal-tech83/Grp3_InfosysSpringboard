@@ -8,16 +8,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- React 18 via CDN (no build step) -->
+
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel for JSX transform in-browser -->
+
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    /* ============================================================
-       DESIGN TOKENS – mirrors SupportPilot palette
-    ============================================================ */
+ 
     :root {
       --bg-app: #f0f4ff;
       --bg-card: rgba(255, 255, 255, 0.82);
@@ -225,7 +223,6 @@
     phone:  'M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.14 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z',
   };
 
-  /* ── Helpers ─────────────────────────────────────────────── */
   function getStrength(pw) {
     let s = 0;
     if (pw.length >= 8) s++;
@@ -292,7 +289,6 @@
   }
   function saveUsers(u) { localStorage.setItem('sp_users', JSON.stringify(u)); }
 
-  /* ─── Login View ────────────────────────────────────────── */
   function LoginView({ onNav, onLoggedIn }) {
     const [email, setEmail] = useState('');
     const [pw, setPw] = useState('');
@@ -351,7 +347,7 @@
     );
   }
 
-  /* ─── Register View ─────────────────────────────────────── */
+
   function RegisterView({ onNav }) {
     const [f, setF] = useState({ name:'', email:'', phone:'', pw:'', confirm:'' });
     const [loading, setLoading] = useState(false);
@@ -406,7 +402,7 @@
     );
   }
 
-  /* ─── Forgot Password View ──────────────────────────────── */
+
   function ForgotView({ onNav }) {
     const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
@@ -499,7 +495,7 @@
     );
   }
 
-  /* ─── Logout View ───────────────────────────────────────── */
+
   function LogoutView({ user, onNav, onLoggedOut }) {
     const [loading, setLoading] = useState(false);
     function doLogout() {

@@ -1,59 +1,26 @@
 """
-SupportPilot — Resolution Agent (Member 5: LangGraph / Resolution Agent)
+SupportPilot — Resolution Agent (Milestone 3: Multi-Agent Orchestrator)
 =========================================================================
 
 WHAT THIS FILE DOES
 --------------------
-This is the multi-agent workflow that runs *after* a ticket has already been
-created (Member 2 / tickets.py) and classified (Member 3 / classify.py).
+This is the multi-agent orchestrator powered by LangGraph. It processes tickets 
+after classification, retrieves knowledge-base context, drafts AI resolutions,
+and coordinates with downstream integration agents (Jira & Email Services).
 
-Pipeline (each box below = one LangGraph node):
-
+Pipeline Nodes:
     fetch_ticket  -->  retrieve_knowledge  -->  generate_response  -->  route()
                                                                           |
                                                         -------------------------------
                                                         |                             |
                                                  save_response                 escalate_ticket
-                                                 (confidence OK)               (confidence low /
-                                                                                 LLM says unresolved)
+                                            (triggers Email Service)        (triggers Jira + Email)
 
-It talks to the REST API that Member 2 built (app/routers/*.py) — it does
-NOT touch the database directly. That keeps your module independent and
-easy to demo/test on its own, and easy to integrate later.
-
-HOW IT PLUGS INTO THE REST OF THE TEAM
----------------------------------------
-- Member 2 (Backend/API): you call his endpoints only —
-    GET   /api/tickets/{id}
-    GET   /api/knowledge-base/search?q=...      (Member 4's KB, keyword search
-                                                  for now, semantic later)
-    POST  /api/tickets/{id}/responses
-    POST  /api/tickets/{id}/escalations
-    PATCH /api/tickets/{id}/status
-- Member 3 (Classification): by the time your graph runs, the ticket already
-  has category/severity/priority filled in (via PATCH .../classification).
-  You just read those fields.
-- Member 4 (RAG): today `retrieve_knowledge` calls the existing keyword
-  search endpoint. The moment Member 4 upgrades `crud.search_kb` to vector
-  search, your node needs ZERO changes — same endpoint, better results.
-- Member 6 (Jira/Email/Testing): the `escalate_ticket` node is the hand-off
-  point for them — after you create the Escalation record, their Jira/email
-  integration picks it up and files a ticket / sends a notification.
-
-HOW TO RUN THIS FILE STANDALONE (for your own testing/demo)
--------------------------------------------------------------
-1. Make sure the backend is running in another terminal:
-       uvicorn app.main:app --reload
-2. Make sure Ollama is running locally with the model pulled:
-       ollama pull llama3.2
-3. From the project root:
-       python -m app.agents.resolution_agent --ticket-id 1
-   (or just `python app/agents/resolution_agent.py --ticket-id 1` if you
-   add the project root to PYTHONPATH)
-4. To test without the other members' modules being ready yet, run:
-       python app/agents/resolution_agent.py --demo
-   This uses fake/mock ticket + KB data instead of hitting the real API, so
-   you are never blocked waiting on teammates.
+Plugs directly into:
+  - Backend API: /api/tickets/{id}
+  - Knowledge Base: /api/knowledge-base/search
+  - Jira Integration: /api/jira/tickets (or /api/jira/create)
+  - Email Service: /api/email/send
 """
 
 from __future__ import annotations
@@ -67,15 +34,15 @@ import ollama
 from langgraph.graph import StateGraph, END
 
 # ---------------------------------------------------------------------------
-# CONFIG
+# CONFIGURATION
 # ---------------------------------------------------------------------------
-API_BASE_URL = "http://127.0.0.1:8000"      # Member 2's FastAPI server
-LLM_MODEL = "llama3.2"                       # local Ollama model
-CONFIDENCE_THRESHOLD = 0.65                  # below this -> escalate to human
+API_BASE_URL = "http://127.0.0.1:8000"      # Backend FastAPI server endpoint
+LLM_MODEL = "llama3.2"                       # Local Ollama LLM model
+CONFIDENCE_THRESHOLD = 0.65                  # Auto-resolution score boundary
 
 
 # ---------------------------------------------------------------------------
-# 1. STATE — the shared "clipboard" every node reads/writes
+# 1. STATE DEFINITION
 # ---------------------------------------------------------------------------
 class TicketState(TypedDict, total=False):
     ticket_id: int
@@ -84,16 +51,18 @@ class TicketState(TypedDict, total=False):
     category: Optional[str]
     severity: Optional[str]
     priority: Optional[str]
+    user_email: Optional[str]
 
-    kb_context: str          # concatenated snippets pulled from the KB
+    kb_context: str          # Knowledge Base snippets
     kb_article_ids: list
 
     generated_response: str
     confidence_score: float
     is_resolved: bool
 
+    jira_issue_key: Optional[str]  # Milestone 3: Jira sync reference
     escalation_reason: Optional[str]
-    log: list                # human-readable trace, printed at the end / shown on screen-share
+    log: list                # Execution trace log
 
 
 def _log(state: TicketState, message: str) -> None:
@@ -103,7 +72,6 @@ def _log(state: TicketState, message: str) -> None:
 
 # ---------------------------------------------------------------------------
 # 2. NODE 1 — fetch_ticket
-#    Pulls the ticket (with its classification already filled in) from the API
 # ---------------------------------------------------------------------------
 def fetch_ticket(state: TicketState) -> TicketState:
     ticket_id = state["ticket_id"]
@@ -116,6 +84,7 @@ def fetch_ticket(state: TicketState) -> TicketState:
     state["category"] = data.get("category")
     state["severity"] = data.get("severity")
     state["priority"] = data.get("priority")
+    state["user_email"] = data.get("user_email", "user@example.com")
 
     _log(state, f"Fetched ticket #{ticket_id}: '{state['subject']}' "
                  f"(category={state['category']}, severity={state['severity']})")
@@ -124,16 +93,14 @@ def fetch_ticket(state: TicketState) -> TicketState:
 
 # ---------------------------------------------------------------------------
 # 3. NODE 2 — retrieve_knowledge
-#    Calls Member 4's knowledge-base search endpoint (RAG)
 # ---------------------------------------------------------------------------
 def retrieve_knowledge(state: TicketState) -> TicketState:
     query = f"{state['subject']} {state['description']}"
-    
-    # Milestone 2 Integration: Pass ticket_id to trigger database category filters
+
     params = {
         "q": query, 
         "limit": 3,
-        "ticket_id": state["ticket_id"]  # Passes the active ticket scope safely
+        "ticket_id": state["ticket_id"]  
     }
 
     if state.get("category"):
@@ -151,66 +118,29 @@ def retrieve_knowledge(state: TicketState) -> TicketState:
     else:
         state["kb_context"] = "No matching knowledge-base articles were found."
         state["kb_article_ids"] = []
-        _log(state, "No KB articles matched this ticket branch boundary.")
+        _log(state, "No KB articles matched this ticket scope.")
 
     return state
 
 
 # ---------------------------------------------------------------------------
 # 4. NODE 3 — generate_response
-#    Feeds ticket + retrieved KB context into the LLM to draft a resolution
 # ---------------------------------------------------------------------------
 def generate_response(state: TicketState) -> TicketState:
-    # ------------------------------------------------------------------
-    # PROMPT ENGINEERING — grounding / anti-hallucination rules.
-    #
-    # Goal: the LLM must NEVER invent a fix that isn't supported by the
-    # knowledge-base context (or well-known, category-level best practice).
-    # Every rule below exists to close a specific hallucination failure
-    # mode we want to avoid in a real helpdesk:
-    #   1. Inventing product/menu names, error codes, or settings that
-    #      were never in the KB context.
-    #   2. Sounding confident about a fix for an issue the KB doesn't
-    #      actually cover.
-    #   3. Silently mixing "verified KB steps" with "general guesses"
-    #      so the user can't tell which is which.
-    #   4. Escaping the required output format, which breaks the
-    #      programmatic RESOLVED/CONFIDENCE parsing downstream.
-    # ------------------------------------------------------------------
     system_prompt = (
         "You are the Resolution Agent for SupportPilot, an internal IT helpdesk.\n\n"
 
         "GROUNDING RULES (do not break these):\n"
-        "1. Only state a specific fix (a setting, command, menu path, error code, "
-        "or version number) if it appears in the knowledge-base context below. "
-        "Never invent specifics that are not present in the context.\n"
-        "2. If the knowledge-base context clearly matches the ticket, base your "
-        "steps directly on it and mention it is from the knowledge base.\n"
-        "3. If the context is missing, irrelevant, or only partially related, "
-        "say so explicitly in one short sentence (e.g. 'No exact match was found "
-        "in the knowledge base for this issue.') before giving anything else.\n"
-        "4. In that case, you may give GENERAL, well-known best-practice "
-        "troubleshooting steps for the ticket's category (e.g. standard network "
-        "or password-reset checks), but you must label them as general guidance, "
-        "not as a verified fix — and you must NOT present them with the same "
-        "confidence as a KB-backed answer.\n"
-        "5. Never fabricate a ticket number, article ID, policy, or quote that "
-        "was not given to you.\n"
-        "6. If you are not sure a step is safe or correct, do not include it — "
-        "prefer fewer, verified steps over more, speculative ones.\n\n"
+        "1. Only state a specific fix if it appears in the knowledge-base context below.\n"
+        "2. If context matches, base steps directly on it.\n"
+        "3. If context is missing, explicitly state: 'No exact match was found in the knowledge base.'\n"
+        "4. Provide general best practices only as secondary guidance, labeled clearly.\n\n"
 
-        "OUTPUT FORMAT (follow exactly, do not add extra sections):\n"
+        "OUTPUT FORMAT:\n"
         "- A short numbered list of troubleshooting steps.\n"
-        "- One line starting with 'RESOLVED: yes' or 'RESOLVED: no'. Answer "
-        "'no' if this needs a human technician (hardware replacement, "
-        "account/security exceptions) OR if the knowledge-base context did "
-        "not actually cover this issue.\n"
-        "- One line starting with 'CONFIDENCE: ' with a number from 0.00 to 1.00. "
-        "Use a HIGH number (0.8+) only when the fix is directly grounded in the "
-        "knowledge-base context. Use a LOW number (below 0.5) when you are "
-        "relying on general guidance rather than the knowledge base.\n"
-        "- Write the RESOLVED and CONFIDENCE lines as plain lines, NOT as bullet "
-        "points or bold text (no leading '-', '*', or markdown)."
+        "- One line starting with 'RESOLVED: yes' or 'RESOLVED: no'.\n"
+        "- One line starting with 'CONFIDENCE: ' with a value from 0.00 to 1.00.\n"
+        "- Do NOT format RESOLVED or CONFIDENCE as markdown bullet points."
     )
 
     user_prompt = (
@@ -231,14 +161,10 @@ def generate_response(state: TicketState) -> TicketState:
     )
     raw_text = response["message"]["content"].strip()
 
-    # Pull out RESOLVED / CONFIDENCE lines, keep the rest as the response body
     resolved = True
     confidence = 0.7
     body_lines = []
     for line in raw_text.splitlines():
-        # Strip common bullet/markdown prefixes ("- ", "* ", "1. ", "**") before
-        # checking for the RESOLVED:/CONFIDENCE: markers, since the LLM
-        # sometimes formats them as list items instead of bare lines.
         cleaned = line.strip().lstrip("-*").strip().strip("*").strip()
         upper = cleaned.upper()
         if upper.startswith("RESOLVED:"):
@@ -260,7 +186,7 @@ def generate_response(state: TicketState) -> TicketState:
 
 
 # ---------------------------------------------------------------------------
-# 5. ROUTER — decides which branch to take after generation
+# 5. ROUTER
 # ---------------------------------------------------------------------------
 def route_after_generation(state: TicketState) -> str:
     if state["is_resolved"] and state["confidence_score"] >= CONFIDENCE_THRESHOLD:
@@ -269,9 +195,10 @@ def route_after_generation(state: TicketState) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 6a. NODE 4a — save_response (happy path: auto-resolved)
+# 6a. NODE 4a — save_response (Milestone 3 Email Integration)
 # ---------------------------------------------------------------------------
 def save_response(state: TicketState) -> TicketState:
+    # 1. Save response to backend
     payload = {
         "generated_response": state["generated_response"],
         "confidence_score": state["confidence_score"],
@@ -282,16 +209,30 @@ def save_response(state: TicketState) -> TicketState:
     )
     resp.raise_for_status()
 
+    # 2. Update status to resolved
     requests.patch(
         f"{API_BASE_URL}/api/tickets/{state['ticket_id']}/status",
         json={"status": "resolved"}, timeout=10,
     )
+
+    # 3. Milestone 3: Call Email Service to notify user
+    try:
+        email_payload = {
+            "to": state.get("user_email", "user@example.com"),
+            "subject": f"Resolved: Ticket #{state['ticket_id']} - {state['subject']}",
+            "body": f"Hello,\n\nYour support ticket has been automatically resolved:\n\n{state['generated_response']}\n\nBest regards,\nSupportPilot Team"
+        }
+        requests.post(f"{API_BASE_URL}/api/email/send", json=email_payload, timeout=5)
+        _log(state, "Resolution email dispatch triggered via Email Service.")
+    except Exception as e:
+        _log(state, f"Note: Email dispatch skipped or offline ({e})")
+
     _log(state, "Response saved and ticket marked 'resolved'.")
     return state
 
 
 # ---------------------------------------------------------------------------
-# 6b. NODE 4b — escalate_ticket (low confidence / needs a human)
+# 6b. NODE 4b — escalate_ticket (Milestone 3 Jira + Email Integration)
 # ---------------------------------------------------------------------------
 def escalate_ticket(state: TicketState) -> TicketState:
     reason = (
@@ -310,7 +251,7 @@ def escalate_ticket(state: TicketState) -> TicketState:
     }
     assigned_team = team_map.get(state.get("category"), "General IT Support")
 
-    # Still save the AI's draft response so the human agent has a starting point
+    # 1. Save AI draft response as starting point for human technicians
     requests.post(
         f"{API_BASE_URL}/api/tickets/{state['ticket_id']}/responses",
         json={
@@ -320,17 +261,48 @@ def escalate_ticket(state: TicketState) -> TicketState:
         timeout=10,
     )
 
+    # 2. Log internal escalation record
     requests.post(
         f"{API_BASE_URL}/api/tickets/{state['ticket_id']}/escalations",
         json={"assigned_team": assigned_team, "escalation_reason": reason},
         timeout=10,
     )
+
+    # 3. Milestone 3: Trigger Jira Issue Creation
+    try:
+        jira_payload = {
+            "ticket_id": state["ticket_id"],
+            "summary": f"[SupportPilot] {state['subject']}",
+            "description": f"{state['description']}\n\nEscalation Reason: {reason}",
+            "priority": state.get("priority", "Medium"),
+            "assigned_team": assigned_team
+        }
+        jira_resp = requests.post(f"{API_BASE_URL}/api/jira/tickets", json=jira_payload, timeout=5)
+        if jira_resp.status_code in (200, 201):
+            jira_data = jira_resp.json()
+            state["jira_issue_key"] = jira_data.get("jira_key", "JIRA-AUTO")
+            _log(state, f"Synced escalation to Jira: Issue Key {state['jira_issue_key']}")
+    except Exception as e:
+        _log(state, f"Note: Jira integration endpoint offline ({e})")
+
+    # 4. Milestone 3: Send escalation handoff email to support team/user
+    try:
+        email_payload = {
+            "to": state.get("user_email", "user@example.com"),
+            "subject": f"Escalated: Ticket #{state['ticket_id']} - Handed over to {assigned_team}",
+            "body": f"Hello,\n\nYour ticket '{state['subject']}' has been escalated to {assigned_team}.\nReason: {reason}\n\nOur engineering team will assist you shortly."
+        }
+        requests.post(f"{API_BASE_URL}/api/email/send", json=email_payload, timeout=5)
+        _log(state, "Escalation email dispatch triggered via Email Service.")
+    except Exception as e:
+        _log(state, f"Note: Email dispatch skipped or offline ({e})")
+
     _log(state, f"Ticket escalated to '{assigned_team}'. Reason: {reason}")
     return state
 
 
 # ---------------------------------------------------------------------------
-# 7. BUILD THE GRAPH
+# 7. BUILD LANGGRAPH
 # ---------------------------------------------------------------------------
 def build_graph():
     graph = StateGraph(TicketState)
@@ -356,7 +328,7 @@ def build_graph():
 
 
 # ---------------------------------------------------------------------------
-# 8. ENTRY POINT — lets you demo this module standalone
+# 8. STANDALONE & DEMO RUNNERS
 # ---------------------------------------------------------------------------
 def run_on_real_ticket(ticket_id: int):
     app_graph = build_graph()
@@ -368,17 +340,13 @@ def run_on_real_ticket(ticket_id: int):
 
 
 def run_demo():
-    """
-    Runs the graph against fake in-memory data, WITHOUT calling the FastAPI
-    backend. Useful this week if Member 2/3/4's parts aren't wired up yet —
-    you can still build + present your LangGraph logic.
-    """
     demo_state: TicketState = {
         "ticket_id": 0,
         "subject": "Cannot connect to office VPN",
         "description": "VPN client shows 'Error 807' every time I try to connect from home.",
         "category": "Network",
         "severity": "High",
+        "user_email": "demo.user@company.com",
         "kb_context": (
             "Article: VPN Error 807 Fix\n"
             "Error 807 usually means a network timeout. Ask user to switch off "
@@ -396,9 +364,9 @@ def run_demo():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SupportPilot Resolution Agent (Member 5)")
-    parser.add_argument("--ticket-id", type=int, help="Run the full graph against a real ticket via the API")
-    parser.add_argument("--demo", action="store_true", help="Run against mock data, no API/backend needed")
+    parser = argparse.ArgumentParser(description="SupportPilot Multi-Agent Orchestrator (Member 1)")
+    parser.add_argument("--ticket-id", type=int, help="Run full graph against real ticket via API")
+    parser.add_argument("--demo", action="store_true", help="Run against mock data locally")
     args = parser.parse_args()
 
     if args.demo:
@@ -406,5 +374,5 @@ if __name__ == "__main__":
     elif args.ticket_id is not None:
         run_on_real_ticket(args.ticket_id)
     else:
-        print("Usage:\n  python resolution_agent.py --demo\n  python resolution_agent.py --ticket-id 1")
+        print("Usage:\n  python app/agents/resolution_agent.py --demo\n  python app/agents/resolution_agent.py --ticket-id 1")
         sys.exit(1)

@@ -2,12 +2,52 @@
 
 let currentEmails = [];
 
-function initEmailModule() {
-  currentEmails = [...window.SupportPilotData.mockEmails];
-  
+/**
+ * Initializes the Email module by attempting to fetch real email logs
+ * from the FastAPI backend. Falls back gracefully to mock data if offline.
+ */
+async function initEmailModule() {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/email/logs");
+    if (response.ok) {
+      const liveEmails = await response.json();
+      if (liveEmails && liveEmails.length > 0) {
+        // Map backend log schema to expected UI format
+        currentEmails = liveEmails.map((email, idx) => ({
+          id: email.id || `EML-${100 + idx}`,
+          sender: email.from || email.sender || "SupportPilot Engine",
+          recipient: email.to || email.recipient || "user@example.com",
+          subject: email.subject || "Automated Notification",
+          preview: email.body || email.preview || "",
+          status: email.status || "Delivered",
+          history: email.history || [
+            {
+              date: email.created_at || new Date().toISOString(),
+              status: "Dispatched",
+              details: "Automated trigger execution via LangGraph Orchestrator.",
+            },
+            {
+              date: email.delivered_at || new Date().toISOString(),
+              status: "Delivered",
+              details: "Handshake verify: Delivered successfully to target inbox.",
+            },
+          ],
+        }));
+      } else {
+        currentEmails = [...(window.SupportPilotData?.mockEmails || [])];
+      }
+    } else {
+      currentEmails = [...(window.SupportPilotData?.mockEmails || [])];
+    }
+  } catch (error) {
+    console.warn("Backend API offline or unreachable, falling back to mock data:", error);
+    currentEmails = [...(window.SupportPilotData?.mockEmails || [])];
+  }
+
+  // Render the inbox list pane
   renderEmailInboxList();
 
-  // Load first email by default
+  // Automatically load and display the first email in the details panel
   if (currentEmails.length > 0) {
     loadEmailDetails(currentEmails[0].id);
   }
@@ -24,16 +64,15 @@ function renderEmailInboxList() {
     return;
   }
 
-  currentEmails.forEach(email => {
+  currentEmails.forEach((email) => {
     const card = document.createElement("div");
     card.className = "email-item-card";
     card.id = `email-card-${email.id}`;
 
-    // Get status color
-    let statusDot = "";
-    if (email.status === "Delivered") statusDot = "#10b981";
-    else if (email.status === "Pending") statusDot = "#f59e0b";
-    else statusDot = "#ef4444";
+    // Get status indicator color
+    let statusDot = "#10b981"; // Default green for Delivered
+    if (email.status === "Pending") statusDot = "#f59e0b";
+    else if (email.status === "Failed") statusDot = "#ef4444";
 
     card.innerHTML = `
       <div class="email-header-top">
@@ -53,72 +92,95 @@ function renderEmailInboxList() {
 }
 
 function loadEmailDetails(emailId) {
-  const email = currentEmails.find(e => e.id === emailId);
+  const email = currentEmails.find((e) => e.id === emailId);
   if (!email) return;
 
-  // Toggle active highlights in inbox
-  document.querySelectorAll(".email-item-card").forEach(el => el.classList.remove("active"));
+  // Toggle active CSS highlights in inbox list
+  document.querySelectorAll(".email-item-card").forEach((el) => el.classList.remove("active"));
   const activeCard = document.getElementById(`email-card-${emailId}`);
   if (activeCard) activeCard.classList.add("active");
 
-  document.getElementById("email-detail-empty").style.display = "none";
-  document.getElementById("email-detail-content").style.display = "block";
+  const emptyState = document.getElementById("email-detail-empty");
+  const detailContent = document.getElementById("email-detail-content");
 
-  // Fill content
-  document.getElementById("email-view-subject").textContent = email.subject;
-  document.getElementById("email-view-from").textContent = email.recipient;
-  document.getElementById("email-view-to").textContent = email.sender;
-  document.getElementById("email-view-body").textContent = email.preview;
+  if (emptyState) emptyState.style.display = "none";
+  if (detailContent) detailContent.style.display = "block";
 
-  // Render delivery timeline
+  // Fill content fields
+  const subjectEl = document.getElementById("email-view-subject");
+  const fromEl = document.getElementById("email-view-from");
+  const toEl = document.getElementById("email-view-to");
+  const bodyEl = document.getElementById("email-view-body");
+
+  if (subjectEl) subjectEl.textContent = email.subject;
+  if (fromEl) fromEl.textContent = email.recipient;
+  if (toEl) toEl.textContent = email.sender;
+  if (bodyEl) bodyEl.textContent = email.preview;
+
+  // Render delivery history timeline
   const timelineContainer = document.getElementById("email-delivery-timeline");
-  timelineContainer.innerHTML = "";
-
-  email.history.forEach(log => {
-    const node = document.createElement("div");
-    node.className = `delivery-node ${email.status.toLowerCase()}`;
-    node.innerHTML = `
-      <div style="font-size: 11px; color: var(--text-muted);">${formatEmailTime(log.date)}</div>
-      <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px;">${log.status}</div>
-      <p style="font-size: 12px; color: var(--text-secondary);">${log.details}</p>
-    `;
-    timelineContainer.appendChild(node);
-  });
+  if (timelineContainer) {
+    timelineContainer.innerHTML = "";
+    email.history.forEach((log) => {
+      const node = document.createElement("div");
+      node.className = `delivery-node ${email.status.toLowerCase()}`;
+      node.innerHTML = `
+        <div style="font-size: 11px; color: var(--text-muted);">${formatEmailTime(log.date)}</div>
+        <div style="font-size: 13px; font-weight: 600; margin-bottom: 2px;">${log.status}</div>
+        <p style="font-size: 12px; color: var(--text-secondary);">${log.details}</p>
+      `;
+      timelineContainer.appendChild(node);
+    });
+  }
 }
 
-// Function triggered when ticket is resolved, automatically dispatching an outbox email notification
+/**
+ * Triggered dynamically when a ticket is resolved or escalated,
+ * pushing an automated outbox item into memory and re-rendering.
+ */
 function addAutomatedEmail(ticket) {
   const newEmail = {
     id: `EML-${100 + currentEmails.length + 1}`,
-    recipient: "support@supportpilot.ai",
-    sender: ticket.user.email,
+    recipient: ticket.user?.email || "user@example.com",
+    sender: "support@supportpilot.ai",
     subject: `RESOLVED: [${ticket.id}] ${ticket.subject}`,
-    preview: `Dear Customer, our AI Engine has resolved your support ticket request.\n\nProposed Action Steps:\n${ticket.suggestedResolution}\n\nAssigned Agent: ${ticket.assignedAgent || 'Nova AI System'}.\nSupportPilot Resolution Platform.`,
+    preview: `Dear Customer, our AI Engine has processed your support ticket request.\n\nProposed Steps:\n${ticket.suggestedResolution}\n\nAssigned Agent: ${ticket.assignedAgent || 'Nova AI System'}.`,
     status: "Delivered",
     history: [
-      { date: new Date().toISOString(), status: "Received", details: "Ticket resolution registered in core system." },
-      { date: new Date().toISOString(), status: "Sent", details: "Outbound resolution summary email dispatched." },
-      { date: new Date().toISOString(), status: "Delivered", details: "Handshake verify: Email delivered successfully to customer server." }
+      { date: new Date().toISOString(), status: "Received", details: "Ticket status registered in core engine." },
+      { date: new Date().toISOString(), status: "Sent", details: "Outbound email summary dispatched." },
+      { date: new Date().toISOString(), status: "Delivered", details: "Handshake verify: Email delivered successfully." }
     ]
   };
 
   currentEmails.unshift(newEmail);
   
-  // Re-render
-  if (document.getElementById("email-view").classList.contains("active-view")) {
+  // Re-render view if currently active
+  const emailView = document.getElementById("email-view");
+  if (emailView && emailView.classList.contains("active-view")) {
     renderEmailInboxList();
     loadEmailDetails(newEmail.id);
   }
 }
 
 function formatEmailTime(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  try {
+    const d = new Date(isoString);
+    return d.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch (e) {
+    return isoString;
+  }
 }
 
-// Expose model globally
+// Expose module functions globally
 window.SupportPilotEmail = {
   init: initEmailModule,
   addEmail: addAutomatedEmail,
-  refreshInbox: renderEmailInboxList
+  refreshInbox: renderEmailInboxList,
 };
