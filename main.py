@@ -73,6 +73,32 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
             raw_content = re.search(r"```\s*([\s\S]*?)\s*```", raw_content).group(1)
             
         result = TicketClassificationResponse.model_validate_json(raw_content.strip())
+        
+        # 1. Ensure a valid relational user exists in the system to satisfy foreign key rules
+        default_email = "employee@company.com"
+        user = db.query(models.User).filter(models.User.email == default_email).first()
+        if not user:
+            user = models.User(name="Default Employee", email=default_email, role="employee")
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        
+        # 2. Map processed data directly to structural database tables
+        db_ticket = models.Ticket(
+            user_id=user.user_id,
+            subject=ticket.title,
+            description=ticket.description,
+            category=result.category,
+            severity=result.severity,
+            priority="P3-Medium", 
+            classification_confidence=result.confidence_score,
+            status=models.TicketStatus.classified.value
+        )
+        
+        db.add(db_ticket)
+        db.commit()
+        db.refresh(db_ticket)
+        
         return result
         
     except Exception as e:
@@ -86,6 +112,25 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
             "severity": "High" if "vpn" in ticket.description.lower() or "critical" in ticket.title.lower() else "Medium",
             "confidence_score": 0.92
         }
+        
+        try:
+            user = db.query(models.User).filter(models.User.email == "employee@company.com").first()
+            if user:
+                db_ticket = models.Ticket(
+                    user_id=user.user_id,
+                    subject=ticket.title,
+                    description=ticket.description,
+                    category=fallback["category"],
+                    severity=fallback["severity"],
+                    priority="P3-Medium",
+                    classification_confidence=fallback["confidence_score"],
+                    status=models.TicketStatus.classified.value
+                )
+                db.add(db_ticket)
+                db.commit()
+        except:
+            db.rollback()
+            
         return fallback
 
 class UserLogin(BaseModel):
@@ -186,39 +231,3 @@ async def get_all_tickets(db: Session = Depends(get_db)):
         })
         
     return result
-
-class TicketCreateAPI(BaseModel):
-    subject: str
-    description: str
-    category: str
-    priority: str
-    severity: str
-    confidence_score: float
-    status: str = "Open"
-    user_name: str = "Pranjal kumar"
-    user_email: str = "pranj@choudhary.com"
-
-@app.post("/api/tickets", status_code=201)
-async def create_ticket(ticket_in: TicketCreateAPI, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == ticket_in.user_email).first()
-    if not user:
-        user = models.User(name=ticket_in.user_name, email=ticket_in.user_email, role="employee")
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        
-    db_ticket = models.Ticket(
-        user_id=user.user_id,
-        subject=ticket_in.subject,
-        description=ticket_in.description,
-        category=ticket_in.category,
-        severity=ticket_in.severity,
-        priority=ticket_in.priority,
-        classification_confidence=ticket_in.confidence_score,
-        status=ticket_in.status.lower()
-    )
-    db.add(db_ticket)
-    db.commit()
-    db.refresh(db_ticket)
-    
-    return {"message": "Ticket created successfully", "ticket_id": db_ticket.ticket_id}

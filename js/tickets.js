@@ -449,29 +449,31 @@ function handleNewTicketSubmit(e) {
   const fileInput = document.getElementById("tkt-file");
 
   if (!aiPredictingState) {
-    // Phase 1: AI Engine parsing text content
+    // Phase 1: Simulate AI Engine parsing text content
     document.getElementById("ai-loading-container").style.display = "flex";
     document.getElementById("btn-modal-submit").disabled = true;
 
-    fetch('http://127.0.0.1:8000/api/triage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: subject, description: description })
-    })
-    .then(res => res.json())
-    .then(data => {
+    setTimeout(() => {
       document.getElementById("ai-loading-container").style.display = "none";
       document.getElementById("btn-modal-submit").disabled = false;
 
+      // Predict values based on descriptions/subject content
       let predictedDept = dept;
-      let predictedPriority = data.severity === "Critical" ? "Urgent" : (data.severity || priority);
-      let predictedCategory = data.category || category;
-      let confidence = data.confidence_score ? Math.round(data.confidence_score * 100) : 85;
+      let predictedPriority = priority;
+      let confidence = Math.floor(Math.random() * 15) + 84; // 84% - 98%
+
+      if (subject.toLowerCase().includes("billing") || subject.toLowerCase().includes("invoice") || subject.toLowerCase().includes("charge")) {
+        predictedDept = "Billing";
+        predictedPriority = "High";
+      } else if (subject.toLowerCase().includes("latency") || subject.toLowerCase().includes("auth") || subject.toLowerCase().includes("crash") || subject.toLowerCase().includes("api")) {
+        predictedDept = "Engineering";
+        predictedPriority = "Urgent";
+      }
 
       // Populate predictive UI card
       document.getElementById("ai-pred-priority").textContent = predictedPriority;
       document.getElementById("ai-pred-dept").textContent = predictedDept;
-      document.getElementById("ai-pred-category").textContent = predictedCategory;
+      document.getElementById("ai-pred-category").textContent = category;
       document.getElementById("ai-pred-confidence").textContent = `${confidence}% confidence`;
 
       document.getElementById("ai-prediction-card").style.display = "block";
@@ -479,71 +481,60 @@ function handleNewTicketSubmit(e) {
       // Upgrade state to allow final submit next click
       aiPredictingState = true;
       document.getElementById("btn-modal-submit").innerHTML = "Confirm & Insert Ticket";
-    })
-    .catch(err => {
-      console.error('Error during AI Triage:', err);
-      showToast("Triage Error", "Failed to reach AI Engine.", "error");
-      document.getElementById("ai-loading-container").style.display = "none";
-      document.getElementById("btn-modal-submit").disabled = false;
-    });
+    }, 1500);
 
   } else {
-    // Phase 2: User confirmed predictions, append item to table via API
+    // Phase 2: User confirmed predictions, append item to table
     const predictedDept = document.getElementById("ai-pred-dept").textContent;
     const predictedPriority = document.getElementById("ai-pred-priority").textContent;
-    const predictedCategory = document.getElementById("ai-pred-category").textContent;
     const confidenceVal = parseInt(document.getElementById("ai-pred-confidence").textContent);
 
-    document.getElementById("btn-modal-submit").disabled = true;
-    
-    let severityMap = { "Urgent": "Critical", "High": "High", "Medium": "Medium", "Low": "Low" };
-    let severity = severityMap[predictedPriority] || "Medium";
+    const attachmentsList = [];
+    if (fileInput.files.length > 0) {
+      attachmentsList.push(fileInput.files[0].name);
+    }
 
-    let userSession = null;
-    try {
-      userSession = JSON.parse(localStorage.getItem('sp_session'));
-    } catch(e) {}
-    
-    const userName = userSession ? userSession.name : "Pranjal kumar";
-    const userEmail = userSession ? userSession.email : "pranj@choudhary.com";
-
-    fetch('http://127.0.0.1:8000/api/tickets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subject: subject,
-        description: description,
-        category: predictedCategory,
+    const newId = `TKT-${1024 + currentTickets.length}`;
+    const newTkt = {
+      id: newId,
+      user: { name: "Pranjal kumar", email: "pranj@choudhary.com", company: "Local Workspace" },
+      department: predictedDept,
+      subject: subject,
+      category: category,
+      priority: predictedPriority,
+      severity: predictedPriority === "Urgent" ? "Critical" : (predictedPriority === "High" ? "Major" : "Minor"),
+      status: "Open",
+      assignedAgent: "Unassigned",
+      createdDate: new Date().toISOString(),
+      confidenceScore: confidenceVal,
+      description: description,
+      aiClassification: {
+        category: category,
         priority: predictedPriority,
-        severity: severity,
-        confidence_score: confidenceVal / 100.0,
-        status: "Open",
-        user_name: userName,
-        user_email: userEmail
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      showToast("Ticket Opened", `New ticket created successfully.`, "success");
-      closeNewTicketModal();
-      
-      if (window.SupportPilotData && window.SupportPilotData.fetchLiveTickets) {
-        window.SupportPilotData.fetchLiveTickets();
-      } else {
-        renderTicketsTable();
-      }
+        severity: predictedPriority === "Urgent" ? "Critical" : "Minor",
+        confidence: confidenceVal,
+        suggestedDept: predictedDept
+      },
+      suggestedResolution: `Review the log trace patterns for context related to "${subject}". If issues persist, verify routing and whitelisting.`,
+      escalationHistory: [],
+      timeline: [
+        { time: new Date().toISOString(), title: "Ticket Opened", user: "Pranjal kumar", type: "system" },
+        { time: new Date().toISOString(), title: "Nova AI Classification Run", user: "Diagnosis Agent", type: "ai" }
+      ],
+      attachments: attachmentsList
+    };
 
-      if (typeof refreshDynamicViewElements === "function") {
-        refreshDynamicViewElements();
-      }
-    })
-    .catch(err => {
-      console.error('Error creating ticket:', err);
-      showToast("Creation Error", "Failed to save the ticket to the server.", "error");
-    })
-    .finally(() => {
-      document.getElementById("btn-modal-submit").disabled = false;
-    });
+    // Prepend to ticket lists
+    currentTickets.unshift(newTkt);
+    showToast("Ticket Opened", `New ticket ${newId} created successfully.`, "success");
+
+    closeNewTicketModal();
+    renderTicketsTable();
+
+    // Trigger dynamic sidebar metrics updates in-app
+    if (typeof refreshDynamicViewElements === "function") {
+      refreshDynamicViewElements();
+    }
   }
 }
 
