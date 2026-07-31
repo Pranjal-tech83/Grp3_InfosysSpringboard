@@ -177,7 +177,7 @@
 
 <body>
 <div id="app-container" style="display: flex;">
-  <!-- Dock Menu[cite: 2] -->
+  <!-- Dock Menu -->
   <nav class="dock-menu">
     <div class="dock-container">
       <button class="dock-toggle-btn" id="dock-toggle-btn" aria-label="Toggle Menu">
@@ -262,10 +262,10 @@
       </div>
     </nav>
 
-  <!-- Main Section Content Area[cite: 2] -->
+  <!-- Main Section Content Area -->
   <main id="main-content">
 
-    <!-- Top Sticky Navbar[cite: 2] -->
+    <!-- Top Sticky Navbar -->
     <header class="navbar">
       <button class="nav-action-btn" id="navbar-sidebar-toggle" aria-label="Toggle Sidebar" style="margin-right: 12px; display: none; align-items: center; justify-content: center;">
         <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -308,9 +308,9 @@
         </div>
       </header>
 
-    <!-- View Containers[cite: 2] -->
+    <!-- View Containers -->
 
-    <!-- VIEW 1: DASHBOARD[cite: 2] -->
+    <!-- VIEW 1: DASHBOARD -->
     <section class="view-section active-view" id="dashboard-view">
       <div id="dashboard-react-root"></div>
       <div style="display: none;" id="legacy-dashboard-hide">
@@ -462,7 +462,7 @@
         </div>
       </section>
 
-      <!-- VIEW 2: TICKETS TABLE[cite: 2] -->
+      <!-- VIEW 2: TICKETS TABLE -->
       <section class="view-section" id="tickets-view">
         <div class="table-controls">
           <div class="table-filters">
@@ -533,7 +533,7 @@
         </div>
       </section>
 
-      <!-- VIEW 3: AI ASSISTANT[cite: 2] -->
+      <!-- VIEW 3: AI ASSISTANT -->
       <section class="view-section" id="assistant-view">
         <div class="view-header">
           <div>
@@ -554,7 +554,7 @@
         </div>
       </section>
 
-      <!-- VIEW 6: ANALYTICS[cite: 2] -->
+      <!-- VIEW 6: ANALYTICS -->
       <section class="view-section" id="analytics-view">
         <div class="workflow-control-bar">
           <div>
@@ -615,12 +615,12 @@
         </div>
       </section>
 
-      <!-- VIEW 7: EMAIL AUTOMATION[cite: 2] -->
+      <!-- VIEW 7: EMAIL AUTOMATION -->
       <section class="view-section" id="email-view">
         <!-- Populated dynamically by email-enhanced.js -->
       </section>
 
-      <!-- VIEW 9: INTEGRATIONS[cite: 2] -->
+      <!-- VIEW 9: INTEGRATIONS -->
       <section class="view-section" id="integrations-view">
         <div class="workflow-control-bar"
           style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
@@ -715,7 +715,7 @@
         </div>
       </section>
 
-      <!-- VIEW 8: SETTINGS (React-powered)[cite: 2] -->
+      <!-- VIEW 8: SETTINGS (React-powered) -->
       <section class="view-section" id="settings-view">
         <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Settings
         </h1>
@@ -755,7 +755,7 @@
     </main>
   </div>
 
-  <!-- Ticket Details Drawer backdrop overlay[cite: 2] -->
+  <!-- Ticket Details Drawer backdrop overlay -->
   <div class="drawer-backdrop" id="ticket-drawer-backdrop">
     <div class="drawer" id="ticket-drawer">
       <div class="drawer-header">
@@ -790,7 +790,7 @@
 
       <!-- Details Panel (existing content) -->
       <div id="drawer-panel-details" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden">
-        <!-- Integrated Multi-Column Layout for RAG Details Panel[cite: 2] -->
+        <!-- Integrated Multi-Column Layout for RAG Details Panel -->
         <div class="drawer-content" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
           <div>
             <h2 id="drawer-subject" style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">API Authentication
@@ -808,11 +808,11 @@
             </p>
           </div>
 
-          <!-- NEW: Milestone 2 Live RAG Pipeline Diagnostics Integrated Context Panel[cite: 2] -->
+          <!-- NEW: Milestone 2 Live RAG Pipeline Diagnostics Integrated Context Panel -->
           <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 8px;">
             <div class="drawer-section-title"
               style="color: var(--accent-primary); display: flex; align-items: center; gap: 6px;">
-              📍 AI Resolution Generator RAG Telemetry
+              桃 AI Resolution Generator RAG Telemetry
             </div>
 
             <div style="margin: 12px 0; background: var(--bg-app); padding: 12px; border-radius: 8px; font-size: 12px;">
@@ -820,10 +820,10 @@
                 style="font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; font-size: 10px;">
                 RAG Workflow Execution Status</div>
               <div style="display: flex; flex-direction: column; gap: 6px; color: #3b82f6; font-weight: 600;">
-                <div>🔵 1. Ticket Analysis & Query Generation</div>
-                <div>🔵 2. Knowledge Base Retrieval</div>
-                <div>🔵 3. Context Augmentation</div>
-                <div>🔵 4. Response Generation</div>
+                <div>鳩 1. Ticket Analysis & Query Generation</div>
+                <div>鳩 2. Knowledge Base Retrieval</div>
+                <div>鳩 3. Context Augmentation</div>
+                <div>鳩 4. Response Generation</div>
               </div>
             </div>
 
@@ -911,7 +911,7 @@
                     </div>
                     <div>
                       <div style="font-size: 13px; font-weight: 600; color: #1e293b;">Jira Integration</div>
-                      <div style="font-size: 11px; color: var(--text-muted);">Connected • Last synced 2 mins ago</div>
+                      <div style="font-size: 11px; color: var(--text-muted);">Connected 窶｢ Last synced 2 mins ago</div>
                     </div>
                   </div>
                   <span
@@ -932,7 +932,7 @@
                     </div>
                     <div>
                       <div style="font-size: 13px; font-weight: 600; color: #1e293b;">Email Automation</div>
-                      <div style="font-size: 11px; color: var(--text-muted);">Connected • 24 emails sent today</div>
+                      <div style="font-size: 11px; color: var(--text-muted);">Connected 窶｢ 24 emails sent today</div>
                     </div>
                   </div>
                   <span
@@ -1002,7 +1002,7 @@
     </div>
   </div>
 
-  <!-- Create New Ticket Dialog Modal[cite: 2] -->
+  <!-- Create New Ticket Dialog Modal -->
   <div class="modal-backdrop" id="new-ticket-modal-backdrop">
     <div class="modal">
       <div class="modal-header">
@@ -1015,6 +1015,13 @@
       </div>
       <form id="new-ticket-form">
         <div class="modal-body">
+          <!-- Requester Email Address Input Field -->
+          <div class="form-group">
+            <label for="tkt-email">Requester Email Address</label>
+            <input type="email" class="form-control" id="tkt-email" required
+              placeholder="e.g., sneh.singh@gmail.com">
+          </div>
+
           <div class="form-group">
             <label for="tkt-subject">Subject Header</label>
             <input type="text" class="form-control" id="tkt-subject" required
@@ -1113,16 +1120,16 @@
     </div>
   </div>
 
-  <!-- Toast Notification Stack[cite: 2] -->
+  <!-- Toast Notification Stack -->
   <div class="toast-container" id="toast-stack-container">
     <!-- Rendered dynamically -->
   </div>
 
-  <!-- React 18 + ReactDOM CDN[cite: 2] -->
+  <!-- React 18 + ReactDOM CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-  <!-- Javascript Modules Load[cite: 2] -->
+  <!-- Javascript Modules Load -->
   <script src="js/dashboard-react.js?v=7"></script>
   <script src="js/data.js?v=3"></script>
   <script src="js/tickets.js?v=3"></script>
@@ -1148,7 +1155,7 @@
     };
   </script>
 
-  <!-- React Settings Panel Component[cite: 2] -->
+  <!-- React Settings Panel Component -->
   <script src="js/settings-react.js"></script>
 
   <script>
@@ -1215,7 +1222,7 @@
     })();
   </script>
 
-  <!-- Mobile Sidebar Menu Logic[cite: 2] -->
+  <!-- Mobile Sidebar Menu Logic -->
   <script>
     (function () {
       function isMobile() {
