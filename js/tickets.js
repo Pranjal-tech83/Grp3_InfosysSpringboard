@@ -1,6 +1,5 @@
-// tickets.js - Tickets View, Table Sorting, Pagination, Drawer & Form Modal Controller
+// tickets.js - Tickets View with LocalStorage Persistence
 
-// State for Tickets Page
 let currentTickets = [];
 let tableState = {
   searchQuery: "",
@@ -10,25 +9,56 @@ let tableState = {
   sortColumn: "id",
   sortAsc: false,
   currentPage: 1,
-  pageSize: 5
+  pageSize: 5,
+  dayFilter: "all"
 };
 
-// Tracks if AI prediction card has been displayed for the current form submission
 let aiPredictingState = false;
 
-// Initialize the Tickets manager
-function initTicketsModule() {
-  // Load initial tickets from mock database
-  currentTickets = [...window.SupportPilotData.initialTickets];
+// ---------------------------------------------------------------------------
+// LOCAL STORAGE PERSISTENCE HELPERS
+// ---------------------------------------------------------------------------
+function loadStoredTickets() {
+  const stored = localStorage.getItem("supportpilot_created_tickets");
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to parse local stored tickets:", e);
+    }
+  }
+  return [];
+}
 
-  // Listen for real-time telemetry updates from data.js backend poll
-  document.addEventListener('ticketsUpdated', (e) => {
-    currentTickets = [...e.detail];
-    renderTicketsTable();
+function saveStoredTickets(ticketsList) {
+  localStorage.setItem("supportpilot_created_tickets", JSON.stringify(ticketsList));
+}
+
+// ---------------------------------------------------------------------------
+// INITIALIZATION
+// ---------------------------------------------------------------------------
+function initTicketsModule() {
+  // 1. Get tickets saved from previous sessions in localStorage
+  const localSaved = loadStoredTickets();
+
+  // 2. Load mock initial dataset
+  const initial = (window.SupportPilotData && window.SupportPilotData.initialTickets)
+    ? window.SupportPilotData.initialTickets
+    : [];
+
+  // Merge unique entries (local user tickets take priority at the top)
+  const mergedMap = new Map();
+  localSaved.forEach(t => mergedMap.set(t.id, t));
+  initial.forEach(t => {
+    if (!mergedMap.has(t.id)) mergedMap.set(t.id, t);
   });
 
-  // Setup DOM Event Listeners
-  // Safe event binder
+  currentTickets = Array.from(mergedMap.values());
+
+  // 3. Attempt async fetch from FastAPI backend to merge backend database items
+  fetchLiveTickets();
+
+  // Bind UI Controls
   const bind = (id, event, handler) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener(event, handler);
@@ -39,7 +69,6 @@ function initTicketsModule() {
   bind("filter-priority", "change", handleFilterChange);
   bind("filter-status", "change", handleFilterChange);
 
-  // Table header clicks for sorting
   const headers = document.querySelectorAll("#main-tickets-table th");
   headers.forEach(header => {
     header.addEventListener("click", () => {
@@ -48,65 +77,140 @@ function initTicketsModule() {
     });
   });
 
-  // Modal open/close actions
   bind("btn-create-ticket-modal", "click", openNewTicketModal);
   bind("dash-action-new-tkt", "click", openNewTicketModal);
   bind("modal-close-btn", "click", closeNewTicketModal);
   bind("btn-modal-cancel", "click", closeNewTicketModal);
   bind("new-ticket-form", "submit", handleNewTicketSubmit);
 
-  // Details drawer closing actions
   bind("drawer-close-btn", "click", closeDetailsDrawer);
   bind("ticket-drawer-backdrop", "click", (e) => {
     if (e.target.id === "ticket-drawer-backdrop") closeDetailsDrawer();
   });
 
-  // Drawer buttons
   bind("btn-drawer-resolve", "click", handleDrawerResolve);
   bind("btn-drawer-escalate", "click", handleDrawerEscalate);
   bind("btn-drawer-assign", "click", handleDrawerAssign);
 
-  // Export CSV mock trigger
   bind("btn-export-ui", "click", handleExportCSV);
 
-  // First rendering of tickets table
   renderTicketsTable();
 }
 
-// Global listener to capture live backend data when the async fetch completes
-document.addEventListener('ticketsUpdated', (e) => {
-  console.log("Tickets event received inside tickets.js!", e.detail);
-  currentTickets = [...e.detail];
+async function fetchLiveTickets() {
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/tickets");
+    if (response.ok) {
+      const backendTickets = await response.json();
+      if (backendTickets && backendTickets.length > 0) {
+        const mergedMap = new Map();
+
+        backendTickets.forEach((t, idx) => {
+          const tId = typeof t.ticket_id === 'number' ? `TKT-${t.ticket_id}` : (t.ticket_id || `TKT-${idx + 1}`);
+          if (!mergedMap.has(tId)) {
+            mergedMap.set(tId, {
+              id: tId,
+              user: { name: t.user?.name || "Corporate Employee", company: t.user?.company || "Local Workspace", email: t.user?.email || "employee@company.com" },
+              department: t.department || "Customer Support",
+              subject: t.subject || "No Subject",
+              description: t.description || "",
+              category: t.category || "Software",
+              priority: t.priority || "P3-Medium",
+              severity: t.severity || "Medium",
+              status: t.status ? (t.status.charAt(0).toUpperCase() + t.status.slice(1)) : "Open",
+              assignedAgent: t.assigned_agent || "Nova AI System",
+              createdDate: t.created_at || new Date().toISOString(),
+              confidenceScore: Math.round((t.confidence_score || 0.88) * 100),
+              aiClassification: { category: t.category || "Software", priority: t.priority || "P3-Medium", suggestedDept: t.department || "Customer Support" },
+              suggestedResolution: t.resolution_text || "AI triage completed.",
+              timeline: [{ time: t.created_at || new Date().toISOString(), title: "Ticket Created", user: "System", type: "system" }],
+              attachments: []
+            });
+          }
+        });
+
+        currentTickets = Array.from(mergedMap.values());
+        
+        // Update local storage just in case we need it when offline
+        saveStoredTickets(currentTickets);
+        
+        renderTicketsTable();
+      }
+    }
+  } catch (err) {
+    console.warn("FastAPI backend offline, using local persistent tickets:", err);
+  }
+}
+
+// Global hook to filter by day from Dashboard
+window.filterTicketsByDay = function(dayIndex) {
+  tableState.dayFilter = dayIndex;
   renderTicketsTable();
+  const nav = document.querySelector('.nav-item[data-target="tickets"]');
+  if (nav) {
+    // Navigate without triggering the click listener that resets the filter
+    nav.setAttribute('data-no-reset', 'true');
+    nav.click();
+  }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const ticketsNav = document.querySelector('.nav-item[data-target="tickets"]');
+  if (ticketsNav) {
+    ticketsNav.addEventListener('click', () => {
+      if (ticketsNav.getAttribute('data-no-reset') === 'true') {
+        ticketsNav.removeAttribute('data-no-reset');
+      } else {
+        tableState.dayFilter = 'all';
+        if (typeof renderTicketsTable === 'function') renderTicketsTable();
+      }
+    });
+  }
 });
 
-// Render the Ticket Table
+// ---------------------------------------------------------------------------
+// EVENTS & SEARCH
+// ---------------------------------------------------------------------------
 function renderTicketsTable() {
   const tbody = document.getElementById("tickets-tbody");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
-  // Apply filters
   let filtered = currentTickets.filter(t => {
-    const matchesSearch = t.subject.toLowerCase().includes(tableState.searchQuery.toLowerCase()) ||
-      t.user.name.toLowerCase().includes(tableState.searchQuery.toLowerCase()) ||
-      t.id.toLowerCase().includes(tableState.searchQuery.toLowerCase());
+    const searchQuery = (tableState.searchQuery || "").toLowerCase();
+    const matchesSearch = !searchQuery ||
+      (t.subject && t.subject.toLowerCase().includes(searchQuery)) ||
+      (t.user && t.user.name && t.user.name.toLowerCase().includes(searchQuery)) ||
+      (t.id && t.id.toLowerCase().includes(searchQuery));
 
     const matchesDept = tableState.deptFilter === "all" || t.department === tableState.deptFilter;
     const matchesPriority = tableState.priorityFilter === "all" || t.priority === tableState.priorityFilter;
-    const matchesStatus = tableState.statusFilter === "all" || t.status === tableState.statusFilter;
+    const matchesStatus = tableState.statusFilter === "all" || (t.status && t.status.toLowerCase() === tableState.statusFilter.toLowerCase());
 
-    return matchesSearch && matchesDept && matchesPriority && matchesStatus;
+    const matchesDay = tableState.dayFilter === "all" || (function() {
+      if (!t.createdDate) return false;
+      const d = new Date(t.createdDate);
+      if (isNaN(d.getTime())) return false;
+      const day = d.getDay();
+      const index = day === 0 ? 6 : day - 1; // Map to 0=Mon, ..., 6=Sun
+      return index === tableState.dayFilter;
+    })();
+
+    return matchesSearch && matchesDept && matchesPriority && matchesStatus && matchesDay;
   });
 
-  // Apply sorting
   filtered.sort((a, b) => {
     let valA = a[tableState.sortColumn];
     let valB = b[tableState.sortColumn];
 
-    // Handle nested object parameters (e.g. user.name)
     if (tableState.sortColumn === "user") {
-      valA = a.user.name;
-      valB = b.user.name;
+      valA = a.user ? a.user.name : "";
+      valB = b.user ? b.user.name : "";
+    } else if (tableState.sortColumn === "id") {
+      // Parse numerical part of ID for proper sequential sorting
+      valA = parseInt(valA.toString().replace(/\D/g, '')) || 0;
+      valB = parseInt(valB.toString().replace(/\D/g, '')) || 0;
     }
 
     if (valA < valB) return tableState.sortAsc ? -1 : 1;
@@ -114,7 +218,6 @@ function renderTicketsTable() {
     return 0;
   });
 
-  // Apply pagination
   const totalEntries = filtered.length;
   const totalPages = Math.ceil(totalEntries / tableState.pageSize) || 1;
 
@@ -126,13 +229,12 @@ function renderTicketsTable() {
   const endIdx = Math.min(startIdx + tableState.pageSize, totalEntries);
   const paginatedTickets = filtered.slice(startIdx, endIdx);
 
-  // Render rows
   if (paginatedTickets.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="8">
-          <div class="empty-state">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="empty-state" style="text-align: center; padding: 40px;">
+            <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <h3>No matching tickets found</h3>
             <p>Try refining your search query or adjust your filters.</p>
           </div>
@@ -146,15 +248,15 @@ function renderTicketsTable() {
         <td><strong style="color: var(--accent-primary); font-family: monospace;">${t.id}</strong></td>
         <td>
           <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: 600;">${t.user.name}</span>
-            <span style="font-size: 11px; color: var(--text-muted);">${t.user.company}</span>
+            <span style="font-weight: 600;">${t.user ? t.user.name : 'Unknown'}</span>
+            <span style="font-size: 11px; color: var(--text-muted);">${t.user ? t.user.email || t.user.company : 'Workspace'}</span>
           </div>
         </td>
-        <td>${t.department}</td>
+        <td>${t.department || 'General'}</td>
         <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.subject}">${t.subject}</td>
         <td><span style="font-size: 12px; color: var(--text-secondary);">${t.category}</span></td>
-        <td><span class="badge badge-priority-${t.priority.toLowerCase()}">${t.priority}</span></td>
-        <td><span class="badge badge-status-${t.status.toLowerCase()}">${t.status}</span></td>
+        <td><span class="badge badge-priority-${(t.priority || 'medium').toLowerCase().replace(/[^a-z]/g, '')}">${t.priority}</span></td>
+        <td><span class="badge badge-status-${(t.status || 'open').toLowerCase()}">${t.status}</span></td>
         <td style="color: var(--text-secondary);">${formatShortDate(t.createdDate)}</td>
       `;
       tr.addEventListener("click", () => openDetailsDrawer(t.id));
@@ -162,29 +264,26 @@ function renderTicketsTable() {
     });
   }
 
-  // Update pagination info label
   const infoLabel = document.getElementById("pagination-info");
-  if (totalEntries > 0) {
-    infoLabel.textContent = `Showing ${startIdx + 1} to ${endIdx} of ${totalEntries} entries`;
-  } else {
-    infoLabel.textContent = "Showing 0 entries";
+  if (infoLabel) {
+    infoLabel.textContent = totalEntries > 0
+      ? `Showing ${startIdx + 1} to ${endIdx} of ${totalEntries} entries`
+      : "Showing 0 entries";
   }
 
-  // Update pagination button controls
   renderPaginationControls(totalPages);
 
-  // Sync dashboard active table if rendered
   if (typeof updateDashboardViews === "function") {
     updateDashboardViews(currentTickets);
   }
+  document.dispatchEvent(new CustomEvent('ticketsUpdated', { detail: [...currentTickets] }));
 }
 
-// Render pagination numeric controls
 function renderPaginationControls(totalPages) {
   const container = document.getElementById("pagination-controls");
+  if (!container) return;
   container.innerHTML = "";
 
-  // Prev Button
   const prevBtn = document.createElement("button");
   prevBtn.className = "page-btn";
   prevBtn.innerHTML = "&larr;";
@@ -195,7 +294,6 @@ function renderPaginationControls(totalPages) {
   });
   container.appendChild(prevBtn);
 
-  // Page Numbers
   for (let i = 1; i <= totalPages; i++) {
     const numBtn = document.createElement("button");
     numBtn.className = `page-btn ${tableState.currentPage === i ? "active" : ""}`;
@@ -207,7 +305,6 @@ function renderPaginationControls(totalPages) {
     container.appendChild(numBtn);
   }
 
-  // Next Button
   const nextBtn = document.createElement("button");
   nextBtn.className = "page-btn";
   nextBtn.innerHTML = "&rarr;";
@@ -219,23 +316,20 @@ function renderPaginationControls(totalPages) {
   container.appendChild(nextBtn);
 }
 
-// Handling Search Input
 function handleSearch(e) {
   tableState.searchQuery = e.target.value;
   tableState.currentPage = 1;
   renderTicketsTable();
 }
 
-// Handling Filter Selection Changes
 function handleFilterChange() {
-  tableState.deptFilter = document.getElementById("filter-dept").value;
-  tableState.priorityFilter = document.getElementById("filter-priority").value;
-  tableState.statusFilter = document.getElementById("filter-status").value;
+  tableState.deptFilter = document.getElementById("filter-dept")?.value || "all";
+  tableState.priorityFilter = document.getElementById("filter-priority")?.value || "all";
+  tableState.statusFilter = document.getElementById("filter-status")?.value || "all";
   tableState.currentPage = 1;
   renderTicketsTable();
 }
 
-// Handling Column Header Clicks for Table Sorting
 function handleSort(column) {
   if (tableState.sortColumn === column) {
     tableState.sortAsc = !tableState.sortAsc;
@@ -246,7 +340,9 @@ function handleSort(column) {
   renderTicketsTable();
 }
 
-// Open Details Drawer from Table Row Click
+// ---------------------------------------------------------------------------
+// DRAWER CONTROLLER
+// ---------------------------------------------------------------------------
 let activeDrawerTicketId = null;
 
 function openDetailsDrawer(ticketId) {
@@ -255,94 +351,72 @@ function openDetailsDrawer(ticketId) {
 
   activeDrawerTicketId = ticketId;
 
-  // Set values inside Drawer Elements
-  document.getElementById("drawer-ticket-id").textContent = ticket.id;
-  document.getElementById("drawer-subject").textContent = ticket.subject;
-  document.getElementById("drawer-desc").textContent = ticket.description;
+  const setElText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
 
-  // Set priority and status badges
+  setElText("drawer-ticket-id", ticket.id);
+  setElText("drawer-subject", ticket.subject);
+  setElText("drawer-user-name", ticket.user ? ticket.user.name : "Unknown");
+  setElText("drawer-user-email", ticket.user ? (ticket.user.email || ticket.user.company) : "Workspace");
+  setElText("drawer-desc", ticket.description);
+
   const badgeContainer = document.getElementById("drawer-badges");
-  badgeContainer.innerHTML = `
-    <span class="badge badge-priority-${ticket.priority.toLowerCase()}">${ticket.priority}</span>
-    <span class="badge badge-status-${ticket.status.toLowerCase()}">${ticket.status}</span>
-  `;
-
-  // AI Classification mapping
-  document.getElementById("drawer-ai-confidence").textContent = `${ticket.confidenceScore}% Confident`;
-  document.getElementById("drawer-ai-category").textContent = ticket.aiClassification.category;
-  document.getElementById("drawer-ai-dept").textContent = ticket.aiClassification.suggestedDept;
-
-  // Resolution suggestion body
-  document.getElementById("drawer-resolution-text").textContent = ticket.suggestedResolution;
-
-  // Render attachment lists
-  const attachmentList = document.getElementById("drawer-attachments-list");
-  attachmentList.innerHTML = "";
-  if (ticket.attachments.length === 0) {
-    attachmentList.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">No attachments provided.</span>`;
-  } else {
-    ticket.attachments.forEach(file => {
-      const fileTag = document.createElement("span");
-      fileTag.style.cssText = "font-size: 11px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-app); cursor: pointer;";
-      fileTag.textContent = file;
-      fileTag.addEventListener("click", () => {
-        showToast("Attachment Download", `Downloading ${file} locally...`, "info");
-      });
-      attachmentList.appendChild(fileTag);
-    });
-  }
-
-  // Update Enterprise Integrations UI
-  const jiraId = ticket.id.replace('TKT', 'IT-2023');
-  const integJiraIdEl = document.getElementById("drawer-integ-jira-id");
-  if (integJiraIdEl) integJiraIdEl.textContent = jiraId;
-
-  const integJiraStatusEl = document.getElementById("drawer-integ-jira-status");
-  if (integJiraStatusEl) integJiraStatusEl.textContent = ticket.status;
-
-  const integJiraAssigneeEl = document.getElementById("drawer-integ-jira-assignee");
-  if (integJiraAssigneeEl) integJiraAssigneeEl.textContent = ticket.assignedAgent || "Unassigned";
-
-  const integJiraPriorityEl = document.getElementById("drawer-integ-jira-priority");
-  if (integJiraPriorityEl) integJiraPriorityEl.textContent = ticket.priority;
-
-  const integEmailBodyEl = document.getElementById("drawer-integ-email-body");
-  if (integEmailBodyEl) {
-    integEmailBodyEl.textContent = `Your support ticket #${ticket.id} has been received. We're working on resolving your ${ticket.subject} issue. Our AI system has identified potential solutions and assigned this to the ${ticket.assignedAgent || "Support Team"}. You'll receive updates as we progress.`;
-  }
-
-  // Render history timeline nodes
-  const timelineFlow = document.getElementById("drawer-timeline-flow");
-  timelineFlow.innerHTML = "";
-  ticket.timeline.forEach(event => {
-    const node = document.createElement("div");
-    node.className = `timeline-node ${event.type === "ai" ? "timeline-ai" : ""}`;
-    node.innerHTML = `
-      <div class="timeline-node-time">${formatTime(event.time)}</div>
-      <div class="timeline-node-title">${event.title} (${event.user})</div>
+  if (badgeContainer) {
+    badgeContainer.innerHTML = `
+      <span class="badge badge-priority-${(ticket.priority || 'medium').toLowerCase().replace(/[^a-z]/g, '')}">${ticket.priority}</span>
+      <span class="badge badge-status-${(ticket.status || 'open').toLowerCase()}">${ticket.status}</span>
     `;
-    timelineFlow.appendChild(node);
-  });
+  }
 
-  // Toggle visible drawers
-  document.getElementById("ticket-drawer-backdrop").classList.add("active");
+  setElText("drawer-ai-confidence", `${ticket.confidenceScore}% Confident`);
+  setElText("drawer-ai-category", ticket.aiClassification ? ticket.aiClassification.category : ticket.category);
+  setElText("drawer-ai-dept", ticket.aiClassification ? ticket.aiClassification.suggestedDept : ticket.department);
 
-  // Reset to Details tab
+  setElText("drawer-resolution-text", ticket.suggestedResolution);
+
+  const attachmentList = document.getElementById("drawer-attachments-list");
+  if (attachmentList) {
+    attachmentList.innerHTML = "";
+    if (!ticket.attachments || ticket.attachments.length === 0) {
+      attachmentList.innerHTML = `<span style="font-size: 12px; color: var(--text-muted);">No attachments provided.</span>`;
+    } else {
+      ticket.attachments.forEach(file => {
+        const fileTag = document.createElement("span");
+        fileTag.style.cssText = "font-size: 11px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-app); cursor: pointer;";
+        fileTag.textContent = file;
+        fileTag.addEventListener("click", () => {
+          if (typeof showToast === "function") showToast("Attachment Download", `Downloading ${file} locally...`, "info");
+        });
+        attachmentList.appendChild(fileTag);
+      });
+    }
+  }
+
+  const jiraId = ticket.id.replace('TKT-', 'IT-2026-');
+  setElText("drawer-integ-jira-id", jiraId);
+  setElText("drawer-integ-jira-status", ticket.status);
+  setElText("drawer-integ-jira-assignee", ticket.assignedAgent || "Unassigned");
+  setElText("drawer-integ-jira-priority", ticket.priority);
+
+  const backdrop = document.getElementById("ticket-drawer-backdrop");
+  if (backdrop) backdrop.classList.add("active");
+
   if (typeof window._drawerTab === 'function') window._drawerTab('details');
 
-  // Trigger agent pipeline for this ticket
   if (window.SupportPilotAgentPipeline) {
     window.SupportPilotAgentPipeline.loadTicket(ticket);
   }
 }
 
 function closeDetailsDrawer() {
-  document.getElementById("ticket-drawer-backdrop").classList.remove("active");
+  const backdrop = document.getElementById("ticket-drawer-backdrop");
+  if (backdrop) backdrop.classList.remove("active");
   activeDrawerTicketId = null;
 }
 
-// Action Buttons within the Drawer
-function handleDrawerResolve() {
+async function handleDrawerResolve() {
   if (!activeDrawerTicketId) return;
 
   const ticket = currentTickets.find(t => t.id === activeDrawerTicketId);
@@ -355,14 +429,32 @@ function handleDrawerResolve() {
       type: "agent"
     });
 
-    // Create automated email outbox dispatch
-    if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
-      window.SupportPilotEmailEnhanced.addEmail(ticket);
-    } else if (typeof addAutomatedEmail === "function") {
-      addAutomatedEmail(ticket); // Fallback for legacy
+    saveStoredTickets(currentTickets);
+
+    const recipientEmail = ticket.user?.email || "22snehs@gmail.com";
+
+    // 1. Dispatch real email via FastAPI backend
+    try {
+      await fetch("http://127.0.0.1:8000/api/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: `RESOLVED: [${ticket.id}] ${ticket.subject}`,
+          body: `Dear ${ticket.user?.name || 'Customer'},\n\nYour ticket #${ticket.id} (${ticket.subject}) has been resolved by SupportPilot.\n\nResolution:\n${ticket.suggestedResolution}\n\nBest regards,\nSupportPilot AI Team`
+        })
+      });
+      console.log(`Real email API triggered for ${recipientEmail}`);
+    } catch (err) {
+      console.warn("Backend server offline or email endpoint failed:", err);
     }
 
-    showToast("Ticket Resolved", `Ticket ${ticket.id} marked as Resolved successfully.`, "success");
+    // 2. Add to frontend outbox view
+    if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
+      window.SupportPilotEmailEnhanced.addEmail(ticket, 'Resolved');
+    }
+
+    if (typeof showToast === "function") showToast("Ticket Resolved", `Ticket ${ticket.id} marked as Resolved and email sent to ${recipientEmail}.`, "success");
     closeDetailsDrawer();
     renderTicketsTable();
   }
@@ -372,7 +464,6 @@ function handleDrawerEscalate() {
   if (!activeDrawerTicketId) return;
   const ticket = currentTickets.find(t => t.id === activeDrawerTicketId);
   if (ticket) {
-    // Escalate changes priority to Urgent and assigns to Engineering
     ticket.priority = "Urgent";
     ticket.department = "Engineering";
     ticket.timeline.push({
@@ -382,23 +473,15 @@ function handleDrawerEscalate() {
       type: "ai"
     });
 
-    showToast("Ticket Escalated", `Ticket ${ticket.id} was escalated to Engineering support queues.`, "warning");
+    saveStoredTickets(currentTickets);
+
+    if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
+      window.SupportPilotEmailEnhanced.addEmail(ticket, 'Escalated');
+    }
+
+    if (typeof showToast === "function") showToast("Ticket Escalated", `Ticket ${ticket.id} was escalated to Engineering support queues.`, "warning");
     closeDetailsDrawer();
     renderTicketsTable();
-
-    // Open Workflow tab for them to see pipeline simulation
-    setTimeout(() => {
-      const wfNav = document.querySelector('[data-target="workflow"]');
-      if (wfNav) wfNav.click();
-      if (typeof runWorkflowSimulation === "function") {
-        runWorkflowSimulation(ticket);
-      }
-    }, 1000);
-
-    // Auto-create Jira ticket if the integration is enabled
-    if (window.SupportPilotJira && typeof window.SupportPilotJira.addActivity === 'function') {
-      window.SupportPilotJira.addActivity(ticket);
-    }
   }
 }
 
@@ -409,188 +492,230 @@ function handleDrawerAssign() {
     const agents = ["Sarah Connor", "Alex Mercer", "Emma Stone"];
     const randomAgent = agents[Math.floor(Math.random() * agents.length)];
     ticket.assignedAgent = randomAgent;
-    ticket.timeline.push({
-      time: new Date().toISOString(),
-      title: `Assigned to ${randomAgent}`,
-      user: "Staff Admin",
-      type: "agent"
-    });
 
-    showToast("Agent Assigned", `Ticket ${ticket.id} assigned to ${randomAgent}.`, "info");
+    saveStoredTickets(currentTickets);
+
+    if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
+      window.SupportPilotEmailEnhanced.addEmail(ticket, 'Assigned');
+    }
+
+    if (typeof showToast === "function") showToast("Agent Assigned", `Ticket ${ticket.id} assigned to ${randomAgent}.`, "info");
     closeDetailsDrawer();
     renderTicketsTable();
   }
 }
 
-// Modal management for Creating Tickets
+// ---------------------------------------------------------------------------
+// FORM MODAL & TICKET INSERTION WITH PERSISTENCE
+// ---------------------------------------------------------------------------
 function openNewTicketModal() {
-  // Clear any existing forms
-  document.getElementById("new-ticket-form").reset();
-  document.getElementById("ai-prediction-card").style.display = "none";
-  document.getElementById("ai-loading-container").style.display = "none";
+  const form = document.getElementById("new-ticket-form");
+  if (form) form.reset();
+
+  const predCard = document.getElementById("ai-prediction-card");
+  const loadingContainer = document.getElementById("ai-loading-container");
+  const submitBtn = document.getElementById("btn-modal-submit");
+
+  if (predCard) predCard.style.display = "none";
+  if (loadingContainer) loadingContainer.style.display = "none";
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Run AI Prediction";
+  }
+
   aiPredictingState = false;
 
-  document.getElementById("new-ticket-modal-backdrop").classList.add("active");
+  const backdrop = document.getElementById("new-ticket-modal-backdrop");
+  if (backdrop) backdrop.classList.add("active");
 }
 
 function closeNewTicketModal() {
-  document.getElementById("new-ticket-modal-backdrop").classList.remove("active");
+  const backdrop = document.getElementById("new-ticket-modal-backdrop");
+  if (backdrop) backdrop.classList.remove("active");
 }
 
-// Form Submission handling (Predictive AI Phase and Insertion Phase)
-function handleNewTicketSubmit(e) {
+async function handleNewTicketSubmit(e) {
   e.preventDefault();
 
-  const subject = document.getElementById("tkt-subject").value;
-  const description = document.getElementById("tkt-desc").value;
-  const dept = document.getElementById("tkt-dept").value;
-  const category = document.getElementById("tkt-category").value;
-  const priority = document.getElementById("tkt-priority").value;
-  const fileInput = document.getElementById("tkt-file");
+  const subjectEl = document.getElementById("tkt-subject");
+  const descEl = document.getElementById("tkt-desc");
+  const nameEl = document.getElementById("tkt-name");
+  const emailEl = document.getElementById("tkt-email");
+  
+  const subject = subjectEl ? subjectEl.value.trim() : "";
+  const description = descEl ? descEl.value.trim() : "";
+  const requesterName = nameEl ? nameEl.value.trim() : "";
+  const requesterEmail = emailEl ? emailEl.value.trim() : "";
 
-  if (!aiPredictingState) {
-    // Phase 1: Simulate AI Engine parsing text content
-    document.getElementById("ai-loading-container").style.display = "flex";
-    document.getElementById("btn-modal-submit").disabled = true;
-
-    setTimeout(() => {
-      document.getElementById("ai-loading-container").style.display = "none";
-      document.getElementById("btn-modal-submit").disabled = false;
-
-      // Predict values based on descriptions/subject content
-      let predictedDept = dept;
-      let predictedPriority = priority;
-      let confidence = Math.floor(Math.random() * 15) + 84; // 84% - 98%
-
-      if (subject.toLowerCase().includes("billing") || subject.toLowerCase().includes("invoice") || subject.toLowerCase().includes("charge")) {
-        predictedDept = "Billing";
-        predictedPriority = "High";
-      } else if (subject.toLowerCase().includes("latency") || subject.toLowerCase().includes("auth") || subject.toLowerCase().includes("crash") || subject.toLowerCase().includes("api")) {
-        predictedDept = "Engineering";
-        predictedPriority = "Urgent";
-      }
-
-      // Populate predictive UI card
-      document.getElementById("ai-pred-priority").textContent = predictedPriority;
-      document.getElementById("ai-pred-dept").textContent = predictedDept;
-      document.getElementById("ai-pred-category").textContent = category;
-      document.getElementById("ai-pred-confidence").textContent = `${confidence}% confidence`;
-
-      document.getElementById("ai-prediction-card").style.display = "block";
-
-      // Upgrade state to allow final submit next click
-      aiPredictingState = true;
-      document.getElementById("btn-modal-submit").innerHTML = "Confirm & Insert Ticket";
-    }, 1500);
-
-  } else {
-    // Phase 2: User confirmed predictions, append item to table
-    const predictedDept = document.getElementById("ai-pred-dept").textContent;
-    const predictedPriority = document.getElementById("ai-pred-priority").textContent;
-    const confidenceVal = parseInt(document.getElementById("ai-pred-confidence").textContent);
-
-    const attachmentsList = [];
-    if (fileInput.files.length > 0) {
-      attachmentsList.push(fileInput.files[0].name);
-    }
-
-    const newId = `TKT-${1024 + currentTickets.length}`;
-    const newTkt = {
-      id: newId,
-      user: { name: "Pranjal kumar", email: "pranj@choudhary.com", company: "Local Workspace" },
-      department: predictedDept,
-      subject: subject,
-      category: category,
-      priority: predictedPriority,
-      severity: predictedPriority === "Urgent" ? "Critical" : (predictedPriority === "High" ? "Major" : "Minor"),
-      status: "Open",
-      assignedAgent: "Unassigned",
-      createdDate: new Date().toISOString(),
-      confidenceScore: confidenceVal,
-      description: description,
-      aiClassification: {
-        category: category,
-        priority: predictedPriority,
-        severity: predictedPriority === "Urgent" ? "Critical" : "Minor",
-        confidence: confidenceVal,
-        suggestedDept: predictedDept
-      },
-      suggestedResolution: `Review the log trace patterns for context related to "${subject}". If issues persist, verify routing and whitelisting.`,
-      escalationHistory: [],
-      timeline: [
-        { time: new Date().toISOString(), title: "Ticket Opened", user: "Pranjal kumar", type: "system" },
-        { time: new Date().toISOString(), title: "Nova AI Classification Run", user: "Diagnosis Agent", type: "ai" }
-      ],
-      attachments: attachmentsList
-    };
-
-    // Prepend to ticket lists
-    currentTickets.unshift(newTkt);
-    showToast("Ticket Opened", `New ticket ${newId} created successfully.`, "success");
-
-    closeNewTicketModal();
-    renderTicketsTable();
-
-    // Trigger dynamic sidebar metrics updates in-app
-    if (typeof refreshDynamicViewElements === "function") {
-      refreshDynamicViewElements();
-    }
-  }
-}
-
-// Export Table contents mock handler
-function handleExportCSV() {
-  if (currentTickets.length === 0) {
-    showToast("Export Failed", "No tickets available to export.", "warning");
+  if (!subject || !description) {
+    if (typeof showToast === "function") showToast("Form Error", "Please fill in all required fields.", "error");
     return;
   }
 
-  showToast("CSV Export Started", "Formatting tickets dataset...", "info");
+  if (!aiPredictingState) {
+    const loadingContainer = document.getElementById("ai-loading-container");
+    const submitBtn = document.getElementById("btn-modal-submit");
 
+    if (loadingContainer) loadingContainer.style.display = "flex";
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      // Phase 1: Call actual Backend API
+      const response = await fetch("http://127.0.0.1:8000/api/triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: subject,
+          description: description,
+          requester_name: requesterName,
+          requester_email: requesterEmail
+        })
+      });
+
+      if (!response.ok) throw new Error("API failed");
+      const triageResult = await response.json();
+
+      if (loadingContainer) loadingContainer.style.display = "none";
+      if (submitBtn) submitBtn.disabled = false;
+
+      let predictedDept = "Engineering";
+      if (triageResult.category === "Password Reset" || triageResult.category === "Email") predictedDept = "Customer Support";
+      
+      const predPriEl = document.getElementById("ai-pred-priority");
+      const predDeptEl = document.getElementById("ai-pred-dept");
+      const predCatEl = document.getElementById("ai-pred-category");
+      const predConfEl = document.getElementById("ai-pred-confidence");
+
+      if (predPriEl) predPriEl.textContent = triageResult.severity === "High" ? "High" : "Medium";
+      if (predDeptEl) predDeptEl.textContent = predictedDept;
+      if (predCatEl) predCatEl.textContent = triageResult.category;
+      if (predConfEl) predConfEl.textContent = `${Math.round(triageResult.confidence_score * 100)}% confidence`;
+
+      const predCard = document.getElementById("ai-prediction-card");
+      if (predCard) predCard.style.display = "block";
+
+      aiPredictingState = true;
+      if (submitBtn) submitBtn.textContent = "Close & View Tickets";
+      
+      // Auto-refresh tickets from db as it's already inserted by the backend
+      await fetchLiveTickets();
+
+      // Find the newly created ticket (usually the one with the highest ID or matching subject)
+      let newTicket = currentTickets.find(t => t.subject === subject) || currentTickets[0];
+      if (!newTicket) {
+        newTicket = {
+          id: `TKT-NEW-${Math.floor(Math.random() * 10000)}`,
+          subject: subject,
+          category: triageResult.category || "Software",
+          priority: triageResult.severity === "High" ? "High" : "Medium",
+          user: { name: requesterName || 'Customer', email: requesterEmail || 'customer@example.com' },
+          department: predictedDept,
+          status: "Open"
+        };
+      }
+
+      // Automatically sync with Jira (Moved BEFORE email to prevent blocking)
+      if (window.SupportPilotJira && typeof window.SupportPilotJira.addActivity === "function") {
+        window.SupportPilotJira.addActivity(newTicket, true);
+      }
+
+      // Automatically send confirmation email
+      try {
+        await fetch("http://127.0.0.1:8000/api/email/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: requesterEmail || "employee@company.com",
+            subject: `RECEIVED: ${subject}`,
+            body: `Dear ${requesterName || 'Customer'},\n\nWe have received your ticket regarding "${subject}".\n\nOur team will review it shortly. It has been categorized as ${triageResult.category} with ${triageResult.severity} severity.\n\nBest regards,\nSupportPilot AI Team`
+          })
+        });
+        if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
+          window.SupportPilotEmailEnhanced.addEmail(newTicket, 'Created');
+        }
+      } catch (err) {
+        console.warn("Auto email failed:", err);
+      }
+
+      if (typeof showToast === "function") showToast("Ticket Created", `New ticket created, email sent, and Jira synced.`, "success");
+
+    } catch (err) {
+      console.error("Backend triage failed:", err);
+      if (loadingContainer) loadingContainer.style.display = "none";
+      if (submitBtn) submitBtn.disabled = false;
+      if (typeof showToast === "function") showToast("Error", "Failed to reach triage API. Backend might be offline.", "error");
+    }
+
+  } else {
+    // Phase 2: User acknowledges AI prediction and closes modal
+    closeNewTicketModal();
+    const modal = document.getElementById("new-ticket-modal");
+    if (modal) modal.style.display = "none";
+    e.target.reset();
+    
+    const aiPredictionCard = document.getElementById("ai-prediction-card");
+    if (aiPredictionCard) aiPredictionCard.style.display = "none";
+    const submitBtn = document.getElementById("btn-modal-submit");
+    if (submitBtn) submitBtn.textContent = "Create Ticket";
+    aiPredictingState = false;
+    
+    const nav = document.querySelector('[data-target="tickets"]');
+    if (nav) nav.click();
+  }
+}
+
+function handleExportCSV() {
+  if (currentTickets.length === 0) return;
   const headers = ["Ticket ID", "User", "Company", "Department", "Subject", "Category", "Priority", "Status", "Created Date"];
-  const rows = currentTickets.map(t => {
-    return [
-      t.id,
-      `"${t.user.name}"`,
-      `"${t.user.company}"`,
-      `"${t.department}"`,
-      `"${t.subject.replace(/"/g, '""')}"`,
-      `"${t.category}"`,
-      t.priority,
-      t.status,
-      t.createdDate
-    ].join(",");
-  });
+  const rows = currentTickets.map(t => [
+    t.id,
+    `"${t.user ? t.user.name : ''}"`,
+    `"${t.user ? t.user.company : ''}"`,
+    `"${t.department}"`,
+    `"${t.subject ? t.subject.replace(/"/g, '""') : ''}"`,
+    `"${t.category}"`,
+    t.priority,
+    t.status,
+    t.createdDate
+  ].join(","));
 
-  const csvContent = headers.join(",") + "\\n" + rows.join("\\n");
+  const csvContent = headers.join("\n") + "\n" + rows.join("\n");
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
   link.setAttribute("download", "supportpilot_tickets.csv");
-  link.style.display = "none";
-  document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-
-  showToast("CSV Downloaded", "Tickets list saved successfully.", "success");
 }
 
-// Helper date utilities
 function formatShortDate(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  try {
+    if (isoString && !isoString.endsWith('Z') && !isoString.includes('+')) {
+      isoString += 'Z';
+    }
+    const d = new Date(isoString);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch (e) {
+    return isoString;
+  }
 }
 
 function formatTime(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  try {
+    if (isoString && !isoString.endsWith('Z') && !isoString.includes('+')) {
+      isoString += 'Z';
+    }
+    const d = new Date(isoString);
+    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  } catch (e) {
+    return isoString;
+  }
 }
 
-// Expose functionality globally
 window.SupportPilotTickets = {
   init: initTicketsModule,
   render: renderTicketsTable,
   getTickets: () => currentTickets,
-  openDrawer: openDetailsDrawer
+  openDrawer: openDetailsDrawer,
+  refresh: fetchLiveTickets
 };

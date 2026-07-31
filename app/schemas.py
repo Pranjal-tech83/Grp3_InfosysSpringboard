@@ -59,6 +59,7 @@ class TicketOut(BaseModel):
     ticket_id: int
     ticket_ref: str
     user_id: int
+    user: Optional["UserOut"] = None
     subject: str
     description: str
     category: Optional[str]

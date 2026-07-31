@@ -876,11 +876,10 @@ tr:hover td {
 .drawer {
   position: fixed;
   top: 0;
-  right: -550px;
-  width: 500px;
+  right: -100vw;
+  width: 100vw;
   height: 100vh;
   background-color: var(--bg-sidebar);
-  border-left: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
   z-index: 1001;
   display: flex;

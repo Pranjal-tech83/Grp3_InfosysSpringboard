@@ -134,62 +134,230 @@
     );
   }
 
-  function BarChart() {
-    var data = [60, 75, 85, 94, 80, 98, 92];
+  function AdvancedMetricsPanel(props) {
+    var tickets = props.tickets || [];
+    
+    // Compute data from tickets
+    var dataReceived = [0, 0, 0, 0, 0, 0, 0];
+    var dataResolved = [0, 0, 0, 0, 0, 0, 0];
+    tickets.forEach(function(t) {
+      if (!t.createdDate) return;
+      var d = new Date(t.createdDate);
+      if (isNaN(d.getTime())) return;
+      var day = d.getDay(); // 0 is Sunday, 1 is Monday
+      var index = day === 0 ? 6 : day - 1; // Map to 0=Mon ... 6=Sun
+      dataReceived[index]++;
+      if (t.status === 'Resolved') {
+        dataResolved[index]++;
+      }
+    });
+    
     var labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    var barColors = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6'];
-    var maxVal = 100;
-    var activeState = useState(null);
-    var activeBar = activeState[0];
-    var setActiveBar = activeState[1];
+
+    // Convert data to SVG path coordinates
+    function generatePath(data, maxVal, width, height) {
+      var path = '';
+      var spacing = width / (data.length - 1);
+      data.forEach(function(val, i) {
+        var x = i * spacing;
+        var y = height - ((val / maxVal) * height);
+        if (i === 0) {
+          path += 'M ' + x + ' ' + y + ' ';
+        } else {
+          // simple bezier curve calculation
+          var prevX = (i - 1) * spacing;
+          var prevY = height - ((data[i - 1] / maxVal) * height);
+          var cp1x = prevX + spacing / 2;
+          var cp1y = prevY;
+          var cp2x = x - spacing / 2;
+          var cp2y = y;
+          path += 'C ' + cp1x + ' ' + cp1y + ', ' + cp2x + ' ' + cp2y + ', ' + x + ' ' + y + ' ';
+        }
+      });
+      return path;
+    }
+
+    var chartW = 400;
+    var chartH = 120;
+    var maxChartVal = Math.max.apply(null, dataReceived.concat(dataResolved).concat([10])); // At least scale to 10
+    
+    // Calculate rounded upper bound for maxChartVal for y-axis labels
+    var yStep = Math.ceil(maxChartVal / 6);
+    maxChartVal = yStep * 6; // Adjust max value to fit exactly 6 grid lines nicely
+    
+    var pathReceived = generatePath(dataReceived, maxChartVal, chartW, chartH);
+    var pathResolved = generatePath(dataResolved, maxChartVal, chartW, chartH);
+    
+    // Fill paths (close to bottom)
+    var fillReceived = pathReceived + 'L ' + chartW + ' ' + chartH + ' L 0 ' + chartH + ' Z';
+    var fillResolved = pathResolved + 'L ' + chartW + ' ' + chartH + ' L 0 ' + chartH + ' Z';
+
+    // SVG Icons for lists
+    var trendIcon = h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, style: { width: 16, height: 16, marginRight: 6 } }, h('polyline', { points: '22 7 13.5 15.5 8.5 10.5 2 17' }), h('polyline', { points: '16 7 22 7 22 13' }));
+    var optIcon = h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, style: { width: 16, height: 16, marginRight: 6 } }, h('path', { d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }), h('path', { d: 'M9 12l2 2 4-4' }));
+
     var viewState = useState('chart');
     var viewMode = viewState[0];
     var setViewMode = viewState[1];
 
-    return h('div', { style: Object.assign({}, STYLES.sectionCard, { display: 'flex', flexDirection: 'column' }) },
-      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' } },
-        h('div', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0 }) }, 'SLA Performance Trend'),
-        h('button', {
-          style: { background: 'var(--bg-hover)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' },
-          onClick: function () { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
-        }, viewMode === 'chart' ? 'Show Data' : 'Back')
-      ),
-      viewMode === 'chart' ? h('div', { style: { position: 'relative', height: '200px', width: '100%', marginTop: 'auto' } },
-        h('svg', { viewBox: '0 -10 100 110', preserveAspectRatio: 'none', style: { width: '100%', height: '100%', overflow: 'visible' } },
-          // Data bars
-          data.map(function (val, i) {
-            var barWidth = 8;
-            var spacing = (100 - barWidth) / (data.length - 1);
-            var x = i * spacing;
-            var hVal = (val / maxVal) * 100;
-            var y = 100 - hVal;
-            var isActive = activeBar === i;
-            var opacity = activeBar === null || isActive ? 1 : 0.3;
+    return h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%' } },
+      
+      // LEFT PANEL
+      h('div', { style: Object.assign({}, STYLES.sectionCard, { display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }) },
+        
+        // Line Chart Section
+        h('div', null,
+          h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' } },
+            h('div', { style: { display: 'flex', alignItems: 'center' } },
+              trendIcon,
+              h('span', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0, fontSize: '15px' }) }, 'Ticket Volume & Resolution')
+            ),
+            h('button', {
+              style: { background: 'var(--bg-hover)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' },
+              onClick: function () { setViewMode(viewMode === 'chart' ? 'data' : 'chart'); }
+            }, viewMode === 'chart' ? 'Show Data' : 'Back')
+          ),
+          
+          viewMode === 'chart' ? h('div', null,
+            h('div', { style: { display: 'flex', justifyContent: 'center', gap: '16px', fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px' } },
+              h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
+                h('div', { style: { width: 12, height: 12, border: '2px solid #2563eb', borderRadius: 2 } }), 'Tickets Received'
+              ),
+              h('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
+                h('div', { style: { width: 12, height: 12, border: '2px solid #10b981', borderRadius: 2 } }), 'Tickets Resolved'
+              )
+            ),
+            h('div', { style: { position: 'relative', height: '150px', width: '100%' } },
+              h('div', { style: { position: 'absolute', left: 0, top: 0, bottom: '20px', width: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' } },
+                [6, 5, 4, 3, 2, 1, 0].map(function(mult) {
+                  return h('span', { key: mult }, (mult * yStep).toString());
+                })
+              ),
+            h('svg', { 
+              viewBox: '0 0 ' + chartW + ' ' + (chartH+5), 
+              preserveAspectRatio: 'none', 
+              style: { position: 'absolute', left: '25px', right: 0, top: 0, width: 'calc(100% - 25px)', height: 'calc(100% - 20px)' }
+            },
+              
+              // Grid lines
+              [0, 1, 2, 3, 4, 5, 6].map(function(mult) {
+                var y = mult * yStep;
+                var yPos = chartH - ((y / maxChartVal) * chartH);
+                return h('line', { x1: 0, y1: yPos, x2: chartW, y2: yPos, stroke: 'var(--border-color)', strokeWidth: 0.5, opacity: 0.5, key: y });
+              }),
 
-            return h('g', { key: i, style: { cursor: 'pointer' }, onClick: function () { setActiveBar(isActive ? null : i); } },
-              h('rect', { x: x, y: y, width: barWidth, height: hVal, rx: 3, fill: barColors[i % barColors.length], style: { opacity: opacity, transition: 'opacity 0.2s' } }),
-              isActive && h('text', { x: x + (barWidth / 2), y: y - 3, fill: 'var(--text-primary)', fontSize: '7px', fontWeight: 'bold', textAnchor: 'middle' }, val)
+              // Fills
+              h('path', { d: fillReceived, fill: 'rgba(37,99,235,0.05)', stroke: 'none', style: { pointerEvents: 'none' } }),
+              h('path', { d: fillResolved, fill: 'rgba(16,185,129,0.15)', stroke: 'none', style: { pointerEvents: 'none' } }),
+              
+              // Lines
+              h('path', { d: pathReceived, fill: 'none', stroke: '#2563eb', strokeWidth: 2.5, style: { pointerEvents: 'none' } }),
+              h('path', { d: pathResolved, fill: 'none', stroke: '#10b981', strokeWidth: 2.5, style: { pointerEvents: 'none' } }),
+
+              // Points
+              dataReceived.map(function(val, i) {
+                return h('circle', { cx: i * (chartW / (dataReceived.length - 1)), cy: chartH - ((val / maxChartVal) * chartH), r: 2.5, fill: '#fff', stroke: '#2563eb', strokeWidth: 1.5, key: 'rcv'+i, style: { pointerEvents: 'none' } });
+              }),
+              dataResolved.map(function(val, i) {
+                return h('circle', { cx: i * (chartW / (dataResolved.length - 1)), cy: chartH - ((val / maxChartVal) * chartH), r: 2.5, fill: '#fff', stroke: '#10b981', strokeWidth: 1.5, key: 'res'+i, style: { pointerEvents: 'none' } });
+              }),
+              
+              // Clickable Overlay Regions
+              labels.map(function(_, i) {
+                var spacing = chartW / (labels.length - 1);
+                var x = i === 0 ? 0 : (i * spacing) - (spacing / 2);
+                var width = i === 0 || i === labels.length - 1 ? spacing / 2 : spacing;
+                return h('rect', {
+                  key: 'overlay'+i,
+                  x: x,
+                  y: 0,
+                  width: width,
+                  height: chartH,
+                  fill: 'rgba(0,0,0,0)',
+                  style: { cursor: 'pointer', pointerEvents: 'all' },
+                  onClick: function() {
+                    console.log('Line graph overlay clicked! Day index:', i);
+                    if (window.filterTicketsByDay) {
+                      window.filterTicketsByDay(i);
+                    } else {
+                      console.error("filterTicketsByDay function missing!");
+                    }
+                  }
+                });
+              })
+            ),
+              h('div', { style: { position: 'absolute', left: '25px', right: 0, bottom: 0, display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' } },
+                labels.map(function(l, i) { return h('span', { key: i }, l); })
+              )
+            )
+          ) : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '180px' } },
+            labels.map(function (day, i) {
+              return h('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '6px 0', borderBottom: '1px solid var(--border-color)' } },
+                h('span', { style: { fontWeight: 500, color: 'var(--text-secondary)' } }, day),
+                h('div', { style: { display: 'flex', gap: '16px' } },
+                  h('span', { style: { color: '#2563eb', fontWeight: 600 } }, 'Recv: ' + dataReceived[i]),
+                  h('span', { style: { color: '#10b981', fontWeight: 600 } }, 'Res: ' + dataResolved[i])
+                )
+              );
+            })
+          )
+        ),
+        
+        // Workflow Status Section
+        h('div', { style: { marginTop: '10px' } },
+          h('div', { style: { display: 'flex', alignItems: 'center', marginBottom: '12px' } },
+            h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, style: { width: 16, height: 16, marginRight: 6 } }, h('path', { d: 'M7 11V7a5 5 0 0 1 10 0v4' }), h('rect', { x: 3, y: 11, width: 18, height: 11, rx: 2, ry: 2 })),
+            h('span', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0, fontSize: '13px' }) }, 'Escalation Workflow Status')
+          ),
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } },
+            [
+              { num: 1, title: 'AI Classification', desc: '127 tickets classified today', color: '#10b981' },
+              { num: 2, title: 'AI Resolution Attempt', desc: '85 tickets resolved automatically', color: '#10b981' },
+              { num: 3, title: 'Human Agent Review', desc: '32 tickets escalated to support team', color: '#2563eb' },
+              { num: 4, title: 'Resolution Validation', desc: '10 tickets pending validation', color: '#94a3b8' }
+            ].map(function(item) {
+              return h('div', { key: item.num, style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+                h('div', { style: { width: 24, height: 24, borderRadius: '50%', background: item.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' } }, item.num),
+                h('div', { style: { display: 'flex', flexDirection: 'column' } },
+                  h('span', { style: { fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' } }, item.title),
+                  h('span', { style: { fontSize: '11px', color: 'var(--text-secondary)' } }, item.desc)
+                )
+              );
+            })
+          )
+        )
+      ),
+
+      // RIGHT PANEL
+      h('div', { style: Object.assign({}, STYLES.sectionCard, { display: 'flex', flexDirection: 'column', padding: '16px', background: 'var(--bg-sidebar)' }) },
+        h('div', { style: { display: 'flex', alignItems: 'center', marginBottom: '20px' } },
+          optIcon,
+          h('span', { style: Object.assign({}, STYLES.sectionTitle, { marginBottom: 0, fontSize: '15px' }) }, 'System Optimization Metrics')
+        ),
+        
+        h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' } },
+          [
+            { label: 'Classification Accuracy', value: '94%', color: '#2563eb', pct: 94 },
+            { label: 'Resolution Success Rate', value: '87%', color: '#10b981', pct: 87 },
+            { label: 'Knowledge Base Coverage', value: '92%', color: '#f59e0b', pct: 92 },
+            { label: 'System Uptime', value: '99.9%', color: '#8b5cf6', pct: 99.9 },
+            { label: 'Avg. Response Generation Time', value: '2.3s', color: '#2563eb', pct: 75 },
+            { label: 'User Satisfaction Score', value: '92%', color: '#10b981', pct: 92 }
+          ].map(function(m, i) {
+            return h('div', { key: i, style: { background: 'var(--bg-app)', padding: '12px', borderRadius: '8px' } },
+              h('div', { style: { fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' } }, m.label),
+              h('div', { style: { fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' } }, m.value),
+              h('div', { style: { height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' } },
+                h('div', { style: { height: '100%', width: m.pct + '%', background: m.color, borderRadius: '3px' } })
+              )
             );
           })
-        ),
-        // X Axis Labels
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '12px' } },
-          labels.map(function (l, i) {
-            return h('span', { key: i, style: { fontSize: '12px', color: 'var(--text-muted)' } }, l);
-          })
         )
-      ) : h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', flexGrow: 1, justifyContent: 'center' } },
-        data.map(function (val, i) {
-          return h('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0', borderBottom: '1px solid var(--border-color)' } },
-            h('span', { style: { fontWeight: 500, color: 'var(--text-secondary)' } }, labels[i]),
-            h('span', { style: { fontWeight: 600, color: 'var(--text-primary)' } }, val + '%')
-          );
-        })
       )
     );
   }
 
-  function PieChart() {
+  function PieChart(props) {
     var activeState = useState(null);
     var activeSlice = activeState[0];
     var setActiveSlice = activeState[1];
@@ -197,13 +365,21 @@
     var viewMode = viewState[0];
     var setViewMode = viewState[1];
 
-    // Values: Total=1248, Resolved=1196, AI=86, Open=52 (Sum=2582)
+    var tickets = props.tickets || [];
+    var total = tickets.length;
+    var resolved = tickets.filter(function(t) { return t.status === 'Resolved'; }).length;
+    var open = tickets.filter(function(t) { return t.status === 'Open'; }).length;
+    var aiCount = tickets.filter(function (t) { return t.aiClassification && t.aiClassification.category; }).length;
+    var aiPct = total > 0 ? Math.round((aiCount / total) * 100) : 0;
+    
+    var sum = total + resolved + aiPct + open;
+
     // Slices for pie (normalized to 100 for stroke-dasharray)
     var slices = [
-      { color: '#3b82f6', value: 48, display: '1,248', label: 'Total TICKETS' },
-      { color: '#10b981', value: 46, display: '1,196', label: 'Resolved TICKETS' },
-      { color: '#8b5cf6', value: 4, display: '86.4%', label: 'AI RESOLUTION' },
-      { color: '#f59e0b', value: 2, display: '52', label: 'Open TICKETS' }
+      { color: '#3b82f6', value: sum > 0 ? (total / sum) * 100 : 0, display: total.toString(), label: 'Total TICKETS' },
+      { color: '#10b981', value: sum > 0 ? (resolved / sum) * 100 : 0, display: resolved.toString(), label: 'Resolved TICKETS' },
+      { color: '#8b5cf6', value: sum > 0 ? (aiPct / sum) * 100 : 0, display: aiPct + '%', label: 'AI RESOLUTION' },
+      { color: '#f59e0b', value: sum > 0 ? (open / sum) * 100 : 0, display: open.toString(), label: 'Open TICKETS' }
     ];
 
     // Circle math: r=15.9155 => circumference=100
@@ -290,17 +466,17 @@
 
       /* KPI Grid */
       h('div', { style: STYLES.grid4 },
-        h(KPICard, { title: 'TOTAL TICKETS', value: tickets.length > 0 ? tickets.length.toString() : '1,248', trend: 12.4, icon: ICONS.ticket, iconColor: '#3b82f6', iconBg: 'rgba(59,130,246,0.1)' }),
-        h(KPICard, { title: 'OPEN TICKETS', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Open'; }).length.toString() : '52', trend: -3.1, icon: ICONS.open, iconColor: '#eab308', iconBg: 'rgba(234,179,8,0.1)' }),
-        h(KPICard, { title: 'RESOLVED', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Resolved'; }).length.toString() : '1,196', trend: 15.3, icon: ICONS.resolved, iconColor: '#10b981', iconBg: 'rgba(16,185,129,0.1)' }),
-        h(KPICard, { title: 'AI RESOLUTION', value: tickets.length > 0 ? Math.round((tickets.filter(function (t) { return t.aiClassification && t.aiClassification.category; }).length / tickets.length) * 100) + '%' : '86.4%', trend: 1.8, icon: ICONS.ai, iconColor: '#8b5cf6', iconBg: 'rgba(139,92,246,0.1)' })
+        h(KPICard, { title: 'TOTAL TICKETS', value: tickets.length > 0 ? tickets.length.toString() : '0', trend: 0, icon: ICONS.ticket, iconColor: '#3b82f6', iconBg: 'rgba(59,130,246,0.1)' }),
+        h(KPICard, { title: 'OPEN TICKETS', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Open'; }).length.toString() : '0', trend: 0, icon: ICONS.open, iconColor: '#eab308', iconBg: 'rgba(234,179,8,0.1)' }),
+        h(KPICard, { title: 'RESOLVED', value: tickets.length > 0 ? tickets.filter(function (t) { return t.status === 'Resolved'; }).length.toString() : '0', trend: 0, icon: ICONS.resolved, iconColor: '#10b981', iconBg: 'rgba(16,185,129,0.1)' }),
+        h(KPICard, { title: 'AI RESOLUTION', value: tickets.length > 0 ? Math.round((tickets.filter(function (t) { return t.aiClassification && t.aiClassification.category; }).length / tickets.length) * 100) + '%' : '0%', trend: 0, icon: ICONS.ai, iconColor: '#8b5cf6', iconBg: 'rgba(139,92,246,0.1)' })
       ),
 
       /* Main Content Grid */
-      h('div', { className: 'react-main-grid', style: STYLES.mainGrid },
-        h(BarChart, null),
-        h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
-          h(PieChart, null),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
+        h(AdvancedMetricsPanel, { tickets: tickets }),
+        h('div', { className: 'react-main-grid', style: STYLES.mainGrid },
+          h(PieChart, { tickets: tickets }),
           h(QuickActions, null)
         )
       )

@@ -154,7 +154,7 @@ function addAutomatedEmail(ticket) {
   };
 
   currentEmails.unshift(newEmail);
-  
+
   // Re-render view if currently active
   const emailView = document.getElementById("email-view");
   if (emailView && emailView.classList.contains("active-view")) {

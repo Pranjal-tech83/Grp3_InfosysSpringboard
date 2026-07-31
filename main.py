@@ -1,8 +1,11 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import sqlite3
 import json
 import re
 from datetime import datetime, timezone
-from typing import Literal, List, Dict, Any
+from typing import Literal, List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -43,13 +46,36 @@ app.include_router(analytics.router)
 
 models.Base.metadata.create_all(bind=engine)
 
-# In-memory storage for email logs
-email_logs_db: List[Dict[str, Any]] = []
+import json
+import os
+
+EMAIL_LOGS_FILE = "email_logs.json"
+
+def load_email_logs():
+    if os.path.exists(EMAIL_LOGS_FILE):
+        try:
+            with open(EMAIL_LOGS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+def save_email_logs():
+    try:
+        with open(EMAIL_LOGS_FILE, "w") as f:
+            json.dump(email_logs_db, f)
+    except Exception:
+        pass
+
+# Persistent storage for email logs
+email_logs_db: List[Dict[str, Any]] = load_email_logs()
 
 
 class TicketInput(BaseModel):
     title: str
     description: str
+    requester_name: Optional[str] = None
+    requester_email: Optional[str] = None
 
 
 class TicketClassificationResponse(BaseModel):
@@ -109,10 +135,11 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
 
         result = TicketClassificationResponse.model_validate_json(raw_content.strip())
 
-        default_email = "employee@company.com"
+        default_email = ticket.requester_email if ticket.requester_email else "employee@company.com"
+        default_name = ticket.requester_name if ticket.requester_name else "Default Employee"
         user = db.query(models.User).filter(models.User.email == default_email).first()
         if not user:
-            user = models.User(name="Default Employee", email=default_email, role="employee")
+            user = models.User(name=default_name, email=default_email, role="employee")
             db.add(user)
             db.commit()
             db.refresh(user)
@@ -146,7 +173,15 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
         }
 
         try:
-            user = db.query(models.User).filter(models.User.email == "employee@company.com").first()
+            default_email = ticket.requester_email if ticket.requester_email else "employee@company.com"
+            default_name = ticket.requester_name if ticket.requester_name else "Default Employee"
+            user = db.query(models.User).filter(models.User.email == default_email).first()
+            if not user:
+                user = models.User(name=default_name, email=default_email, role="employee")
+                db.add(user)
+                db.commit()
+                db.refresh(user)
+                
             if user:
                 db_ticket = models.Ticket(
                     user_id=user.user_id,
@@ -177,21 +212,59 @@ def get_email_logs():
 @app.post("/api/email/send")
 def send_email_notification(payload: EmailPayload):
     now_iso = datetime.now(timezone.utc).isoformat()
+    
+    brevo_api_key = os.getenv("BREVO_API_KEY")
+    email_from = os.getenv("EMAIL_FROM", "support@supportpilot.ai")
+    email_from_name = os.getenv("EMAIL_FROM_NAME", "Support Pilot")
+    
+    delivery_status = "Delivered"
+    details = "Delivered successfully to target inbox."
+
+    if brevo_api_key:
+        import urllib.request
+        import urllib.error
+        import json
+        
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": brevo_api_key,
+            "content-type": "application/json"
+        }
+        data = {
+            "sender": {"name": email_from_name, "email": email_from},
+            "to": [{"email": payload.to, "name": payload.to}],
+            "subject": payload.subject,
+            "htmlContent": f"<p>{payload.body.replace(chr(10), '<br>')}</p>"
+        }
+        req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req) as response:
+                if response.status not in (200, 201, 202):
+                    delivery_status = "Failed"
+                    details = f"Brevo API error: {response.status}"
+        except urllib.error.URLError as e:
+            err_msg = e.read().decode('utf-8') if hasattr(e, 'read') else str(e)
+            print(f"Brevo API error: {err_msg}")
+            delivery_status = "Failed"
+            details = f"Brevo API error: {err_msg}"
+
     email_entry = {
         "id": f"EML-{len(email_logs_db) + 101}",
         "to": payload.to,
-        "from": "support@supportpilot.ai",
+        "from": email_from,
         "subject": payload.subject,
         "body": payload.body,
-        "status": "Delivered",
+        "status": delivery_status,
         "created_at": now_iso,
         "history": [
-            {"date": now_iso, "status": "Dispatched", "details": "Triggered via LangGraph orchestrator node."},
-            {"date": now_iso, "status": "Delivered", "details": "Delivered successfully to target inbox."},
+            {"date": now_iso, "status": "Dispatched", "details": "Triggered via backend API."},
+            {"date": now_iso, "status": delivery_status, "details": details},
         ],
     }
     email_logs_db.append(email_entry)
-    return {"status": "success", "email": email_entry}
+    save_email_logs()
+    return {"status": "success" if delivery_status == "Delivered" else "error", "email": email_entry}
 
 class UserLogin(BaseModel):
     email: str

@@ -4,81 +4,93 @@
  * stats bar, filter controls, and per-email delivery timeline modal.
  */
 (function () {
-    'use strict';
+  'use strict';
 
-    // ── Seed email data ───────────────────────────────────────────────────────
-    const SEED_EMAILS = [];
+  // ── Seed email data ───────────────────────────────────────────────────────
+  const SEED_EMAILS = [];
 
-    let emails = [...SEED_EMAILS];
-    let filterStatus = 'all';
-    let searchQuery = '';
-    let activeId = null;
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    function fmtRelative(d) {
-        const mins = Math.round((Date.now() - d.getTime()) / 60000);
-        if (mins < 1) return 'Just now';
-        if (mins < 60) return `${mins}m ago`;
-        const hrs = Math.floor(mins / 60);
-        if (hrs < 24) return `${hrs}h ago`;
-        return `${Math.floor(hrs / 24)}d ago`;
+  let emails = [...SEED_EMAILS];
+  try {
+    const saved = localStorage.getItem('supportpilot_emails');
+    if (saved) {
+      emails = JSON.parse(saved).map(e => {
+        e.sentAt = new Date(e.sentAt);
+        return e;
+      });
     }
+  } catch (err) {
+    console.error("Failed to load emails from storage", err);
+  }
 
-    function fmtTime(d) {
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
+  let filterStatus = 'all';
+  let searchQuery = '';
+  let activeId = null;
 
-    function statusStyle(s) {
-        const M = {
-            Delivered: ['#10b981', '#10b98120'],
-            Sent: ['#3b82f6', '#3b82f620'],
-            Bounced: ['#f59e0b', '#f59e0b20'],
-            Failed: ['#ef4444', '#ef444420']
-        };
-        const [c, bg] = M[s] || ['#94a3b8', '#94a3b820'];
-        return { color: c, background: bg };
-    }
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function fmtRelative(d) {
+    const mins = Math.round((Date.now() - d.getTime()) / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
 
-    function avatarColor(name) {
-        const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899'];
-        let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
-        return colors[h % colors.length];
-    }
+  function fmtTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
 
-    function getInitials(name) {
-        return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-    }
+  function statusStyle(s) {
+    const M = {
+      Delivered: ['#10b981', '#10b98120'],
+      Sent: ['#3b82f6', '#3b82f620'],
+      Bounced: ['#f59e0b', '#f59e0b20'],
+      Failed: ['#ef4444', '#ef444420']
+    };
+    const [c, bg] = M[s] || ['#94a3b8', '#94a3b820'];
+    return { color: c, background: bg };
+  }
 
-    // ── Stats ─────────────────────────────────────────────────────────────────
-    function computeStats() {
-        const today = emails.filter(e => {
-            const h = (Date.now() - e.sentAt.getTime()) / 3600000;
-            return h <= 24;
-        });
-        const delivered = emails.filter(e => e.status === 'Delivered').length;
-        const rate = emails.length ? Math.round((delivered / emails.length) * 100) : 0;
-        const failed = emails.filter(e => e.status === 'Failed' || e.status === 'Bounced').length;
-        return { today: today.length, rate, failed, total: emails.length };
-    }
+  function avatarColor(name) {
+    const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899'];
+    let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+    return colors[h % colors.length];
+  }
 
-    // ── Filter emails ─────────────────────────────────────────────────────────
-    function filtered() {
-        return emails.filter(e => {
-            const matchStatus = filterStatus === 'all' || e.status.toLowerCase() === filterStatus;
-            const q = searchQuery.toLowerCase();
-            const matchSearch = !q || e.subject.toLowerCase().includes(q) || e.recipient.toLowerCase().includes(q) || e.ticketId.toLowerCase().includes(q);
-            return matchStatus && matchSearch;
-        });
-    }
+  function getInitials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
 
-    // ── Main render ───────────────────────────────────────────────────────────
-    function render() {
-        const view = document.getElementById('email-view');
-        if (!view) return;
-        const stats = computeStats();
-        const rows = filtered();
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  function computeStats() {
+    const today = emails.filter(e => {
+      const h = (Date.now() - e.sentAt.getTime()) / 3600000;
+      return h <= 24;
+    });
+    const delivered = emails.filter(e => e.status === 'Delivered').length;
+    const rate = emails.length ? Math.round((delivered / emails.length) * 100) : 0;
+    const failed = emails.filter(e => e.status === 'Failed' || e.status === 'Bounced').length;
+    return { today: today.length, rate, failed, total: emails.length };
+  }
 
-        view.innerHTML = `
+  // ── Filter emails ─────────────────────────────────────────────────────────
+  function filtered() {
+    return emails.filter(e => {
+      const matchStatus = filterStatus === 'all' || e.status.toLowerCase() === filterStatus;
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || e.subject.toLowerCase().includes(q) || e.recipient.toLowerCase().includes(q) || e.ticketId.toLowerCase().includes(q);
+      return matchStatus && matchSearch;
+    });
+  }
+
+  // ── Main render ───────────────────────────────────────────────────────────
+  function render() {
+    const view = document.getElementById('email-view');
+    if (!view) return;
+    const stats = computeStats();
+    const rows = filtered();
+
+    view.innerHTML = `
       <!-- Page Header -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px">
         <div>
@@ -94,11 +106,11 @@
       <!-- Stats Bar -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px">
         ${[
-                { label: 'Emails Today', val: stats.today, icon: '📧', bg: '#3b82f620', color: '#3b82f6' },
-                { label: 'Delivery Rate', val: stats.rate + '%', icon: '✅', bg: '#10b98120', color: '#10b981' },
-                { label: 'Total Sent', val: stats.total, icon: '📤', bg: '#8b5cf620', color: '#8b5cf6' },
-                { label: 'Failed/Bounced', val: stats.failed, icon: '⚠', bg: '#ef444420', color: '#ef4444' }
-            ].map(s => `
+        { label: 'Emails Today', val: stats.today, icon: '📧', bg: '#3b82f620', color: '#3b82f6' },
+        { label: 'Delivery Rate', val: stats.rate + '%', icon: '✅', bg: '#10b98120', color: '#10b981' },
+        { label: 'Total Sent', val: stats.total, icon: '📤', bg: '#8b5cf620', color: '#8b5cf6' },
+        { label: 'Failed/Bounced', val: stats.failed, icon: '⚠', bg: '#ef444420', color: '#ef4444' }
+      ].map(s => `
           <div style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;box-shadow:var(--shadow-sm)">
             <div style="width:40px;height:40px;border-radius:10px;background:${s.bg};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${s.icon}</div>
             <div>
@@ -136,15 +148,15 @@
             <thead>
               <tr>
                 ${['Recipient', 'Subject', 'Ticket', 'Status', 'Sent', ''].map(h =>
-                `<th style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:12px 16px;text-align:left;background:var(--bg-app);border-bottom:1px solid var(--border-color)">${h}</th>`
-            ).join('')}
+        `<th style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);padding:12px 16px;text-align:left;background:var(--bg-app);border-bottom:1px solid var(--border-color)">${h}</th>`
+      ).join('')}
               </tr>
             </thead>
             <tbody>
               ${rows.map(e => {
-                const ss = statusStyle(e.status);
-                const ac = avatarColor(e.recipient);
-                return `<tr style="transition:background 0.15s;${activeId === e.id ? 'background:var(--accent-primary-light)' : ''}" onmouseover="this.style.background='var(--accent-primary-light)'" onmouseout="this.style.background='${activeId === e.id ? 'var(--accent-primary-light)' : 'transparent'}'">
+        const ss = statusStyle(e.status);
+        const ac = avatarColor(e.recipient);
+        return `<tr style="transition:background 0.15s;${activeId === e.id ? 'background:var(--accent-primary-light)' : ''}" onmouseover="this.style.background='var(--accent-primary-light)'" onmouseout="this.style.background='${activeId === e.id ? 'var(--accent-primary-light)' : 'transparent'}'">
                   <td style="padding:12px 16px;border-bottom:1px solid var(--border-color)">
                     <div style="display:flex;align-items:center;gap:10px">
                       <div style="width:32px;height:32px;border-radius:50%;background:${ac};color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">${getInitials(e.recipient)}</div>
@@ -166,26 +178,26 @@
                     </button>
                   </td>
                 </tr>`;
-            }).join('')}
+      }).join('')}
             </tbody>
           </table>`}
       </div>`;
-    }
+  }
 
-    // ── Email detail modal ────────────────────────────────────────────────────
-    function viewEmail(id) {
-        activeId = id;
-        const email = emails.find(e => e.id === id);
-        if (!email) return;
-        const ss = statusStyle(email.status);
+  // ── Email detail modal ────────────────────────────────────────────────────
+  function viewEmail(id) {
+    activeId = id;
+    const email = emails.find(e => e.id === id);
+    if (!email) return;
+    const ss = statusStyle(email.status);
 
-        const timeline = [
-            { stage: 'Queued', time: new Date(email.sentAt.getTime() - 5000), detail: 'Email queued by resolution engine', ok: true },
-            { stage: 'Sent', time: new Date(email.sentAt.getTime()), detail: 'Dispatched via SMTP relay', ok: true },
-            { stage: 'Delivered', time: new Date(email.sentAt.getTime() + 12000), detail: email.status === 'Delivered' ? 'Confirmed delivery receipt' : (email.status === 'Bounced' ? 'Bounced — invalid address' : 'Delivery failed'), ok: email.status === 'Delivered' }
-        ];
+    const timeline = [
+      { stage: 'Queued', time: new Date(email.sentAt.getTime() - 5000), detail: 'Email queued by resolution engine', ok: true },
+      { stage: 'Sent', time: new Date(email.sentAt.getTime()), detail: 'Dispatched via SMTP relay', ok: true },
+      { stage: 'Delivered', time: new Date(email.sentAt.getTime() + 12000), detail: email.status === 'Delivered' ? 'Confirmed delivery receipt' : (email.status === 'Bounced' ? 'Bounced — invalid address' : 'Delivery failed'), ok: email.status === 'Delivered' }
+    ];
 
-        const body = `Dear ${email.recipient.split(' ')[0]},
+    const body = `Dear ${email.recipient.split(' ')[0]},
 
 Thank you for contacting SupportPilot. We have received your support request (${email.ticketId}).
 
@@ -198,13 +210,13 @@ Status: ${email.status} at ${fmtTime(email.sentAt)}
 Best regards,
 SupportPilot Automated Response System`;
 
-        // Remove old modal
-        document.getElementById('ee-modal')?.remove();
+    // Remove old modal
+    document.getElementById('ee-modal')?.remove();
 
-        const modal = document.createElement('div');
-        modal.id = 'ee-modal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9001;animation:fadeIn 0.2s ease';
-        modal.innerHTML = `
+    const modal = document.createElement('div');
+    modal.id = 'ee-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9001;animation:fadeIn 0.2s ease';
+    modal.innerHTML = `
       <div style="background:var(--bg-sidebar);border-radius:16px;border:1px solid var(--border-color);box-shadow:0 24px 60px rgba(0,0,0,0.2);width:100%;max-width:640px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)">
         <div style="padding:20px 24px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
           <div>
@@ -230,8 +242,8 @@ SupportPilot Automated Response System`;
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:14px">Delivery Timeline</div>
             <div style="display:flex;flex-direction:column;gap:0">
               ${timeline.map((t, i) => {
-            const dotColor = t.ok ? '#10b981' : '#ef4444';
-            return `
+      const dotColor = t.ok ? '#10b981' : '#ef4444';
+      return `
                   <div style="display:grid;grid-template-columns:20px 1fr;gap:12px;align-items:start">
                     <div style="display:flex;flex-direction:column;align-items:center">
                       <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${dotColor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -245,63 +257,95 @@ SupportPilot Automated Response System`;
                       <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${t.detail}</div>
                     </div>
                   </div>`;
-        }).join('')}
+    }).join('')}
             </div>
           </div>
         </div>
       </div>`;
-        document.body.appendChild(modal);
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  }
+
+  function setFilter(val) { filterStatus = val; render(); }
+  function setSearch(val) { searchQuery = val; render(); }
+  async function init() { await refresh(); }
+  async function refresh() {
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/api/email/logs");
+      if (resp.ok) {
+        const data = await resp.json();
+        emails = data.reverse().map(d => ({
+          id: d.id,
+          ticketId: d.subject.split(": ")[1] ? "TKT-Linked" : "TKT-Auto",
+          subject: d.subject,
+          recipient: d.to,
+          email: d.to,
+          status: d.status,
+          sentAt: new Date(d.created_at),
+          category: "Automated"
+        }));
+      }
+    } catch (e) {
+      console.warn("Failed to fetch email logs", e);
+    }
+    render();
+  }
+
+  function exportCSV() {
+    const rows = [['ID', 'TicketID', 'Subject', 'Recipient', 'Email', 'Status', 'Sent']];
+    emails.forEach(e => rows.push([e.id, e.ticketId, e.subject, e.recipient, e.email, e.status, e.sentAt.toISOString()]));
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `supportpilot_email_export_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Dispatch Automated Email ────────────────────────────────────────────────
+  function addEmail(ticket, actionType = 'Resolved') {
+    if (!ticket) return;
+    const newId = 'EM-' + String(emails.length + 1).padStart(3, '0');
+
+    // Use actual ticket user and subject data
+    const recipient = ticket.user && ticket.user.name ? ticket.user.name : "Customer";
+    const emailAddr = ticket.user && ticket.user.email ? ticket.user.email : "customer@example.com";
+    const subjectTitle = ticket.subject || ticket.title || "Support Request";
+
+    let subjectPrefix = 'Update';
+    if (actionType === 'Created') subjectPrefix = 'New Ticket';
+    else if (actionType === 'Resolved') subjectPrefix = 'Resolved';
+    else if (actionType === 'Escalated') subjectPrefix = 'Escalated';
+    else if (actionType === 'Assigned') subjectPrefix = 'Assigned';
+
+    emails.unshift({
+      id: newId,
+      ticketId: ticket.id,
+      subject: `${subjectPrefix}: ${subjectTitle}`,
+      recipient: recipient,
+      email: emailAddr,
+      status: 'Delivered',
+      sentAt: new Date(),
+      category: ticket.category || 'General'
+    });
+
+    try {
+      localStorage.setItem('supportpilot_emails', JSON.stringify(emails));
+    } catch (err) {
+      console.error("Failed to save emails to storage", err);
     }
 
-    function setFilter(val) { filterStatus = val; render(); }
-    function setSearch(val) { searchQuery = val; render(); }
-    function init() { render(); }
-    function refresh() { render(); }
+    if (document.getElementById('email-view')) render();
 
-    function exportCSV() {
-        const rows = [['ID', 'TicketID', 'Subject', 'Recipient', 'Email', 'Status', 'Sent']];
-        emails.forEach(e => rows.push([e.id, e.ticketId, e.subject, e.recipient, e.email, e.status, e.sentAt.toISOString()]));
-        const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `supportpilot_email_export_${Date.now()}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
+    // If there's a toast function available in global scope, use it
+    if (typeof showToast === 'function') {
+      showToast('Email Dispatched', `Automated ${actionType.toLowerCase()} email sent for ${ticket.id}`, 'info');
     }
+  }
 
-    // ── Dispatch Automated Email ────────────────────────────────────────────────
-    function addEmail(ticket) {
-        if (!ticket) return;
-        const newId = 'EM-' + String(emails.length + 1).padStart(3, '0');
-
-        // Use actual ticket user and subject data
-        const recipient = ticket.user && ticket.user.name ? ticket.user.name : "Customer";
-        const emailAddr = ticket.user && ticket.user.email ? ticket.user.email : "customer@example.com";
-        const subjectTitle = ticket.subject || ticket.title || "Support Request";
-
-        emails.unshift({
-            id: newId,
-            ticketId: ticket.id,
-            subject: `Resolved: ${subjectTitle}`,
-            recipient: recipient,
-            email: emailAddr,
-            status: 'Delivered',
-            sentAt: new Date(),
-            category: ticket.category || 'General'
-        });
-
-        if (document.getElementById('email-view')) render();
-
-        // If there's a toast function available in global scope, use it
-        if (typeof showToast === 'function') {
-            showToast('Email Dispatched', `Automated resolution email sent for ${ticket.id}`, 'info');
-        }
-    }
-
-    // ── Public API ────────────────────────────────────────────────────────────
-    window.SupportPilotEmailEnhanced = { init, refresh, setSearch, setFilter, viewEmail, exportCSV, addEmail };
+  // ── Public API ────────────────────────────────────────────────────────────
+  window.SupportPilotEmailEnhanced = { init, refresh, setSearch, setFilter, viewEmail, exportCSV, addEmail };
 
 })();
