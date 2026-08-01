@@ -30,11 +30,15 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     return db_user
 
 
-def get_or_create_user(db: Session, email: str, department: Optional[str] = None) -> models.User:
+def get_or_create_user(db: Session, email: str, name: Optional[str] = None, department: Optional[str] = None) -> models.User:
     existing = get_user_by_email(db, email)
     if existing:
+        if name and existing.name != name:
+            existing.name = name
+            db.commit()
+            db.refresh(existing)
         return existing
-    name_guess = email.split("@")[0].replace(".", " ").title()
+    name_guess = name if name else email.split("@")[0].replace(".", " ").title()
     return create_user(db, schemas.UserCreate(name=name_guess, email=email, department=department))
 
 
@@ -53,7 +57,7 @@ def log_activity(db: Session, ticket_id: int, action: str, performed_by: str) ->
 
 
 def create_ticket(db: Session, ticket_in: schemas.TicketCreate) -> models.Ticket:
-    user = get_or_create_user(db, ticket_in.requester_email, ticket_in.department)
+    user = get_or_create_user(db, ticket_in.requester_email, ticket_in.requester_name, ticket_in.department)
 
     db_ticket = models.Ticket(
         user_id=user.user_id,
