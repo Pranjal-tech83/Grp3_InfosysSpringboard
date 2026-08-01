@@ -9,7 +9,7 @@ let tableState = {
   sortColumn: "id",
   sortAsc: false,
   currentPage: 1,
-  pageSize: 5,
+  pageSize: 8,
   dayFilter: "all"
 };
 
@@ -130,10 +130,10 @@ async function fetchLiveTickets() {
         });
 
         currentTickets = Array.from(mergedMap.values());
-        
+
         // Update local storage just in case we need it when offline
         saveStoredTickets(currentTickets);
-        
+
         renderTicketsTable();
       }
     }
@@ -143,7 +143,7 @@ async function fetchLiveTickets() {
 }
 
 // Global hook to filter by day from Dashboard
-window.filterTicketsByDay = function(dayIndex) {
+window.filterTicketsByDay = function (dayIndex) {
   tableState.dayFilter = dayIndex;
   renderTicketsTable();
   const nav = document.querySelector('.nav-item[data-target="tickets"]');
@@ -188,7 +188,7 @@ function renderTicketsTable() {
     const matchesPriority = tableState.priorityFilter === "all" || t.priority === tableState.priorityFilter;
     const matchesStatus = tableState.statusFilter === "all" || (t.status && t.status.toLowerCase() === tableState.statusFilter.toLowerCase());
 
-    const matchesDay = tableState.dayFilter === "all" || (function() {
+    const matchesDay = tableState.dayFilter === "all" || (function () {
       if (!t.createdDate) return false;
       const d = new Date(t.createdDate);
       if (isNaN(d.getTime())) return false;
@@ -508,6 +508,7 @@ function handleDrawerAssign() {
 // ---------------------------------------------------------------------------
 // FORM MODAL & TICKET INSERTION WITH PERSISTENCE
 // ---------------------------------------------------------------------------
+// Modal management for Creating Tickets
 function openNewTicketModal() {
   const form = document.getElementById("new-ticket-form");
   if (form) form.reset();
@@ -541,26 +542,29 @@ async function handleNewTicketSubmit(e) {
   const descEl = document.getElementById("tkt-desc");
   const nameEl = document.getElementById("tkt-name");
   const emailEl = document.getElementById("tkt-email");
-  
+  const deptEl = document.getElementById("tkt-dept");
+
   const subject = subjectEl ? subjectEl.value.trim() : "";
   const description = descEl ? descEl.value.trim() : "";
   const requesterName = nameEl ? nameEl.value.trim() : "";
   const requesterEmail = emailEl ? emailEl.value.trim() : "";
+  const dept = deptEl ? deptEl.value : "";
 
+  // Validate required fields
   if (!subject || !description) {
     if (typeof showToast === "function") showToast("Form Error", "Please fill in all required fields.", "error");
     return;
   }
 
-  if (!aiPredictingState) {
-    const loadingContainer = document.getElementById("ai-loading-container");
-    const submitBtn = document.getElementById("btn-modal-submit");
+  const loadingContainer = document.getElementById("ai-loading-container");
+  const submitBtn = document.getElementById("btn-modal-submit");
 
+  if (!aiPredictingState) {
+    // Phase 1: Call Backend API (/api/triage)
     if (loadingContainer) loadingContainer.style.display = "flex";
     if (submitBtn) submitBtn.disabled = true;
 
     try {
-      // Phase 1: Call actual Backend API
       const response = await fetch("http://127.0.0.1:8000/api/triage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -578,9 +582,12 @@ async function handleNewTicketSubmit(e) {
       if (loadingContainer) loadingContainer.style.display = "none";
       if (submitBtn) submitBtn.disabled = false;
 
-      let predictedDept = "Engineering";
-      if (triageResult.category === "Password Reset" || triageResult.category === "Email") predictedDept = "Customer Support";
-      
+      let predictedDept = dept || "Engineering";
+      if (triageResult.category === "Password Reset" || triageResult.category === "Email") {
+        predictedDept = "Customer Support";
+      }
+
+      // Populate predictive UI card
       const predPriEl = document.getElementById("ai-pred-priority");
       const predDeptEl = document.getElementById("ai-pred-dept");
       const predCatEl = document.getElementById("ai-pred-category");
@@ -591,35 +598,77 @@ async function handleNewTicketSubmit(e) {
       if (predCatEl) predCatEl.textContent = triageResult.category;
       if (predConfEl) predConfEl.textContent = `${Math.round(triageResult.confidence_score * 100)}% confidence`;
 
+      // Display AI Prediction Card
       const predCard = document.getElementById("ai-prediction-card");
       if (predCard) predCard.style.display = "block";
 
+      // Upgrade state to allow final submit next click
       aiPredictingState = true;
-      if (submitBtn) submitBtn.textContent = "Close & View Tickets";
+      if (submitBtn) submitBtn.textContent = "Confirm & Insert Ticket";
+
+    } catch (err) {
+      console.error("Backend triage failed:", err);
+      if (loadingContainer) loadingContainer.style.display = "none";
+      if (submitBtn) submitBtn.disabled = false;
+      if (typeof showToast === "function") showToast("Error", "Unable to predict. Please try again.", "error");
+    }
+
+  } else {
+    // Phase 2: Insert ticket into backend/database
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      // 1. Insert into database
+      const predictedDept = document.getElementById("ai-pred-dept").textContent;
       
-      // Auto-refresh tickets from db as it's already inserted by the backend
-      await fetchLiveTickets();
-
-      // Find the newly created ticket (usually the one with the highest ID or matching subject)
-      let newTicket = currentTickets.find(t => t.subject === subject) || currentTickets[0];
-      if (!newTicket) {
-        newTicket = {
-          id: `TKT-NEW-${Math.floor(Math.random() * 10000)}`,
+      const createRes = await fetch("http://127.0.0.1:8000/api/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           subject: subject,
-          category: triageResult.category || "Software",
-          priority: triageResult.severity === "High" ? "High" : "Medium",
-          user: { name: requesterName || 'Customer', email: requesterEmail || 'customer@example.com' },
-          department: predictedDept,
-          status: "Open"
-        };
-      }
+          description: description,
+          requester_name: requesterName || "Customer",
+          requester_email: requesterEmail || "employee@company.com",
+          department: predictedDept
+        })
+      });
 
-      // Automatically sync with Jira (Moved BEFORE email to prevent blocking)
+      if (!createRes.ok) throw new Error("Failed to insert ticket");
+      const createdTicket = await createRes.json();
+
+      // 2. Patch with classification data
+      const predictedCategory = document.getElementById("ai-pred-category").textContent;
+      const predictedSeverity = document.getElementById("ai-pred-priority").textContent;
+      const confidenceStr = document.getElementById("ai-pred-confidence").textContent;
+      const confidenceVal = parseFloat(confidenceStr) / 100 || 0.9;
+
+      await fetch(`http://127.0.0.1:8000/api/tickets/${createdTicket.ticket_id}/classification`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: predictedCategory,
+          severity: predictedSeverity,
+          priority: "P3-Medium",
+          classification_confidence: confidenceVal,
+          status: "classified"
+        })
+      });
+
+      // 3. Refresh ticket list/table
+      await fetchLiveTickets();
+      
+      // Let dashboard know to update too
+      document.dispatchEvent(new CustomEvent('ticketsUpdated', { detail: [...currentTickets] }));
+
+      // Find the newly created ticket for integrations
+      let newTicket = currentTickets.find(t => t.id === `TKT-${createdTicket.ticket_id}`) || currentTickets[0];
+      
+      // 4. Jira Sync
       if (window.SupportPilotJira && typeof window.SupportPilotJira.addActivity === "function") {
         window.SupportPilotJira.addActivity(newTicket, true);
       }
 
-      // Automatically send confirmation email
+      // 5. Send Email
       try {
         await fetch("http://127.0.0.1:8000/api/email/send", {
           method: "POST",
@@ -627,7 +676,7 @@ async function handleNewTicketSubmit(e) {
           body: JSON.stringify({
             to: requesterEmail || "employee@company.com",
             subject: `RECEIVED: ${subject}`,
-            body: `Dear ${requesterName || 'Customer'},\n\nWe have received your ticket regarding "${subject}".\n\nOur team will review it shortly. It has been categorized as ${triageResult.category} with ${triageResult.severity} severity.\n\nBest regards,\nSupportPilot AI Team`
+            body: `Dear ${requesterName || 'Customer'},\n\nWe have received your ticket regarding "${subject}".\n\nOur team will review it shortly. It has been categorized as ${predictedCategory} with ${predictedSeverity} severity.\n\nBest regards,\nSupportPilot AI Team`
           })
         });
         if (window.SupportPilotEmailEnhanced && typeof window.SupportPilotEmailEnhanced.addEmail === "function") {
@@ -637,30 +686,25 @@ async function handleNewTicketSubmit(e) {
         console.warn("Auto email failed:", err);
       }
 
-      if (typeof showToast === "function") showToast("Ticket Created", `New ticket created, email sent, and Jira synced.`, "success");
+      // 6. Show success message & close modal
+      if (typeof showToast === "function") showToast("Ticket Created", `New ticket created successfully.`, "success");
+
+      closeNewTicketModal();
+      e.target.reset();
+
+      const aiPredictionCard = document.getElementById("ai-prediction-card");
+      if (aiPredictionCard) aiPredictionCard.style.display = "none";
+      if (submitBtn) {
+        submitBtn.textContent = "Run AI Prediction";
+        submitBtn.disabled = false;
+      }
+      aiPredictingState = false;
 
     } catch (err) {
-      console.error("Backend triage failed:", err);
-      if (loadingContainer) loadingContainer.style.display = "none";
+      console.error("Backend ticket creation failed:", err);
       if (submitBtn) submitBtn.disabled = false;
-      if (typeof showToast === "function") showToast("Error", "Failed to reach triage API. Backend might be offline.", "error");
+      if (typeof showToast === "function") showToast("Error", "Failed to create ticket. Please try again.", "error");
     }
-
-  } else {
-    // Phase 2: User acknowledges AI prediction and closes modal
-    closeNewTicketModal();
-    const modal = document.getElementById("new-ticket-modal");
-    if (modal) modal.style.display = "none";
-    e.target.reset();
-    
-    const aiPredictionCard = document.getElementById("ai-prediction-card");
-    if (aiPredictionCard) aiPredictionCard.style.display = "none";
-    const submitBtn = document.getElementById("btn-modal-submit");
-    if (submitBtn) submitBtn.textContent = "Create Ticket";
-    aiPredictingState = false;
-    
-    const nav = document.querySelector('[data-target="tickets"]');
-    if (nav) nav.click();
   }
 }
 
