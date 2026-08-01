@@ -135,31 +135,18 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
 
         result = TicketClassificationResponse.model_validate_json(raw_content.strip())
 
-        default_email = ticket.requester_email if ticket.requester_email else "employee@company.com"
-        default_name = ticket.requester_name if ticket.requester_name else "Default Employee"
-        user = db.query(models.User).filter(models.User.email == default_email).first()
-        if not user:
-            user = models.User(name=default_name, email=default_email, role="employee")
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-
-        db_ticket = models.Ticket(
-            user_id=user.user_id,
-            subject=ticket.title,
-            description=ticket.description,
-            category=result.category,
-            severity=result.severity,
-            priority="P3-Medium",
-            classification_confidence=result.confidence_score,
-            status=models.TicketStatus.classified.value,
-        )
-
-        db.add(db_ticket)
-        db.commit()
-        db.refresh(db_ticket)
-
-        return result
+        return {
+            "status": "success",
+            "category": result.category,
+            "severity": result.severity,
+            "confidence_score": result.confidence_score,
+            "reasoning_summary": result.reasoning_summary,
+            "message": "Ticket successfully triaged via AI",
+            "ticket": {
+                "subject": ticket.title,
+                "description": ticket.description
+            }
+        }
 
     except Exception as e:
         db.rollback()
@@ -172,33 +159,18 @@ async def triage_ticket(ticket: TicketInput, db: Session = Depends(get_db)):
             "confidence_score": 0.92,
         }
 
-        try:
-            default_email = ticket.requester_email if ticket.requester_email else "employee@company.com"
-            default_name = ticket.requester_name if ticket.requester_name else "Default Employee"
-            user = db.query(models.User).filter(models.User.email == default_email).first()
-            if not user:
-                user = models.User(name=default_name, email=default_email, role="employee")
-                db.add(user)
-                db.commit()
-                db.refresh(user)
-                
-            if user:
-                db_ticket = models.Ticket(
-                    user_id=user.user_id,
-                    subject=ticket.title,
-                    description=ticket.description,
-                    category=fallback["category"],
-                    severity=fallback["severity"],
-                    priority="P3-Medium",
-                    classification_confidence=fallback["confidence_score"],
-                    status=models.TicketStatus.classified.value,
-                )
-                db.add(db_ticket)
-                db.commit()
-        except Exception:
-            db.rollback()
-
-        return fallback
+        return {
+            "status": "success",
+            "category": fallback["category"],
+            "severity": fallback["severity"],
+            "confidence_score": fallback["confidence_score"],
+            "reasoning_summary": fallback.get("reasoning_summary", "Fallback applied due to timeout."),
+            "message": "Ticket triaged via fallback",
+            "ticket": {
+                "subject": ticket.title,
+                "description": ticket.description
+            }
+        }
 
 
 # ---------------------------------------------------------------------------
