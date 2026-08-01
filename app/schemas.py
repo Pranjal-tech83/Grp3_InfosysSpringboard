@@ -36,6 +36,7 @@ class TicketCreate(BaseModel):
     subject: str
     description: str
     requester_email: EmailStr
+    requester_name: Optional[str] = None
     department: Optional[str] = None
 
 
