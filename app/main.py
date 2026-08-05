@@ -10,7 +10,7 @@ frontend team can use to see every endpoint and try requests live.
 
 from datetime import datetime, timezone
 from typing import List, Dict, Any
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -53,8 +53,50 @@ app.include_router(responses.router)
 app.include_router(escalations.router)
 app.include_router(jira_tickets.router)
 app.include_router(analytics.router)
-app.include_router(analytics.router)
-app.include_router(email.router, prefix="/api/email", tags=["email"])
+app.include_router(analytics.dashboard_router)
+app.include_router(email.router)
+
+
+# ---------------------------------------------------------------------------
+# WEBSOCKET REAL-TIME BROADCAST MANAGER FOR DASHBOARD
+# ---------------------------------------------------------------------------
+class DashboardConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in list(self.active_connections):
+            try:
+                await connection.send_json(message)
+            except Exception:
+                self.disconnect(connection)
+
+ws_manager = DashboardConnectionManager()
+
+
+@app.websocket("/ws/dashboard")
+async def websocket_dashboard_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        await websocket.send_json({"type": "connected", "message": "SupportPilot Real-time Dashboard Connected"})
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_json({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()})
+            elif data == "refresh":
+                await ws_manager.broadcast({"type": "ticketsUpdated", "timestamp": datetime.now(timezone.utc).isoformat()})
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+    except Exception:
+        ws_manager.disconnect(websocket)
 
 
 # In-memory storage for email automation logs
@@ -71,30 +113,4 @@ class EmailPayload(BaseModel):
 def health_check():
     return {"status": "ok", "service": "SupportPilot API"}
 
-
-# ---------------------------------------------------------------------------
-# EMAIL AUTOMATION SERVICE ENDPOINTS
-# ---------------------------------------------------------------------------
-@app.get("/api/email/logs", tags=["Email Automation"])
-def get_email_logs():
-    return email_logs_db
-
-
-@app.post("/api/email/send", tags=["Email Automation"])
-def send_email_notification(payload: EmailPayload):
-    now_iso = datetime.now(timezone.utc).isoformat()
-    email_entry = {
-        "id": f"EML-{len(email_logs_db) + 101}",
-        "to": payload.to,
-        "from": "support@supportpilot.ai",
-        "subject": payload.subject,
-        "body": payload.body,
-        "status": "Delivered",
-        "created_at": now_iso,
-        "history": [
-            {"date": now_iso, "status": "Dispatched", "details": "Triggered via LangGraph orchestrator node."},
-            {"date": now_iso, "status": "Delivered", "details": "Delivered successfully to target inbox."},
-        ],
-    }
-    email_logs_db.append(email_entry)
-    return {"status": "success", "email": email_entry}
+
