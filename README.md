@@ -1,20 +1,23 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,50:3b82f6,100:06b6d4&height=200&section=header&text=SupportPilot&fontSize=60&fontColor=ffffff&fontAlignY=38&desc=AI-Powered+IT+Ticket+Resolution+Platform&descSize=20&descAlignY=58" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,50:3b82f6,100:06b6d4&height=220&section=header&text=SupportPilot&fontSize=62&fontColor=ffffff&fontAlignY=36&desc=Enterprise+AI-Powered+IT+Ticket+Resolution+%26+Multi-Agent+Orchestration+Platform&descSize=19&descAlignY=58" width="100%"/>
 
 <br/>
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-FF6F00?style=for-the-badge&logo=langchain&logoColor=white)](https://www.langchain.com/langgraph)
+[![Ollama](https://img.shields.io/badge/Ollama-LLaMA_3.2-000000?style=for-the-badge&logo=meta&logoColor=white)](https://ollama.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Ollama](https://img.shields.io/badge/Ollama-LLaMA_3.2-black?style=for-the-badge&logo=meta&logoColor=white)](https://ollama.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![WebSocket](https://img.shields.io/badge/WebSocket-Live_Stream-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.4-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
 
 <br/>
 
-> 🚀 A full-stack AI helpdesk platform built during the **Infosys Springboard Program** by **Group 3**.  
-> Combines a React-powered frontend dashboard with a FastAPI + LLaMA 3.2 AI triage backend.
+> 🚀 **SupportPilot** is an end-to-end, enterprise-grade IT Helpdesk & Automated Ticket Resolution Platform developed during the **Infosys Springboard Program** by **Group 3**.  
+> It pairs a responsive **React 18** client dashboard with a high-throughput **FastAPI** backend, featuring **LLaMA 3.2 Chain-of-Thought AI Triage**, a **LangGraph Multi-Agent Pipeline (RAG + ChromaDB)**, **Bi-Directional Jira Integration**, **Event-Driven Transactional Email Automation**, and **Real-Time WebSocket Updates**.
 
 </div>
 
@@ -22,79 +25,117 @@
 
 ## 📋 Table of Contents
 
-- [✨ Features](#-features)
-- [🏗️ Architecture](#️-architecture)
+- [✨ Key Features](#-key-features)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🤖 Multi-Agent Orchestration & RAG Pipeline](#-multi-agent-orchestration--rag-pipeline)
+- [🔄 Jira & Email Integration Ecosystem](#-jira--email-integration-ecosystem)
+- [📊 Interactive Dashboard & Analytics](#-interactive-dashboard--analytics)
 - [🖥️ Tech Stack](#️-tech-stack)
 - [📁 Project Structure](#-project-structure)
-- [🚀 Getting Started](#-getting-started)
-- [🤖 AI Triage Engine](#-ai-triage-engine)
-- [📊 Dashboard & Analytics](#-dashboard--analytics)
-- [🔌 API Reference](#-api-reference)
-- [🎨 UI Highlights](#-ui-highlights)
-- [🤝 Team](#-team)
+- [🚀 Quickstart & Installation](#-quickstart--installation)
+- [🔌 Complete API Reference](#-complete-api-reference)
+- [🏷️ AI Classification Taxonomy & Routing Matrix](#️-ai-classification-taxonomy--routing-matrix)
+- [🎨 UI / UX Design System](#-ui--ux-design-system)
+- [🤝 Infosys Springboard Milestones & Team](#-infosys-springboard-milestones--team)
+- [📄 License](#-license)
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-### 🎫 Ticket Management
-- Submit, view, filter, and sort tickets
-- Real-time status updates (`Open` → `In Progress` → `Resolved`)
-- Priority and severity tagging
-- Full audit/activity log per ticket
-
-</td>
-<td width="50%">
-
-### 🤖 AI Triage Agent
-- Powered by **LLaMA 3.2** via Ollama
-- Auto-classifies tickets into 5 categories
-- Assigns severity levels with confidence scores
-- Graceful fallback heuristics if LLM is unavailable
+### 🎫 Intelligent Ticket Management
+- **Full Ticket Lifecycle**: Create, view, update status (`Open` → `In Progress` → `Escalated` → `Resolved`), assign, and delete tickets.
+- **Dynamic Filtering & Search**: Instant filtering by status, category, department, priority (P1–P4), and search keywords.
+- **Detailed Drawer & Activity Trail**: Slide-out ticket drawer with full chronological event logs, resolution details, and agent telemetry.
+- **Reassignment & Manual Override**: Operators can manually reassign tickets to specific support agents or departments.
 
 </td>
-</tr>
-<tr>
-<td>
+<td width="50%" valign="top">
 
-### 📊 Analytics Dashboard
-- Live KPI cards (total, open, resolved, AI-handled)
-- **Interactive charts** powered by Chart.js
-- Ticket trend graphs, category breakdowns, severity distributions
-- All built with **React 18** using `React.createElement` (no JSX/build step)
-
-</td>
-<td>
-
-### 💬 AI Assistant Chatbot
-- Context-aware IT support assistant
-- Scenario-based routing (VPN, printer, password, network)
-- Quick-action buttons for common resolutions
-- Embedded directly in the dashboard sidebar
+### 🧠 LLaMA 3.2 AI Triage Engine
+- **Chain-of-Thought Reasoning**: AI writes technical justification before categorizing to maximize classification accuracy.
+- **Auto-Categorization**: Maps complaints into 8+ IT categories, assigning department, priority, severity, and tags.
+- **Confidence Scoring**: Computes a confidence score ($0.00 - 1.00$) per ticket.
+- **High-Speed Heuristic Fallback**: Zero downtime fallback heuristic engine if the local Ollama LLM is unavailable.
 
 </td>
 </tr>
 <tr>
-<td>
+<td width="50%" valign="top">
 
-### ⚙️ Settings & Workflow
-- User profile and notification preferences
-- Email escalation integration
-- Jira ticket linking
-- Dark / Light theme toggle
+### 🕸️ LangGraph Multi-Agent Orchestrator
+- **Diagnosis Agent**: Deeply evaluates issue descriptions, analyzes root cause, and classifies severity.
+- **Retrieval Agent (RAG)**: Queries vector store and corporate knowledge base to extract matching runbooks and past solutions.
+- **Resolution Agent**: Synthesizes structured remediation steps with actionable recovery guides.
+- **Escalation Agent**: Monitors SLA breach risks and coordinates Jira syncing & team notifications.
 
 </td>
-<td>
+<td width="50%" valign="top">
 
-### 📱 Fully Responsive
-- Mobile-first layout with hamburger nav
-- Slide-in sidebar with blur overlay
-- Scrollable tables and adaptive KPI grids
-- Works on all screen sizes ≥ 320px
+### 🔄 Enterprise Jira Integration Hub
+- **Bi-Directional Sync**: Automatically creates Jira issues (`ENG`, `NET`, `SW`, `DBA`) and synchronizes status changes.
+- **Smart Team Routing**: Keyword-based routing to NetOps, Desktop Support, DBA, or Billing with assigned leads.
+- **Jira Management UI**: Filter issues, view sync status, trigger manual syncs, and post comments directly to Jira.
+- **Configurable Settings**: Custom Jira project keys, URLs, tokens, issue types, and polling intervals.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📬 Transactional Email Automation
+- **Event-Triggered Notifications**: Automated dispatch upon ticket creation, AI resolution, and team escalation.
+- **Interactive Dispatch Timelines**: Visual stage tracker (*Generated → Queued → Sending → Delivered → Opened → Clicked*).
+- **Rich Email Templates**: Pre-configured corporate HTML templates with auto-inserted ticket parameters.
+- **Delivery Audit Logs**: JSON & SQLite persistence of all dispatched emails with status filters.
+
+</td>
+<td width="50%" valign="top">
+
+### ⚡ Real-Time WebSocket Streaming
+- **Live Ticket Sync (`/ws/dashboard`)**: Instant updates pushed to all active connected clients when tickets change.
+- **Zero-Latency Heartbeat**: Built-in ping/pong heartbeat and reconnect resilience.
+- **Instant KPI Recalculation**: Analytics counters, trend graphs, and active tables update without page reload.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📊 React 18 KPI Dashboard & Chart.js Analytics
+- **Live Metric Cards**: Total tickets, open cases, resolved count, and AI automation rate with MTD trends.
+- **Interactive Charts**: 30-day ticket volume trends, category distribution doughnuts, and severity breakdown bars.
+- **Zero Build Overhead**: Built with pure React 18 via CDN (`React.createElement`) — no Node.js compilation required.
+
+</td>
+<td width="50%" valign="top">
+
+### 💬 Contextual IT AI Assistant Chatbot
+- **Interactive Support Bot**: Floating AI assistant capable of troubleshooting VPN, printer, password, and Wi-Fi issues.
+- **Scenario Quick-Actions**: One-click remediation prompts for rapid employee self-service.
+- **Embedded Assistant**: Always accessible from any view via the collapsible dock menu.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🔒 Authentication & Role-Based Access
+- **Dual Flow**: Standalone login/register portal (`login.html`) + seamless SPA dashboard (`index.html`).
+- **Role Permissions**: Role management for `Employee`, `IT Support Agent`, and `Administrator`.
+- **SHA-256 Hashed Credentials**: Secure password verification and session storage.
+
+</td>
+<td width="50%" valign="top">
+
+### 🌓 Premium Floating Dock & Glassmorphism UI
+- **Modern Floating Dock**: Collapsible glassmorphic dock menu with smooth icon micro-animations.
+- **Dark & Light Theming**: Seamless CSS custom-variable theme toggle with system preference detection.
+- **Mobile First**: Adaptive layout supporting all screen sizes with smooth slide-in mobile navigation.
 
 </td>
 </tr>
@@ -102,67 +143,131 @@
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        BROWSER (Client)                         │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │           React 18 Frontend (No Build Step)             │   │
-│   │                                                         │   │
-│   │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │   │
-│   │  │Dashboard │ │ Tickets  │ │Analytics │ │Assistant │  │   │
-│   │  │  React   │ │  (JS)    │ │ Chart.js │ │  Bot(JS) │  │   │
-│   │  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │   │
-│   │                        │                               │   │
-│   │              Settings · Workflow · Email               │   │
-│   └───────────────────────┬─────────────────────────────────┘   │
-└───────────────────────────┼─────────────────────────────────────┘
-                            │ HTTP / REST API
-┌───────────────────────────▼─────────────────────────────────────┐
-│                    FastAPI Backend  (Main.py)                    │
-│                                                                 │
-│   POST /api/triage ──► AI Triage Agent (LLaMA 3.2 via Ollama)  │
-│                              │                                  │
-│              ┌───────────────▼───────────────┐                  │
-│              │        Pydantic Validation     │                  │
-│              │  category · severity · score   │                  │
-│              └───────────────┬───────────────┘                  │
-│                              │                                  │
-│              ┌───────────────▼───────────────┐                  │
-│              │      SQLite Database           │                  │
-│              │   (supportpilot.db)            │                  │
-│              └───────────────────────────────┘                  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   CLIENT TIER (Browser SPA)                                 │
+│                                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────────────────────┐  │
+│  │                    Modern Glassmorphic UI (Vanilla CSS + React 18)                    │  │
+│  │                                                                                       │  │
+│  │   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐ │  │
+│  │   │ React KPI   │   │ Ticket Ops  │   │ Multi-Agent │   │ Jira Hub &  │   │ Email Auto  │ │  │
+│  │   │  Dashboard  │   │  & Filter   │   │  Telemetry  │   │ Integration │   │  & Timeline │ │  │
+│  │   └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘ │  │
+│  │          │                 │                 │                 │                 │        │  │
+│  │          └─────────────────┴────────┬────────┴─────────────────┴─────────────────┘        │  │
+│  │                                     │ REST & WebSockets                                   │  │
+│  └─────────────────────────────────────┼─────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────┼────────────────────────────────────────────────────┘
+                                         │
+                                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   APPLICATION TIER (FastAPI)                                │
+│                                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────────────────────┐  │
+│  │                               FastAPI Backend (Main / App)                             │  │
+│  │                                                                                       │  │
+│  │  [Routers] Tickets · Users · KB · Escalations · Responses · Jira · Email · Analytics  │  │
+│  │  [WebSocket] /ws/dashboard Live Broadcast Hub · [CORS] Open Middleware               │  │
+│  │  [Validation] Pydantic v2 Schema Enforcement & Type Validation                       │  │
+│  └───────────┬─────────────────────────┬─────────────────────────┬───────────────────────┘  │
+│              │                         │                         │                          │
+│              ▼                         ▼                         ▼                          │
+│   ┌────────────────────┐    ┌────────────────────┐    ┌────────────────────┐                │
+│   │   AI Triage &      │    │  LangGraph Multi-  │    │  RAG Knowledge     │                │
+│   │   Inference Engine │    │  Agent Pipeline    │    │  Retrieval Vector  │                │
+│   │   (LLaMA 3.2)      │    │  (StateGraph)      │    │  (ChromaDB + DB)   │                │
+│   └────────────────────┘    └────────────────────┘    └────────────────────┘                │
+└────────────────┬───────────────────────┬─────────────────────────┬──────────────────────────┘
+                 │                       │                         │
+                 ▼                       ▼                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 PERSISTENCE & INTEGRATION TIER                              │
+│                                                                                             │
+│   ┌───────────────────────────┐ ┌───────────────────────────┐ ┌───────────────────────────┐   │
+│   │     SQL Database (ORM)    │ │   Atlassian Jira Cloud    │ │   Transactional Email     │   │
+│   │   SQLite / PostgreSQL     │ │  Bi-Directional REST Sync │ │  Relay & Log Store (JSON) │   │
+│   └───────────────────────────┘ └───────────────────────────┘ └───────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Data Flow — Ticket Lifecycle
+---
+
+## 🤖 Multi-Agent Orchestration & RAG Pipeline
+
+SupportPilot incorporates a **LangGraph StateGraph Multi-Agent Pipeline** (`app/agents/resolution_agent.py`) that systematically breaks down incident resolution into distinct autonomous agent stages:
+
+```mermaid
+graph TD
+    A([📥 Ticket Intake]) --> B[Node 1: Fetch Ticket]
+    B --> C[Node 2: Retrieve Knowledge Context - RAG]
+    C --> D[Node 3: Generate AI Resolution]
+    D --> E{Confidence >= 0.65?}
+    
+    E -- Yes --> F[Node 4A: Save Resolution & Mark Resolved]
+    F --> G[📬 Trigger Transactional Email Service]
+    
+    E -- No --> H[Node 4B: Escalate Ticket to Human Team]
+    H --> I[🔄 Sync with Atlassian Jira]
+    I --> J[📬 Dispatch Escalation Alert Email]
+    
+    G --> K([🏁 Complete])
+    J --> K([🏁 Complete])
+    
+    style A fill:#1e3a8a,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style K fill:#06b6d4,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style E fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+```
+
+### Agent Roles & Telemetry Endpoints
+
+| Agent | Module | Responsibilities | Telemetry API |
+|-------|--------|------------------|---------------|
+| **Diagnosis Agent** | `resolution_agent.py` | Analyzes incident subject/body, performs semantic taxonomy mapping, root cause analysis, and severity prediction. | `GET /api/agents/{ticket_id}` |
+| **Retrieval Agent** | `resolution_agent.py` | Vector search across ChromaDB and KB articles to find high-similarity runbooks and past resolutions. | `GET /api/rag/{ticket_id}` |
+| **Resolution Agent** | `resolution_agent.py` | Synthesizes step-by-step remediation plan with minimal downtime impact based on retrieved context. | `GET /api/agents/{ticket_id}` |
+| **Escalation Agent** | `resolution_agent.py` | Evaluates SLA breach risk, triggers Jira issue creation, and alerts designated on-call technical leads. | `POST /api/escalate` |
+
+---
+
+## 🔄 Jira & Email Integration Ecosystem
+
+### Intelligent Jira Team Routing Rules
+
+When a ticket is triaged or escalated, SupportPilot automatically applies intelligent routing heuristics to assign the corresponding Jira project key, team, and lead assignee:
+
+| Issue Keywords | Project Key | Assigned Team | Default Lead Assignee | Priority |
+|----------------|-------------|---------------|-----------------------|----------|
+| `vpn`, `network`, `wifi`, `dns`, `firewall`, `gateway` | **NET** | Network Operations (NetOps) | Alex Rivera (NetOps Lead) | `High` |
+| `software`, `install`, `setup`, `update`, `patch`, `os` | **SW** | Desktop Software Support | Devon Vance (Desktop Eng) | `Medium` |
+| `database`, `sql`, `postgres`, `deadlock`, `query`, `redis` | **DBA** | Database Reliability Eng | Marcus Brody (Principal DBA) | `Critical` |
+| `payment`, `invoice`, `stripe`, `billing`, `subscription` | **BILL** | Billing & Finance Operations | Elena Rostova (Billing Mgr) | `Medium` |
+| `hardware`, `laptop`, `monitor`, `battery`, `printer` | **HW** | IT Hardware Asset Ops | Jason Chen (IT Asset Specialist) | `Low` |
+
+### Email Automation Lifecycle
+
+Every notification progresses through an interactive 6-stage delivery pipeline visible in the **Email Automation** tab:
 
 ```
-User Submits Ticket
-        │
-        ▼
-  Frontend (index.html)
-        │ POST /api/triage
-        ▼
-  FastAPI (Main.py)
-        │
-        ├──► LLaMA 3.2 (Ollama)
-        │         │
-        │    JSON Response:
-        │    { category, severity, confidence, reasoning }
-        │         │
-        ├◄────────┘
-        │
-        ├──► SQLite INSERT (tickets table)
-        │
-        └──► Return result to Frontend
-                   │
-                   ▼
-        Dashboard updates KPI cards,
-        charts, and ticket table in real-time
+[1. Generated] ──► [2. Queued] ──► [3. Sending] ──► [4. Delivered (250 OK)] ──► [5. Opened] ──► [6. Clicked]
 ```
+
+---
+
+## 📊 Interactive Dashboard & Analytics
+
+The analytics dashboard provides real-time visualization of IT operations:
+
+- **Volume & SLA Trends**: 30-day ticket intake vs resolution rates.
+- **Category Doughnut Chart**: Proportion of Network, Authentication, Hardware, Software, Payment, and Database tickets.
+- **Severity Breakdown**: Distribution of Low, Medium, High, and Critical issues.
+- **Real-Time Counters**:
+  - 📈 **Total Tickets**: Total incident volume tracked.
+  - ⏳ **Open Tickets**: Active pending tickets awaiting resolution.
+  - ✅ **Resolved**: Successfully closed tickets.
+  - 🤖 **AI Handled**: Percentage of tickets triaged and resolved autonomously by SupportPilot.
 
 ---
 
@@ -170,25 +275,26 @@ User Submits Ticket
 
 ### Frontend
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **UI Framework** | React 18 (CDN, no JSX) | Dashboard & Settings panels |
-| **Charts** | Chart.js | Ticket trend graphs, category pie charts, severity bars |
-| **Styling** | Vanilla CSS + CSS Variables | Full theming (dark/light), glassmorphism |
-| **Fonts** | Plus Jakarta Sans (Google Fonts) | Premium typography |
-| **Icons** | Inline SVG | Zero-dependency icon system |
-| **Animations** | CSS keyframes + transitions | Micro-animations, hover effects, toast fades |
+| Layer | Technology | Description |
+|-------|------------|-------------|
+| **Core Architecture** | Vanilla HTML5 / ES6 JavaScript | Zero-build single page application |
+| **Reactive UI** | React 18 (via CDN) | Dynamic KPI dashboard (`dashboard-react.js`) & Settings panel (`settings-react.js`) |
+| **Charting Engine** | Chart.js 4.4 | Responsive canvas data visualization (`analytics.js`) |
+| **Real-time Protocol**| HTML5 WebSockets | Real-time bi-directional update streaming |
+| **Design System** | Custom Vanilla CSS3 | Glassmorphism, CSS variables, dark/light theme engine, floating dock menu |
+| **Typography** | Plus Jakarta Sans (Google Fonts) | Clean enterprise typography |
 
 ### Backend
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **API Framework** | FastAPI 0.115 | REST API, async routing, Swagger docs |
-| **AI / LLM** | Ollama + LLaMA 3.2 | Ticket classification & reasoning |
-| **Database** | SQLite (dev) / PostgreSQL (prod) | Ticket storage & audit logs |
-| **ORM** | SQLAlchemy 2.0 | DB models and query logic |
-| **Validation** | Pydantic v2 | Request/response schema enforcement |
-| **Server** | Uvicorn | ASGI production server |
+| Layer | Technology | Description |
+|-------|------------|-------------|
+| **API Framework** | FastAPI 0.115 | Asynchronous RESTful routing and WebSocket endpoints |
+| **Server Engine** | Uvicorn 0.30 | High-performance ASGI production server |
+| **Data Validation**| Pydantic v2 | Strict request/response schema modeling |
+| **Database / ORM** | SQLAlchemy 2.0 + SQLite / PostgreSQL | Dual-engine ORM support with automated schema migrations |
+| **AI / LLM Engine**| Ollama + LLaMA 3.2 | Local open-source LLM inference engine with JSON schema mode |
+| **Agent Framework**| LangGraph | Directed state machine multi-agent orchestration |
+| **Authentication** | SHA-256 Hashing | Secure user registration & authentication protocol |
 
 ---
 
@@ -197,255 +303,324 @@ User Submits Ticket
 ```
 Grp3_InfosysSpringboard/
 │
-├── 📄 index.html                  # Main app shell (SPA layout)
-├── 📄 login.html                  # Authentication page
-├── 📄 Main.py                     # FastAPI entry point + AI triage endpoint
-├── 📄 classify.py                 # Standalone ticket classifier utility
-├── 📄 seed_data.py                # Demo data seeder
-├── 📄 requirements.txt            # Python dependencies
-├── 📄 env.example                 # Environment variable template
+├── 📄 index.html                  # Main SPA container (Dock nav, views, modals, drawers)
+├── 📄 login.html                  # User authentication & registration portal
+├── 📄 main.py                     # Primary FastAPI entrypoint (Routers, WebSockets, Triage, Auth)
+├── 📄 classify.py                 # Standalone ticket classifier & Chain-of-Thought utility
+├── 📄 seed_data.py                # Database population script with sample enterprise data
+├── 📄 requirements.txt            # Python backend dependencies
+├── 📄 env.example                 # Environment configuration template
+├── 📄 .env                        # Local environment variables
+├── 📄 supportpilot.db             # Local SQLite database instance
+├── 📄 email_logs.json             # Persistent transactional email store
 │
-├── 📁 app/                        # Backend application package
-│   ├── main.py                    # FastAPI app, CORS, router registration
-│   ├── database.py                # DB engine/session setup
-│   ├── models.py                  # SQLAlchemy ORM models
-│   ├── schemas.py                 # Pydantic request/response models
-│   ├── crud.py                    # All DB query/mutation logic
-│   ├── 📁 agents/                 # AI agent modules
-│   └── 📁 routers/
-│       ├── users.py
-│       ├── tickets.py
-│       ├── knowledge_base.py
-│       ├── responses.py           # AI-generated ticket resolutions
-│       ├── escalations.py
-│       ├── jira_tickets.py
-│       └── analytics.py          # Dashboard stats endpoint
-│
-├── 📁 js/                         # Frontend JavaScript modules
-│   ├── dashboard-react.js         # ⚛️ React 18 KPI dashboard component
-│   ├── analytics.js               # 📊 Chart.js analytics (graphs/charts)
-│   ├── tickets.js                 # 🎫 Ticket table, filters, CRUD
-│   ├── assistant.js               # 🤖 AI chatbot assistant module
-│   ├── settings-react.js          # ⚛️ React settings panel
-│   ├── settings.js                # Settings logic & persistence
-│   ├── workflow.js                # Workflow automation rules
-│   ├── email.js                   # Email escalation integration
-│   └── app.js                     # App bootstrap & navigation
+├── 📁 app/                        # Modular FastAPI Application Package
+│   ├── 📄 __init__.py
+│   ├── 📄 main.py                 # Sub-package FastAPI entrypoint
+│   ├── 📄 database.py             # SQLAlchemy database session & engine config
+│   ├── 📄 models.py               # SQLAlchemy ORM schemas (Users, Tickets, KB, Logs, Jira, etc.)
+│   ├── 📄 schemas.py              # Pydantic request/response validation models
+│   ├── 📄 crud.py                 # Core database CRUD query operations
+│   │
+│   ├── 📁 agents/                 # Multi-Agent Modules
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 resolution_agent.py # LangGraph Multi-Agent Orchestrator (4-Node Pipeline)
+│   │
+│   └── 📁 routers/                # REST API Routers
+│       ├── 📄 __init__.py
+│       ├── 📄 analytics.py        # Dashboard KPI metrics & telemetry endpoint
+│       ├── 📄 email.py            # Email automation, templates, stats & dispatch logs
+│       ├── 📄 escalations.py      # Ticket escalation & assignment endpoints
+│       ├── 📄 jira_tickets.py     # Jira Cloud synchronization & team routing hub
+│       ├── 📄 knowledge_base.py   # KB article management & semantic query search
+│       ├── 📄 responses.py        # AI-generated response records & storage
+│       ├── 📄 tickets.py          # Full Ticket CRUD, status transitions & audit logs
+│       └── 📄 users.py            # User management & profile endpoints
 │
 ├── 📁 css/
-│   └── styles.css                 # Full design system (tokens, themes, components)
+│   └── 📄 styles.css              # Unified design system (Tokens, glassmorphism, dock, animations)
 │
-└── 📁 Ticket-Management/          # Legacy/alternate frontend build
+├── 📁 js/                         # Frontend Modular JavaScript
+│   ├── 📄 agent-pipeline.js       # Multi-agent visualizer & telemetry drawer
+│   ├── 📄 analytics.js            # Chart.js analytics & trend visualizer
+│   ├── 📄 app.js                  # Application bootstrap, navigation & modal controllers
+│   ├── 📄 assistant.js            # Interactive IT AI assistant chatbot
+│   ├── 📄 dashboard-react.js      # React 18 Live KPI Dashboard component
+│   ├── 📄 data.js                 # Initial fallback and mockup datasets
+│   ├── 📄 email-enhanced.js       # Transactional email manager & interactive timeline tracker
+│   ├── 📄 email.js                # Core email notification helpers
+│   ├── 📄 jira-integration.js     # Jira integration UI, issue sync & routing controller
+│   ├── 📄 settings-react.js       # React 18 Settings panel component
+│   ├── 📄 settings.js             # Theme switcher & local persistence
+│   ├── 📄 tickets.js              # Ticket table, real-time filters, drawer & CRUD operations
+│   └── 📄 workflow.js             # Automation rule configuration
+│
+└── 📁 data/                       # Local JSON Data Storage
+    ├── 📄 jira_config.json        # Jira integration settings & credentials
+    └── 📄 jira_issues.json        # Synced Jira issues store & comment logs
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quickstart & Installation
 
 ### Prerequisites
 
-- Python 3.10+
-- [Ollama](https://ollama.com) installed and running
-- LLaMA 3.2 model pulled: `ollama pull llama3.2`
+- **Python 3.10+** installed on your system.
+- **[Ollama](https://ollama.com)** installed and running locally.
+- A modern web browser (Chrome, Edge, Firefox, Safari).
 
-### 1️⃣ Clone the Repository
+---
+
+### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/sssnehsingh/Grp3_InfosysSpringboard.git
 cd Grp3_InfosysSpringboard
 ```
 
-### 2️⃣ Install Python Dependencies
+### Step 2: Create a Virtual Environment & Install Dependencies
 
 ```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# Windows (CMD):
+.\venv\Scripts\activate.bat
+# macOS / Linux:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3️⃣ Configure Environment (Optional)
+### Step 3: Configure Environment Variables
 
 ```bash
+# Copy template configuration
 cp env.example .env
-# Edit .env if you want to switch to PostgreSQL
 ```
 
-### 4️⃣ Start Ollama (AI Engine)
+*(Optional)* The default `.env` uses SQLite (`sqlite:///./supportpilot.db`), requiring zero setup. If you wish to use PostgreSQL:
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/supportpilot
+```
+
+### Step 4: Start Ollama & Pull the LLaMA 3.2 Model
 
 ```bash
+# Start Ollama service (if not running in background)
 ollama serve
-# In a new terminal:
+
+# In a separate terminal, pull the LLaMA 3.2 model:
 ollama pull llama3.2
 ```
 
-### 5️⃣ Run the Backend
+### Step 5: Seed Demo Enterprise Data
 
-```bash
-uvicorn Main:app --reload --port 8000
-```
-
-| URL | Purpose |
-|-----|---------|
-| `http://127.0.0.1:8000` | API base URL |
-| `http://127.0.0.1:8000/docs` | 📖 Swagger interactive docs |
-| `http://127.0.0.1:8000/redoc` | 📖 ReDoc alternative docs |
-
-### 6️⃣ Open the Frontend
-
-```bash
-# Windows
-start index.html
-
-# Mac / Linux
-open index.html
-```
-
-> 💡 **Tip:** Use the **Live Server** extension in VS Code for hot-reload during development.
-
-### 7️⃣ Seed Demo Data (Optional)
+Populate the database with realistic demo users, tickets, KB articles, and activity logs:
 
 ```bash
 python seed_data.py
 ```
 
-Creates: 3 users · 4 tickets · 3 KB articles · 2 AI responses · 1 escalation · 2 Jira tickets
+### Step 6: Start the FastAPI Backend Server
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+- 🌐 **API Base URL**: `http://127.0.0.1:8000`
+- 📖 **Interactive Swagger UI**: `http://127.0.0.1:8000/docs`
+- 📖 **Alternative ReDoc UI**: `http://127.0.0.1:8000/redoc`
+
+### Step 7: Launch the Application Frontend
+
+Open `login.html` or `index.html` directly in your browser:
+
+```bash
+# Windows
+start login.html
+
+# macOS
+open login.html
+
+# Linux
+xdg-open login.html
+```
+
+> 💡 **Tip**: For the best development experience with hot-reloading, use the **Live Server** extension in VS Code.
 
 ---
 
-## 🤖 AI Triage Engine
+## 🔌 Complete API Reference
 
-The AI triage engine (`Main.py`) uses **LLaMA 3.2** (via Ollama) to automatically classify incoming IT support tickets.
+### 1. Health & WebSocket Endpoints
 
-### Classification Taxonomy
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | System health check and status confirmation. |
+| `WS` | `/ws/dashboard` | Real-time WebSocket connection for live ticket updates and dashboard sync. |
 
-| Category | Example Issues | Default Severity |
-|----------|---------------|-----------------|
-| 🌐 **Network** | VPN timeouts, internet disconnections | `High` |
-| 🔐 **Password Reset** | Account lockouts, forgotten credentials | `Low` / `Medium` |
-| 🖥️ **Hardware** | Printer offline, blue screen errors | `Medium` / `High` |
-| 💿 **Software** | App crashes, MS Office failures | `Medium` / `High` |
-| 📧 **Email** | Login failures, send/receive errors | `Medium` |
+---
 
-### Triage Response Schema
+### 2. AI Triage & Multi-Agent Telemetry
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/triage` | Submit ticket for Chain-of-Thought LLaMA 3.2 classification & remediation drafting. |
+| `GET` | `/api/agents/{ticket_id}` | Fetch multi-agent telemetry (Diagnosis, Retrieval, Resolution, Escalation status). |
+| `GET` | `/api/rag/{ticket_id}` | Fetch RAG context augmentation metrics, ChromaDB embeddings & similarity scores. |
+| `GET` | `/api/activity/{ticket_id}`| Retrieve chronological agent activity stream for a ticket. |
+
+#### Sample AI Triage Request & Response
+
+**`POST /api/triage`**
 
 ```json
 {
-  "reasoning_summary": "User reports VPN handshake timeout — maps to Network/High per taxonomy.",
+  "title": "VPN Gateway Handshake Timeout",
+  "description": "Unable to maintain stable connection to the East Coast VPN gateway cluster.",
+  "requester_name": "Alex Morgan",
+  "requester_email": "alex.morgan@acme.corp"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "status": "success",
   "category": "Network",
+  "department": "Engineering",
+  "priority": "P2 High",
   "severity": "High",
-  "confidence_score": 0.97
+  "confidence_score": 0.96,
+  "suggested_team": "Network Operations (NetOps)",
+  "suggested_tags": ["#network", "#vpn-gateway", "#connectivity", "#latency"],
+  "suggested_resolution": "1. Reset local network adapter and verify routing table.\n2. Reconnect through alternate VPN gateway cluster (gw-east-02).\n3. Flush DNS cache via `ipconfig /flushdns`.",
+  "reasoning_summary": "Issue exhibits network interface timeout patterns indicating gateway congestion or DNS resolution latency.",
+  "message": "Ticket successfully triaged via AI Model"
 }
 ```
 
-### Fallback Heuristics
+---
 
-If the LLM is unavailable, the engine falls back to keyword-based classification:
-- `vpn` / `network` in description → **Network / High**
-- `critical` in title → **High severity**
-- All else → **Software / Medium**
+### 3. Ticket Operations (`/api/tickets`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/tickets` | List tickets with optional query filters (`status`, `category`, `priority`, `skip`, `limit`). |
+| `POST` | `/api/tickets` | Create a new ticket and trigger automated classification. |
+| `GET` | `/api/tickets/{id}` | Get ticket details including responses, logs, Jira sync, and escalations. |
+| `PATCH` | `/api/tickets/{id}/status` | Update ticket status (`Open`, `In Progress`, `Escalated`, `Resolved`). |
+| `PATCH` | `/api/tickets/{id}/classification` | Update ticket category, priority, and confidence score. |
+| `DELETE` | `/api/tickets/{id}` | Remove ticket from database. |
+| `GET` | `/api/tickets/{id}/logs` | Fetch activity audit trail for ticket. |
+| `POST` | `/api/escalate` | Escalate ticket to a specialized engineering department. |
+| `POST` | `/api/reassign` | Reassign ticket ownership to a specific support agent. |
 
 ---
 
-## 📊 Dashboard & Analytics
+### 4. Jira Integration Hub (`/api/jira`)
 
-The dashboard is built with **React 18** loaded from CDN — no build step, no JSX, no webpack. Components use `React.createElement` directly.
-
-### KPI Cards
-
-```
-┌────────────────┐  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐
-│  Total Tickets │  │  Open Tickets  │  │    Resolved    │  │  AI Handled    │
-│      247       │  │      43        │  │      189       │  │      91%       │
-│   ↑ 12% MTD   │  │   ↓ 8% MTD    │  │   ↑ 15% MTD   │  │   ↑ 3% MTD    │
-└────────────────┘  └────────────────┘  └────────────────┘  └────────────────┘
-```
-
-### Charts (Chart.js)
-
-| Chart | Type | Data |
-|-------|------|------|
-| **Ticket Trend** | Line graph | Daily ticket volume over 30 days |
-| **Category Breakdown** | Doughnut/Pie | Distribution across 5 IT categories |
-| **Severity Distribution** | Bar chart | Low / Medium / High counts |
-| **Resolution Time** | Area chart | Avg resolution time by category |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/jira/issues` | Retrieve all synced Jira issues with status, priority, and assignee filters. |
+| `POST` | `/api/jira/create` | Manually or automatically create a linked Jira issue from a ticket. |
+| `PATCH` | `/api/jira/issues/{key}/status` | Update Jira issue status (`To Do`, `In Progress`, `Escalated`, `Done`). |
+| `POST` | `/api/jira/issues/{key}/comments`| Post an agent or operator comment to a Jira issue. |
+| `GET` | `/api/jira/config` | Fetch Jira Cloud connection configuration. |
+| `POST` | `/api/jira/config` | Update Jira connection credentials and sync interval. |
+| `POST` | `/api/jira/sync-all` | Trigger full bi-directional sync across all tickets and Jira issues. |
 
 ---
 
-## 🔌 API Reference
+### 5. Transactional Email Automation (`/api/email`)
 
-### Core Endpoint
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/api/triage` | Submit ticket for AI classification |
-
-**Request body:**
-```json
-{
-  "title": "VPN keeps disconnecting",
-  "description": "Cannot maintain a stable VPN connection since this morning."
-}
-```
-
-### Full REST API (via `app/routers/`)
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/api/users` | Create a user |
-| `GET` | `/api/users` | List users |
-| `GET` | `/api/users/{id}` | Get one user |
-| `POST` | `/api/tickets` | Submit a new ticket |
-| `GET` | `/api/tickets` | List tickets (filter by `status`, `category`, `priority`) |
-| `GET` | `/api/tickets/{id}` | Get ticket + responses + escalations + Jira |
-| `PATCH` | `/api/tickets/{id}/classification` | AI agent posts classification result |
-| `PATCH` | `/api/tickets/{id}/status` | Update ticket status |
-| `GET` | `/api/tickets/{id}/logs` | Ticket activity/audit trail |
-| `GET` | `/api/knowledge-base` | List KB articles |
-| `GET` | `/api/knowledge-base/search?q=` | Search KB |
-| `POST` | `/api/tickets/{id}/responses` | Store AI-generated resolution |
-| `POST` | `/api/tickets/{id}/escalations` | Escalate ticket to human team |
-| `GET` | `/api/escalations` | List all escalations |
-| `POST` | `/api/tickets/{id}/jira` | Create/update linked Jira issue |
-| `GET` | `/api/analytics/dashboard` | Dashboard stats |
-
-> All list endpoints support `skip`/`limit` pagination. CORS is open for development.
-
-### Switching to PostgreSQL
-
-```env
-# .env
-DATABASE_URL=postgresql://user:password@localhost:5432/supportpilot
-```
-
-No code changes needed — SQLAlchemy handles both SQLite and PostgreSQL.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/email/logs` | Fetch dispatched email history with pagination and status filters. |
+| `GET` | `/api/email/logs/{id}` | Get single email dispatch details including interactive stage timeline. |
+| `POST` | `/api/email/send` | Dispatch an automated email for ticket lifecycle events. |
+| `GET` | `/api/email/stats` | Retrieve email delivery rate, open rate, click rate, and bounce stats. |
+| `POST` | `/api/email/resend/{id}` | Re-queue and re-dispatch a failed or bounced email. |
 
 ---
 
-## 🎨 UI Highlights
+### 6. Authentication & Knowledge Base
 
-| Feature | Implementation |
-|---------|---------------|
-| **Glassmorphism cards** | `backdrop-filter: blur()` + semi-transparent backgrounds |
-| **Dark / Light theme** | CSS custom properties toggled via `data-theme` attribute |
-| **Micro-animations** | `@keyframes fadeIn`, `slideIn`, `pulse` on every interactive element |
-| **Gradient hero banner** | `linear-gradient(135deg, #1e3a8a → #3b82f6 → #06b6d4)` |
-| **Responsive grid** | CSS Grid + Flexbox, breakpoints at 768px and 480px |
-| **Toast notifications** | Animated slide-in/out with auto-dismiss |
-| **Sidebar nav** | Hamburger toggle on mobile with blur overlay backdrop |
-| **Typography** | Plus Jakarta Sans from Google Fonts |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/register` | Register a new user account with hashed credentials. |
+| `POST` | `/api/login` | Authenticate user credentials and return user profile session. |
+| `GET` | `/api/knowledge-base` | Retrieve knowledge base articles. |
+| `GET` | `/api/knowledge-base/search?q=` | Search knowledge base via semantic keyword matching. |
+| `GET` | `/api/analytics/dashboard` | Retrieve live KPI statistics and performance ratios. |
 
 ---
 
-## 🤝 Team
+## 🏷️ AI Classification Taxonomy & Routing Matrix
 
-> **Infosys Springboard — Group 3**
+SupportPilot's triage system standardizes classification across common enterprise IT incidents:
 
-Built collaboratively across 4 milestones:
+| Category | Typical Scenarios & Keywords | Department | Default Priority | Default Severity | Target Resolution SLA |
+|----------|------------------------------|------------|------------------|------------------|-----------------------|
+| 🌐 **Network** | VPN timeouts, gateway latency, Wi-Fi drops, DNS errors | Engineering | `P2 High` | `High` | 2 Hours |
+| 🔐 **Authentication** | Password resets, SSO errors, MFA locked, access denied | Customer Support | `P3 Medium` | `Medium` | 1 Hour |
+| 🗄️ **Database Performance** | Deadlocks, slow SQL queries, connection pool exhaustion | Engineering | `P1 Urgent` | `Critical` | 30 Minutes |
+| 💻 **Hardware** | Printer offline, monitor failure, battery bulging, docking | IT Desktop Ops | `P4 Low` | `Low` | 8 Hours |
+| 💿 **Software** | Application crash, installer failure, license expiration | Customer Support | `P3 Medium` | `Medium` | 4 Hours |
+| 💳 **Payment Issues** | Stripe failure, invoice dispute, subscription renewal | Billing | `P3 Medium` | `Medium` | 4 Hours |
+| 📧 **Email** | Outlook synchronization, SMTP bounce, mailbox quota | Customer Support | `P3 Medium` | `Medium` | 2 Hours |
 
-| Milestone | Focus |
-|-----------|-------|
-| **1** | Ticket intake, AI classification, FastAPI backend |
-| **2** | KB search, AI response generation, React dashboard |
-| **3** | Escalations, Jira integration, email workflows |
-| **4** | Analytics charts, reporting, full UI polish |
+---
+
+## 🎨 UI / UX Design System
+
+SupportPilot features a refined enterprise aesthetic built entirely with modern Vanilla CSS3:
+
+- **Floating Glassmorphic Dock Menu**: A sleek left-docked floating navigation bar with responsive hover scaling, rotation micro-animations, and collapse/expand toggles.
+- **Adaptive Dark / Light Themes**: Pure CSS custom property tokens (`--bg-primary`, `--accent-primary`, `--card-bg`, `--glass-border`) supporting zero-flicker theme switching.
+- **Micro-Interactions**: Hover lifts, smooth glow shadows, pulse indicators for active AI status, and animated slide-out drawers.
+- **Tabbed Ticket Drawer**: Side inspection panel allowing operators to switch seamlessly between ticket metadata, activity logs, and live Multi-Agent RAG telemetry.
+
+---
+
+## 🤝 Infosys Springboard Milestones & Team
+
+SupportPilot was built collaboratively by **Group 3** as part of the **Infosys Springboard Program**:
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       PROJECT MILESTONE DELIVERABLES                                      │
+├──────────────┬───────────────────────────────────────────────────────────────┬────────────────────────────┤
+│ Milestone    │ Core Deliverables & Technical Scope                           │ Status                     │
+├──────────────┼───────────────────────────────────────────────────────────────┼────────────────────────────┤
+│ **M1**       │ Ticket Intake Engine, AI Classification Taxonomy, FastAPI     │ ✅ Completed               │
+│              │ backend setup, SQLite database modeling, Pydantic schemas.    │                            │
+├──────────────┼───────────────────────────────────────────────────────────────┼────────────────────────────┤
+│ **M2**       │ Vector RAG Knowledge Base search, AI Remediation Generation,  │ ✅ Completed               │
+│              │ React 18 KPI Dashboard, Chart.js trend visualizations.        │                            │
+├──────────────┼───────────────────────────────────────────────────────────────┼────────────────────────────┤
+│ **M3**       │ LangGraph Multi-Agent Orchestrator, Bi-Directional Jira Sync, │ ✅ Completed               │
+│              │ Event-Driven Transactional Email Service & Delivery Timelines.│                            │
+├──────────────┼───────────────────────────────────────────────────────────────┼────────────────────────────┤
+│ **M4**       │ WebSocket Live Broadcasts, Floating Dock UI, Auth Portal,     │ ✅ Completed               │
+│              │ End-to-End System Polish, Testing & Documentation.            │                            │
+└──────────────┴───────────────────────────────────────────────────────────────┴────────────────────────────┘
+```
+
+### Team Members — Group 3
+- **Infosys Springboard Group 3 Contributors**
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -453,6 +628,6 @@ Built collaboratively across 4 milestones:
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:06b6d4,50:3b82f6,100:1e3a8a&height=120&section=footer" width="100%"/>
 
-*Built with ❤️ using **React 18**, **FastAPI**, **LLaMA 3.2**, and **Vanilla CSS***
+**SupportPilot** · *AI-Powered IT Ticket Resolution Platform* · Infosys Springboard Group 3
 
 </div>
