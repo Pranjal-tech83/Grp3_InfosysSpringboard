@@ -612,8 +612,14 @@ SupportPilot was built collaboratively by **Group 3** as part of the **Infosys S
 └──────────────┴───────────────────────────────────────────────────────────────┴────────────────────────────┘
 ```
 
-### Team Members — Group 3
+### 👥Team Members — Group 3
 - **Infosys Springboard Group 3 Contributors**
+
+- 🧠 **Sneh Singh**
+- 🚀 **Pranjal Kumar**
+- 💡 **Ruchitha Reddy**
+- 🔧 **Mithrabharathi Ravula**
+- ✨ **Anuradha Gethe**
 
 ---
 
