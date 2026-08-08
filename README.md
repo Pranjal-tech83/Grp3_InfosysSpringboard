@@ -1,7 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,50:3b82f6,100:06b6d4&height=220&section=header&text=SupportPilot&fontSize=62&fontColor=ffffff&fontAlignY=36&desc=Enterprise+AI-Powered+IT+Ticket+Resolution+%26+Multi-Agent+Orchestration+Platform&descSize=19&descAlignY=58" width="100%"/>
-
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1e3a8a,50:3b82f6,100:06b6d4&height=200&section=header&text=SupportPilot&fontSize=60&fontColor=ffffff&fontAlignY=38&desc=AI-Powered+IT+Ticket+Resolution+Platform&descSize=20&descAlignY=58" width="100%"/>
 <br/>
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
@@ -613,8 +612,14 @@ SupportPilot was built collaboratively by **Group 3** as part of the **Infosys S
 └──────────────┴───────────────────────────────────────────────────────────────┴────────────────────────────┘
 ```
 
-### Team Members — Group 3
+### 👥Team Members — Group 3
 - **Infosys Springboard Group 3 Contributors**
+
+- 🧠 **Sneh Singh**
+- 🚀 **Pranjal Kumar**
+- 💡 **Ruchitha Reddy**
+- 🔧 **Mithrabharathi Ravula**
+- ✨ **Anuradha Gethe**
 
 ---
 
