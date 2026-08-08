@@ -1,5 +1,649 @@
 [
   {
+    "id": "jira-26-3547",
+    "ticket_id": 26,
+    "ticket_code": "TKT-26",
+    "jira_key": "SEC-3547",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Urgent",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Ravi raj",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-08T15:53:42.726958+00:00",
+    "last_updated": "2026-08-08T15:53:42.726958+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 926,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-3547",
+    "comments": [
+      {
+        "id": "c-auto-354",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-26 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-08T15:53:42.726958+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T15:53:42.726958+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-3547 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
+    "id": "jira-25-8475",
+    "ticket_id": 25,
+    "ticket_code": "TKT-25",
+    "jira_key": "NET-8475",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "test",
+    "status": "Open",
+    "priority": "High",
+    "severity": "Critical",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "Riya singh",
+    "reporter_email": "riya@gmail.com",
+    "created_at": "2026-08-08T15:51:03.647553+00:00",
+    "last_updated": "2026-08-08T15:51:03.647553+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1123,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-8475",
+    "comments": [
+      {
+        "id": "c-auto-313",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-25 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-08T15:51:03.647553+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T15:51:03.647553+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-8475 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-22-9671",
+    "ticket_id": 22,
+    "ticket_code": "TKT-22",
+    "jira_key": "FIN-9671",
+    "project_key": "FIN",
+    "issue_type": "Task",
+    "summary": "Payment deducted twice",
+    "description": "payment issue",
+    "status": "Resolved",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Finance Support Team",
+    "assignee": "Clara Oswald (Billing Ops)",
+    "reporter_name": "virat",
+    "reporter_email": "virat@gmail.com",
+    "created_at": "2026-08-08T15:39:59.309649+00:00",
+    "last_updated": "2026-08-08T15:40:44.612070+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1126,
+    "jira_url": "https://supportpilot.atlassian.net/browse/FIN-9671",
+    "comments": [
+      {
+        "id": "c-auto-683",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-22 ingested. Automatically assigned to Finance Support Team (Clara Oswald (Billing Ops)).",
+        "created_at": "2026-08-08T15:39:59.309649+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T15:39:59.309649+00:00",
+        "status": "201 Created",
+        "detail": "Issue FIN-9671 created with intelligent team assignment: Finance Support Team"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-08T15:40:44.612070+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
+      }
+    ]
+  },
+  {
+    "id": "jira-21-2217",
+    "ticket_id": 21,
+    "ticket_code": "TKT-21",
+    "jira_key": "SEC-2217",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Escalated",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Ravi raj",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-08T15:18:04.213919+00:00",
+    "last_updated": "2026-08-08T15:42:12.131414+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 961,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-2217",
+    "comments": [
+      {
+        "id": "c-auto-339",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-21 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-08T15:18:04.213919+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T15:18:04.213919+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-2217 created with intelligent team assignment: Identity & Access / SecOps"
+      },
+      {
+        "event": "Status Updated: Escalated",
+        "timestamp": "2026-08-08T15:42:12.131414+00:00",
+        "status": "200 OK",
+        "detail": "Escalated to Engineering"
+      }
+    ]
+  },
+  {
+    "id": "jira-20-8257",
+    "ticket_id": 20,
+    "ticket_code": "TKT-20",
+    "jira_key": "NET-8257",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "test",
+    "status": "Closed",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "test",
+    "reporter_email": "test@gmail.com",
+    "created_at": "2026-08-08T14:28:43.778034+00:00",
+    "last_updated": "2026-08-08T15:16:01.414286+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 982,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-8257",
+    "comments": [
+      {
+        "id": "c-auto-276",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-20 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-08T14:28:43.778034+00:00"
+      },
+      {
+        "id": "c-5428",
+        "author": "SupportPilot Operator",
+        "content": "hii",
+        "created_at": "2026-08-08T15:03:26.431234+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T14:28:43.778034+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-8257 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T14:43:58.462616+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      },
+      {
+        "event": "Comment Added",
+        "timestamp": "2026-08-08T15:03:26.431234+00:00",
+        "status": "201 Created",
+        "detail": "Comment posted by SupportPilot Operator"
+      },
+      {
+        "event": "Status Updated: Escalated",
+        "timestamp": "2026-08-08T15:12:50.585363+00:00",
+        "status": "200 OK",
+        "detail": "Escalated to Engineering"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T15:16:00.234101+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T15:16:00.396799+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T15:16:01.414286+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      }
+    ]
+  },
+  {
+    "id": "jira-19-6625",
+    "ticket_id": 19,
+    "ticket_code": "TKT-19",
+    "jira_key": "SEC-6625",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Closed",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Ravi raj",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-08T14:24:54.641939+00:00",
+    "last_updated": "2026-08-08T15:16:14.432605+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1291,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-6625",
+    "comments": [
+      {
+        "id": "c-auto-191",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-19 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-08T14:24:54.641939+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-08T14:24:54.641939+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-6625 created with intelligent team assignment: Identity & Access / SecOps"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T14:49:14.960211+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'In Progress'}"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T15:16:13.418892+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-08T15:16:14.432605+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      }
+    ]
+  },
+  {
+    "id": "jira-18-7723",
+    "ticket_id": 18,
+    "ticket_code": "TKT-18",
+    "jira_key": "NET-7723",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "VPN timeouts, gateway latency",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "test",
+    "reporter_email": "test@gmail.com",
+    "created_at": "2026-08-07T17:32:57.420328+00:00",
+    "last_updated": "2026-08-08T15:03:12.542093+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 912,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-7723",
+    "comments": [
+      {
+        "id": "c-auto-892",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-18 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-07T17:32:57.420328+00:00"
+      },
+      {
+        "id": "c-5497",
+        "author": "SupportPilot Operator",
+        "content": "hii",
+        "created_at": "2026-08-08T15:03:12.542093+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T17:32:57.420328+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-7723 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Manual Resynchronization",
+        "timestamp": "2026-08-07T17:40:43.856125+00:00",
+        "status": "200 OK",
+        "detail": "Forced bidirectional resync completed successfully"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Comment Added",
+        "timestamp": "2026-08-08T15:03:12.542093+00:00",
+        "status": "201 Created",
+        "detail": "Comment posted by SupportPilot Operator"
+      }
+    ]
+  },
+  {
+    "id": "jira-17-1805",
+    "ticket_id": 17,
+    "ticket_code": "TKT-17",
+    "jira_key": "NET-1805",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "test",
+    "status": "Resolved",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "roman",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-07T17:10:26.496121+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 795,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-1805",
+    "comments": [
+      {
+        "id": "c-auto-717",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-17 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-07T17:10:26.496121+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T17:10:26.496121+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-1805 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-07T17:31:52.408535+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
+    "id": "jira-16-4342",
+    "ticket_id": 16,
+    "ticket_code": "TKT-16",
+    "jira_key": "ENG-4342",
+    "project_key": "ENG",
+    "issue_type": "Task",
+    "summary": "connection pool exhaustion",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Customer Support Team",
+    "assignee": "Emma Stone (Support Tier-2)",
+    "reporter_name": "Ravi raj",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-07T17:03:11.738181+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 769,
+    "jira_url": "https://supportpilot.atlassian.net/browse/ENG-4342",
+    "comments": [
+      {
+        "id": "c-auto-348",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-16 ingested. Automatically assigned to Customer Support Team (Emma Stone (Support Tier-2)).",
+        "created_at": "2026-08-07T17:03:11.738181+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T17:03:11.738181+00:00",
+        "status": "201 Created",
+        "detail": "Issue ENG-4342 created with intelligent team assignment: Customer Support Team"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
+    "id": "jira-15-5421",
+    "ticket_id": 15,
+    "ticket_code": "TKT-15",
+    "jira_key": "NET-5421",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "test",
+    "status": "Resolved",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "pranjal",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-07T16:57:29.680049+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 855,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-5421",
+    "comments": [
+      {
+        "id": "c-auto-675",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-15 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-07T16:57:29.680049+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T16:57:29.680049+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-5421 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-07T16:58:13.117123+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
+    "id": "jira-14-3816",
+    "ticket_id": 14,
+    "ticket_code": "TKT-14",
+    "jira_key": "FIN-3816",
+    "project_key": "FIN",
+    "issue_type": "Task",
+    "summary": "Payment deducted twice",
+    "description": "payment",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Finance Support Team",
+    "assignee": "Clara Oswald (Billing Ops)",
+    "reporter_name": "roman",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-07T16:46:59.680514+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1093,
+    "jira_url": "https://supportpilot.atlassian.net/browse/FIN-3816",
+    "comments": [
+      {
+        "id": "c-auto-569",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-14 ingested. Automatically assigned to Finance Support Team (Clara Oswald (Billing Ops)).",
+        "created_at": "2026-08-07T16:46:59.680514+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T16:46:59.680514+00:00",
+        "status": "201 Created",
+        "detail": "Issue FIN-3816 created with intelligent team assignment: Finance Support Team"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
+    "id": "jira-13-3509",
+    "ticket_id": 13,
+    "ticket_code": "TKT-13",
+    "jira_key": "NET-3509",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "vpn",
+    "status": "Resolved",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "pranjal",
+    "reporter_email": "pranjal838303@gmail.com",
+    "created_at": "2026-08-07T16:35:12.675985+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 820,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-3509",
+    "comments": [
+      {
+        "id": "c-auto-872",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-13 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-07T16:35:12.675985+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T16:35:12.675985+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-3509 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-07T17:03:30.287911+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
+    "id": "jira-12-9214",
+    "ticket_id": 12,
+    "ticket_code": "TKT-12",
+    "jira_key": "ENG-9214",
+    "project_key": "ENG",
+    "issue_type": "Task",
+    "summary": "Test ticket via API",
+    "description": "This is a test description",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "P3",
+    "assigned_team": "Backend Engineering Team",
+    "assignee": "Sarah Chen (Senior Backend Eng)",
+    "reporter_name": "API Tester",
+    "reporter_email": "api_test@example.com",
+    "created_at": "2026-08-07T16:34:49.491067+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 641,
+    "jira_url": "https://supportpilot.atlassian.net/browse/ENG-9214",
+    "comments": [
+      {
+        "id": "c-auto-769",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-12 ingested. Automatically assigned to Backend Engineering Team (Sarah Chen (Senior Backend Eng)).",
+        "created_at": "2026-08-07T16:34:49.491067+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-07T16:34:49.491067+00:00",
+        "status": "201 Created",
+        "detail": "Issue ENG-9214 created with intelligent team assignment: Backend Engineering Team"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      }
+    ]
+  },
+  {
     "id": "jira-66-8967",
     "ticket_id": 66,
     "ticket_code": "TKT-66",
@@ -16,9 +660,9 @@
     "reporter_name": "ravi",
     "reporter_email": "ravi@gmail.com",
     "created_at": "2026-08-05T17:44:42.498178+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 920,
+    "sync_latency_ms": 656,
     "jira_url": "https://supportpilot.atlassian.net/browse/SEC-8967",
     "comments": [
       {
@@ -38,6 +682,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }
@@ -60,9 +710,9 @@
     "reporter_name": "test",
     "reporter_email": "test@gmail.com",
     "created_at": "2026-08-05T17:33:21.050421+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 699,
+    "sync_latency_ms": 1015,
     "jira_url": "https://supportpilot.atlassian.net/browse/NET-6799",
     "comments": [
       {
@@ -82,6 +732,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }
@@ -104,9 +760,9 @@
     "reporter_name": "pranjal",
     "reporter_email": "pranjal838303@gmail.com",
     "created_at": "2026-08-05T17:31:37.684144+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 1024,
+    "sync_latency_ms": 972,
     "jira_url": "https://supportpilot.atlassian.net/browse/FIN-4182",
     "comments": [
       {
@@ -134,6 +790,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -154,9 +816,9 @@
     "reporter_name": "roman",
     "reporter_email": "roman838303@gmail.com",
     "created_at": "2026-08-05T17:28:18.174113+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 776,
+    "sync_latency_ms": 718,
     "jira_url": "https://supportpilot.atlassian.net/browse/SEC-9368",
     "comments": [
       {
@@ -176,6 +838,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }
@@ -198,9 +866,9 @@
     "reporter_name": "pranjal",
     "reporter_email": "pranjal838303@gmail.com",
     "created_at": "2026-08-05T16:54:07.746011+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 709,
+    "sync_latency_ms": 828,
     "jira_url": "https://supportpilot.atlassian.net/browse/NET-4781",
     "comments": [
       {
@@ -220,6 +888,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }
@@ -242,9 +916,9 @@
     "reporter_name": "Jane Smith",
     "reporter_email": "jane@test.com",
     "created_at": "2026-08-05T16:52:18.271742+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 776,
+    "sync_latency_ms": 618,
     "jira_url": "https://supportpilot.atlassian.net/browse/NET-5042",
     "comments": [
       {
@@ -264,6 +938,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }
@@ -286,9 +966,9 @@
     "reporter_name": "test",
     "reporter_email": "test@gmail.com",
     "created_at": "2026-08-05T15:41:55.544593+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 919,
+    "sync_latency_ms": 1153,
     "jira_url": "https://supportpilot.atlassian.net/browse/SEC-3847",
     "comments": [
       {
@@ -322,6 +1002,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -342,9 +1028,9 @@
     "reporter_name": "DevOps Lead",
     "reporter_email": "devops@enterprise.com",
     "created_at": "2026-08-05T15:38:38.438088+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 912,
+    "sync_latency_ms": 1176,
     "jira_url": "https://supportpilot.atlassian.net/browse/SW-7963",
     "comments": [
       {
@@ -390,6 +1076,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -410,9 +1102,9 @@
     "reporter_name": "Marcus Vance",
     "reporter_email": "m.vance@acme.corp",
     "created_at": "2026-08-05T15:37:49.521848+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 1109,
+    "sync_latency_ms": 788,
     "jira_url": "https://supportpilot.atlassian.net/browse/ENG-4821",
     "comments": [
       {
@@ -446,6 +1138,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -466,9 +1164,9 @@
     "reporter_name": "Elena Rostova",
     "reporter_email": "e.rostova@techcorp.io",
     "created_at": "2026-08-05T15:37:49.521848+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 1135,
+    "sync_latency_ms": 991,
     "jira_url": "https://supportpilot.atlassian.net/browse/NET-3914",
     "comments": [
       {
@@ -496,6 +1194,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -516,9 +1220,9 @@
     "reporter_name": "David Kim",
     "reporter_email": "dkim@globalfin.com",
     "created_at": "2026-08-05T15:37:49.521848+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 1053,
+    "sync_latency_ms": 1045,
     "jira_url": "https://supportpilot.atlassian.net/browse/SEC-1049",
     "comments": [
       {
@@ -552,6 +1256,12 @@
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
       }
     ]
   },
@@ -572,9 +1282,9 @@
     "reporter_name": "Jessica Albright",
     "reporter_email": "jessica@venture.org",
     "created_at": "2026-08-05T15:37:49.521848+00:00",
-    "last_updated": "2026-08-05T17:46:06.323860+00:00",
+    "last_updated": "2026-08-08T10:23:14.748657+00:00",
     "sync_status": "Synced",
-    "sync_latency_ms": 1028,
+    "sync_latency_ms": 682,
     "jira_url": "https://supportpilot.atlassian.net/browse/FIN-2201",
     "comments": [],
     "sync_history": [
@@ -599,6 +1309,12 @@
       {
         "event": "Bulk Synchronization",
         "timestamp": "2026-08-05T17:46:06.323860+00:00",
+        "status": "200 OK",
+        "detail": "Bulk batch synchronization verified"
+      },
+      {
+        "event": "Bulk Synchronization",
+        "timestamp": "2026-08-08T10:23:14.748657+00:00",
         "status": "200 OK",
         "detail": "Bulk batch synchronization verified"
       }

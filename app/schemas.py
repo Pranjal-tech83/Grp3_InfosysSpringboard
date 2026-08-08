@@ -15,18 +15,42 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     department: Optional[str] = None
-    role: str = "employee"
+    role: str = "Support Agent"
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+    email_verified: bool = True
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    department: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    role: Optional[str] = None
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+    confirm_email: EmailStr
 
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: int
+    id: Optional[int] = None
     name: str
     email: EmailStr
-    department: Optional[str]
+    department: Optional[str] = None
     role: str
-    created_at: datetime
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+    profileImage: Optional[str] = None
+    email_verified: bool = True
+    emailVerified: bool = True
+    created_at: Optional[datetime] = None
 
 
 # ---------- Tickets ----------
@@ -178,6 +202,7 @@ class ActivityLogOut(BaseModel):
 # ---------- Analytics ----------
 
 class DashboardSummaryOut(BaseModel):
+    total_tickets: Optional[int] = None
     total_tickets_today: int
     open_tickets: int
     resolved_tickets: int

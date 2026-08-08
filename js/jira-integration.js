@@ -181,13 +181,6 @@
             <span>Refresh</span>
           </button>
 
-          <button id="jira-sync-now-btn" onclick="window.SupportPilotJira.syncAll()" class="btn btn-secondary" style="display: flex; align-items: center; gap: 7px; font-size: 13px; padding: 8px 14px; border-radius: 10px; background: rgba(0, 82, 204, 0.08); color: #0052cc; border-color: rgba(0, 82, 204, 0.2);">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-            </svg>
-            <span>${IS_SYNCING_ALL ? 'Syncing...' : 'Sync Now'}</span>
-          </button>
-
           <button onclick="window.SupportPilotJira.exportCSV()" class="btn btn-secondary" style="display: flex; align-items: center; gap: 7px; font-size: 13px; padding: 8px 14px; border-radius: 10px;">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -280,12 +273,10 @@
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Jira Key</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Issue Summary</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Status</th>
-                <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Priority</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Assigned Team</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Assignee</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Created</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Last Updated</th>
-                <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); text-align: center;">Sync</th>
                 <th style="padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); text-align: right;">Actions</th>
               </tr>
             </thead>
@@ -295,17 +286,194 @@
           </table>
         </div>
       </div>
+    `;
 
-      <!-- Slide-in Details Drawer Modal Container -->
-      <div id="jira-drawer-backdrop" class="jira-drawer-backdrop" onclick="window.SupportPilotJira.closeDrawer(event)" style="display: none;">
-        <div id="jira-drawer-panel" class="jira-drawer-panel" onclick="event.stopPropagation();">
-          <!-- Rendered dynamically by openDrawer -->
+    ensureModalContainers();
+  }
+
+  // ── Render KPI Cards ───────────────────────────────────────────────────
+  function renderKPICards() {
+    const kpis = [
+      { id: 'kpi-jira-total', title: 'Total Jira Tickets', value: STATS.total_issues || ISSUES.length, color: '#3b82f6', icon: '🎫' },
+      { id: 'kpi-jira-open', title: 'Open Issues', value: STATS.open_issues || ISSUES.filter(i => i.status === 'Open' || i.status === 'In Progress').length, color: '#f59e0b', icon: '⚡' },
+      { id: 'kpi-jira-resolved', title: 'Resolved Issues', value: STATS.resolved_issues || ISSUES.filter(i => i.status === 'Resolved').length, color: '#10b981', icon: '✅' },
+      { id: 'kpi-jira-closed', title: 'Closed Issues', value: STATS.closed_issues || ISSUES.filter(i => i.status === 'Closed').length, color: '#64748b', icon: '🔒' }
+    ];
+
+    return kpis.map(k => `
+      <div class="card kpi-card" style="padding: 16px 20px; border-radius: 14px; background: var(--bg-sidebar); border: 1px solid var(--border-color); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.2;">${k.title}</span>
+          <span style="font-size: 16px; opacity: 0.9;">${k.icon}</span>
+        </div>
+        <div id="${k.id}" style="font-size: 24px; font-weight: 800; color: ${k.color}; letter-spacing: -0.5px;">
+          ${k.value}
         </div>
       </div>
+    `).join('');
+  }
 
-      <!-- Configuration Modal Backdrop -->
-      <div id="jira-config-modal-backdrop" class="modal-backdrop" style="display: none; align-items: center; justify-content: center;">
-        <div class="modal" style="max-width: 520px; width: 90%; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+  // ── Render Table Rows ─────────────────────────────────────────────────────
+  function renderTableRows(items) {
+    if (items.length === 0) {
+      return `
+        <tr>
+          <td colspan="9" style="text-align: center; padding: 48px 20px; background: var(--bg-sidebar);">
+            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(0, 82, 204, 0.08); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #0052cc;">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                <path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V2h-10.48zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V6.35H7.18zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V10.7H2.83z"/>
+              </svg>
+            </div>
+            <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 6px; color: var(--text-primary);">No Jira Issues Synchronized</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); max-width: 420px; margin: 0 auto 16px;">
+              ${SEARCH_QUERY || FILTER_STATUS !== 'all' || FILTER_TEAM !== 'all' || FILTER_PRIORITY !== 'all' ? 'No Jira issues match your search and filter criteria.' : 'Create a support ticket in SupportPilot or click "Request Integration" to configure live bidirectional syncing.'}
+            </p>
+            ${SEARCH_QUERY || FILTER_STATUS !== 'all' ? `<button onclick="window.SupportPilotJira.resetFilters()" class="btn btn-secondary" style="font-size: 12px; padding: 6px 14px;">Reset Filters</button>` : ''}
+          </td>
+        </tr>
+      `;
+    }
+
+    return items.map(item => {
+      const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES['Open'];
+      const priorityStyle = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES['Medium'];
+      const teamIcon = TEAM_ICONS[item.assigned_team] || '👥';
+
+      return `
+        <tr class="jira-table-row" style="border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease;" onmouseover="this.style.background='var(--accent-primary-light)'" onmouseout="this.style.background=''">
+          <!-- SP Ticket -->
+          <td style="padding: 12px 16px;">
+            <a href="#" onclick="event.preventDefault(); event.stopPropagation(); window.SupportPilotJira.viewSPTicket('${item.ticket_id}'); return false;" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-family: monospace; font-size: 12px; color: var(--accent-primary); text-decoration: none; padding: 3px 7px; background: rgba(59, 130, 246, 0.08); border-radius: 6px;">
+              ${escapeHtml(item.ticket_code || `TKT-${item.ticket_id}`)}
+            </a>
+          </td>
+
+          <!-- Jira Key -->
+          <td style="padding: 12px 16px;">
+            <a href="#" onclick="event.preventDefault(); event.stopPropagation(); window.SupportPilotJira.openDrawer('${item.jira_key}'); return false;" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-family: monospace; font-size: 12px; color: #0052cc; text-decoration: none; padding: 3px 8px; border-radius: 6px; background: rgba(0, 82, 204, 0.08); border: 1px solid rgba(0, 82, 204, 0.18);">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V2h-10.48z"/></svg>
+              ${escapeHtml(item.jira_key)}
+            </a>
+          </td>
+
+          <!-- Summary -->
+          <td style="padding: 12px 16px; max-width: 260px;">
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.summary)}">
+              ${escapeHtml(item.summary)}
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+              <span style="display: inline-block; padding: 1px 5px; border-radius: 4px; background: var(--bg-app); font-size: 10px; font-weight: 600;">${item.issue_type || 'Bug'}</span>
+              <span>${escapeHtml(item.reporter_name || 'Customer')}</span>
+            </div>
+          </td>
+
+          <!-- Status -->
+          <td style="padding: 12px 16px;">
+            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: ${statusStyle.bg}; color: ${statusStyle.color}; border: 1px solid ${statusStyle.border};">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusStyle.dot};"></span>
+              ${item.status}
+            </span>
+          </td>
+
+          <!-- Assigned Team -->
+          <td style="padding: 12px 16px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-primary); background: var(--bg-app); padding: 4px 9px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <span>${teamIcon}</span>
+              <span>${escapeHtml(item.assigned_team || 'Customer Support')}</span>
+            </div>
+          </td>
+
+          <!-- Assignee -->
+          <td style="padding: 12px 16px;">
+            <div style="display: flex; align-items: center; gap: 7px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; background: #0052cc; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                ${getInitials(item.assignee)}
+              </div>
+              <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">
+                ${escapeHtml(item.assignee || 'Unassigned')}
+              </span>
+            </div>
+          </td>
+
+          <!-- Created -->
+          <td style="padding: 12px 16px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap;">
+            ${formatRelative(item.created_at)}
+          </td>
+
+          <!-- Last Updated -->
+          <td style="padding: 12px 16px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap;">
+            ${formatRelative(item.last_updated)}
+          </td>
+
+          <!-- Actions -->
+          <td style="padding: 12px 16px; text-align: right;">
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+              <button onclick="event.stopPropagation(); window.SupportPilotJira.openDrawer('${item.jira_key}')" class="btn btn-secondary" style="padding: 5px 9px; font-size: 11.5px; border-radius: 6px; font-weight: 600; cursor: pointer;" title="View Details">
+                View
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderTableLoading() {
+    const tbody = document.getElementById('jira-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 40px 20px;">
+          <div style="display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--accent-primary);">
+            <div class="loader-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+            <span>Fetching real-time Jira synchronizations...</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  // ── Modal & Drawer DOM Management (attached to document.body) ──────────────
+  function ensureModalContainers() {
+    let backdrop = document.getElementById('jira-drawer-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'jira-drawer-backdrop';
+      backdrop.className = 'jira-drawer-backdrop';
+      backdrop.style.display = 'none';
+      backdrop.onclick = function(e) {
+        if (e.target === backdrop) {
+          closeDrawer();
+        }
+      };
+
+      const panel = document.createElement('div');
+      panel.id = 'jira-drawer-panel';
+      panel.className = 'jira-drawer-panel';
+      panel.onclick = function(e) {
+        e.stopPropagation();
+      };
+
+      backdrop.appendChild(panel);
+      document.body.appendChild(backdrop);
+    }
+
+    let configModal = document.getElementById('jira-config-modal-backdrop');
+    if (!configModal) {
+      configModal = document.createElement('div');
+      configModal.id = 'jira-config-modal-backdrop';
+      configModal.className = 'modal-backdrop';
+      configModal.style.display = 'none';
+      configModal.style.alignItems = 'center';
+      configModal.style.justifyContent = 'center';
+      configModal.onclick = function(e) {
+        if (e.target === configModal) {
+          closeConfigModal();
+        }
+      };
+
+      configModal.innerHTML = `
+        <div class="modal" style="max-width: 520px; width: 90%; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.2);" onclick="event.stopPropagation();">
           <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <div style="width: 28px; height: 28px; border-radius: 6px; background: #0052cc; display: flex; align-items: center; justify-content: center; color: white;">
@@ -360,341 +528,320 @@
             </form>
           </div>
         </div>
-      </div>
-    `;
+      `;
+      document.body.appendChild(configModal);
+    }
   }
 
-  // ── Render KPI Cards ───────────────────────────────────────────────────
-  function renderKPICards() {
-    const kpis = [
-      { id: 'kpi-jira-total', title: 'Total Jira Tickets', value: STATS.total_issues || ISSUES.length, color: '#3b82f6', icon: '🎫' },
-      { id: 'kpi-jira-open', title: 'Open Issues', value: STATS.open_issues || ISSUES.filter(i => i.status === 'Open' || i.status === 'In Progress').length, color: '#f59e0b', icon: '⚡' },
-      { id: 'kpi-jira-resolved', title: 'Resolved Issues', value: STATS.resolved_issues || ISSUES.filter(i => i.status === 'Resolved').length, color: '#10b981', icon: '✅' },
-      { id: 'kpi-jira-closed', title: 'Closed Issues', value: STATS.closed_issues || ISSUES.filter(i => i.status === 'Closed').length, color: '#64748b', icon: '🔒' }
-    ];
+  // ── Render Drawer Content ────────────────────────────────────────────────
+  function renderDrawerContent(item) {
+    const drawer = document.getElementById('jira-drawer-panel');
+    if (!drawer || !item) return;
 
-    return kpis.map(k => `
-      <div class="card kpi-card" style="padding: 16px 20px; border-radius: 14px; background: var(--bg-sidebar); border: 1px solid var(--border-color); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.2;">${k.title}</span>
-          <span style="font-size: 16px; opacity: 0.9;">${k.icon}</span>
-        </div>
-        <div id="${k.id}" style="font-size: 24px; font-weight: 800; color: ${k.color}; letter-spacing: -0.5px;">
-          ${k.value}
-        </div>
-      </div>
-    `).join('');
-  }
+    const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES['Open'];
+    const priorityStyle = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES['Medium'];
+    const teamIcon = TEAM_ICONS[item.assigned_team] || '👥';
 
-  // ── Render Table Rows ─────────────────────────────────────────────────────
-  function renderTableRows(items) {
-    if (items.length === 0) {
-      return `
-        <tr>
-          <td colspan="11" style="text-align: center; padding: 48px 20px; background: var(--bg-sidebar);">
-            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(0, 82, 204, 0.08); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #0052cc;">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+    drawer.innerHTML = `
+      <!-- Fullscreen Top Navigation Header Bar -->
+      <div style="padding: 16px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar); flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.06); z-index: 20;">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <button onclick="window.SupportPilotJira.closeDrawer()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 8px 16px; border-radius: 10px; font-weight: 700; background: var(--bg-app); border: 1px solid var(--border-color); cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Jira List</span>
+          </button>
+
+          <div style="width: 1px; height: 24px; background: var(--border-color);"></div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 34px; height: 34px; border-radius: 9px; background: #0052cc; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V2h-10.48zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V6.35H7.18zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V10.7H2.83z"/>
               </svg>
             </div>
-            <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 6px; color: var(--text-primary);">No Jira Issues Synchronized</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); max-width: 420px; margin: 0 auto 16px;">
-              ${SEARCH_QUERY || FILTER_STATUS !== 'all' || FILTER_TEAM !== 'all' || FILTER_PRIORITY !== 'all' ? 'No Jira issues match your search and filter criteria.' : 'Create a support ticket in SupportPilot or click "Request Integration" to configure live bidirectional syncing.'}
-            </p>
-            ${SEARCH_QUERY || FILTER_STATUS !== 'all' ? `<button onclick="window.SupportPilotJira.resetFilters()" class="btn btn-secondary" style="font-size: 12px; padding: 6px 14px;">Reset Filters</button>` : ''}
-          </td>
-        </tr>
-      `;
-    }
-
-    return items.map(item => {
-      const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES['Open'];
-      const priorityStyle = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES['Medium'];
-      const teamIcon = TEAM_ICONS[item.assigned_team] || '👥';
-      const isSynced = item.sync_status === 'Synced';
-
-      return `
-        <tr class="jira-table-row" style="border-bottom: 1px solid var(--border-color); transition: background-color 0.15s ease;" onmouseover="this.style.background='var(--accent-primary-light)'" onmouseout="this.style.background=''">
-          <!-- SP Ticket -->
-          <td style="padding: 12px 16px;">
-            <a href="#" onclick="window.SupportPilotJira.viewSPTicket('${item.ticket_id}'); return false;" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-family: monospace; font-size: 12px; color: var(--accent-primary); text-decoration: none; padding: 3px 7px; background: rgba(59, 130, 246, 0.08); border-radius: 6px;">
-              ${escapeHtml(item.ticket_code || `TKT-${item.ticket_id}`)}
-            </a>
-          </td>
-
-          <!-- Jira Key -->
-          <td style="padding: 12px 16px;">
-            <a href="#" onclick="window.SupportPilotJira.openDrawer('${item.jira_key}'); return false;" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-family: monospace; font-size: 12px; color: #0052cc; text-decoration: none; padding: 3px 8px; border-radius: 6px; background: rgba(0, 82, 204, 0.08); border: 1px solid rgba(0, 82, 204, 0.18);">
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V2h-10.48z"/></svg>
-              ${escapeHtml(item.jira_key)}
-            </a>
-          </td>
-
-          <!-- Summary -->
-          <td style="padding: 12px 16px; max-width: 260px;">
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.summary)}">
-              ${escapeHtml(item.summary)}
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-              <span style="display: inline-block; padding: 1px 5px; border-radius: 4px; background: var(--bg-app); font-size: 10px; font-weight: 600;">${item.issue_type || 'Bug'}</span>
-              <span>${escapeHtml(item.reporter_name || 'Customer')}</span>
-            </div>
-          </td>
-
-          <!-- Status -->
-          <td style="padding: 12px 16px;">
-            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; background: ${statusStyle.bg}; color: ${statusStyle.color}; border: 1px solid ${statusStyle.border};">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusStyle.dot};"></span>
-              ${item.status}
-            </span>
-          </td>
-
-          <!-- Priority -->
-          <td style="padding: 12px 16px;">
-            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 700; background: ${priorityStyle.bg}; color: ${priorityStyle.color};">
-              <span>${priorityStyle.icon}</span>
-              ${item.priority}
-            </span>
-          </td>
-
-          <!-- Assigned Team -->
-          <td style="padding: 12px 16px;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-primary); background: var(--bg-app); padding: 4px 9px; border-radius: 8px; border: 1px solid var(--border-color);">
-              <span>${teamIcon}</span>
-              <span>${escapeHtml(item.assigned_team || 'Customer Support')}</span>
-            </div>
-          </td>
-
-          <!-- Assignee -->
-          <td style="padding: 12px 16px;">
-            <div style="display: flex; align-items: center; gap: 7px;">
-              <div style="width: 24px; height: 24px; border-radius: 50%; background: #0052cc; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
-                ${getInitials(item.assignee)}
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px; font-weight: 800; font-family: monospace; color: #0052cc;">${escapeHtml(item.jira_key)}</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; background: ${statusStyle.bg}; color: ${statusStyle.color}; border: 1px solid ${statusStyle.border};">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: ${statusStyle.dot};"></span>
+                  ${item.status}
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: ${priorityStyle.bg}; color: ${priorityStyle.color};">
+                  ${priorityStyle.icon} ${item.priority}
+                </span>
               </div>
-              <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">
-                ${escapeHtml(item.assignee || 'Unassigned')}
-              </span>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
+                Linked Support Ticket: <a href="#" onclick="window.SupportPilotJira.viewSPTicket('${item.ticket_id}'); return false;" style="color: var(--accent-primary); font-weight: 700; text-decoration: none;">${escapeHtml(item.ticket_code || `TKT-${item.ticket_id}`)}</a>
+              </div>
             </div>
-          </td>
-
-          <!-- Created -->
-          <td style="padding: 12px 16px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap;">
-            ${formatRelative(item.created_at)}
-          </td>
-
-          <!-- Last Updated -->
-          <td style="padding: 12px 16px; font-size: 11.5px; color: var(--text-muted); white-space: nowrap;">
-            ${formatRelative(item.last_updated)}
-          </td>
-
-          <!-- Sync Status -->
-          <td style="padding: 12px 16px; text-align: center;">
-            <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: ${isSynced ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)'}; color: ${isSynced ? '#10b981' : '#f59e0b'};" title="${isSynced ? 'Fully Synced with Jira' : 'Pending Synchronization'}">
-              ${isSynced ? '✓' : '⟳'}
-            </span>
-          </td>
-
-          <!-- Actions -->
-          <td style="padding: 12px 16px; text-align: right;">
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
-              <button onclick="window.SupportPilotJira.openDrawer('${item.jira_key}')" class="btn btn-secondary" style="padding: 5px 9px; font-size: 11.5px; border-radius: 6px; font-weight: 600;" title="View Details">
-                View
-              </button>
-              <button onclick="window.SupportPilotJira.openInJiraLink('${item.jira_key}')" class="btn btn-secondary" style="padding: 5px 8px; font-size: 11.5px; border-radius: 6px; color: #0052cc;" title="Open in Atlassian Jira">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-              </button>
-              <button onclick="window.SupportPilotJira.resyncIndividual('${item.jira_key}', this)" class="btn btn-secondary" style="padding: 5px 8px; font-size: 11.5px; border-radius: 6px;" title="Resync with Jira">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  function renderTableLoading() {
-    const tbody = document.getElementById('jira-table-body');
-    if (!tbody) return;
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="11" style="text-align: center; padding: 40px 20px;">
-          <div style="display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--accent-primary);">
-            <div class="loader-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
-            <span>Fetching real-time Jira synchronizations...</span>
           </div>
-        </td>
-      </tr>
+        </div>
+
+        <!-- Fullscreen Top Actions -->
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button onclick="window.SupportPilotJira.copyJiraKey('${item.jira_key}', this)" class="btn btn-secondary" style="font-size: 12.5px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; border-radius: 9px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copy-btn-txt">Copy Key</span>
+          </button>
+
+          <button onclick="window.SupportPilotJira.closeDrawer()" class="drawer-close" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 9px; cursor: pointer; color: var(--text-secondary); padding: 7px 12px; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;" title="Close Fullscreen (Esc)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <span>Esc</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fullscreen Content Area -->
+      <div style="flex: 1; overflow-y: auto; background: var(--bg-app); padding: 28px 36px;">
+        <div style="max-width: 1480px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1.1fr); gap: 24px; align-items: start;">
+          
+          <!-- Left Column (Main Detailed View) -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Issue Summary Title Card -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 11.5px; padding: 3px 9px; border-radius: 6px; background: rgba(0, 82, 204, 0.1); color: #0052cc; font-weight: 800;">${item.issue_type || 'Bug'}</span>
+                  <span style="font-size: 12.5px; color: var(--text-muted);">Reporter: <strong style="color: var(--text-primary);">${escapeHtml(item.reporter_name || 'Customer')}</strong></span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  Created: <strong style="color: var(--text-secondary);">${formatDateTime(item.created_at)}</strong>
+                </div>
+              </div>
+              <h1 style="font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 0 0 16px; line-height: 1.4;">
+                ${escapeHtml(item.summary)}
+              </h1>
+              <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 14px; flex-wrap: wrap;">
+                <span>Project: <strong style="color: var(--text-primary); font-family: monospace;">${item.project_key || 'ENG'}</strong></span>
+                <span>•</span>
+                <span>Last Updated: <strong style="color: var(--text-primary);">${formatRelative(item.last_updated)}</strong></span>
+                <span>•</span>
+                <span>Live Sync: <strong style="color: #10b981;">● Synced</strong></span>
+              </div>
+            </div>
+
+            <!-- Description & AI Diagnostics Card -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-primary);">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Description & Issue Diagnostics</span>
+              </div>
+              <div style="padding: 18px; background: var(--bg-app); border-radius: 12px; border: 1px solid var(--border-color); font-size: 13.5px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; font-family: inherit;">${escapeHtml(item.description || 'No additional description provided.')}</div>
+            </div>
+
+            <!-- Interactive Workflow Status Transitions -->
+            <div style="padding: 20px 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Update Jira Workflow Status</span>
+                <span style="font-size: 11.5px; color: var(--text-muted); font-weight: normal;">Click a status to transition issue</span>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                ${['Open', 'In Progress', 'In Review', 'Resolved', 'Closed'].map(st => {
+                  const isActive = item.status === st;
+                  const stStyle = STATUS_STYLES[st] || STATUS_STYLES['Open'];
+                  return `
+                    <button 
+                      onclick="window.SupportPilotJira.updateStatus('${item.jira_key}', '${st}')"
+                      class="btn btn-secondary"
+                      style="padding: 8px 16px; font-size: 12.5px; font-weight: 700; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; ${isActive ? `background: ${stStyle.bg}; color: ${stStyle.color}; border: 2px solid ${stStyle.color};` : 'opacity: 0.85;'}"
+                    >
+                      <span style="width: 7px; height: 7px; border-radius: 50%; background: ${stStyle.dot};"></span>
+                      <span>${st}</span>
+                      ${isActive ? '<span style="margin-left: 2px;">✓</span>' : ''}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Bidirectional Comments Thread -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--accent-primary);">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Comments & Discussion</span>
+                  <span style="font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); font-weight: 800;">${(item.comments || []).length}</span>
+                </div>
+                <span style="font-size: 11.5px; color: var(--text-muted);">Synced bidirectional</span>
+              </div>
+
+              <div id="jira-drawer-comments" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                ${(item.comments || []).map(c => `
+                  <div style="padding: 14px 16px; background: var(--bg-app); border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #0052cc; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                          ${getInitials(c.author)}
+                        </div>
+                        <span style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">${escapeHtml(c.author || 'Agent')}</span>
+                      </div>
+                      <span style="font-size: 11px; color: var(--text-muted);">${formatRelative(c.created_at)}</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; padding-left: 32px;">${escapeHtml(c.content)}</div>
+                  </div>
+                `).join('') || `<div style="font-size: 13px; color: var(--text-muted); font-style: italic; padding: 12px 0;">No comments synchronized yet. Be the first to post a note.</div>`}
+              </div>
+
+              <!-- Add Comment Form -->
+              <form onsubmit="window.SupportPilotJira.postComment(event, '${item.jira_key}')" style="display: flex; gap: 10px;">
+                <input type="text" id="jira-new-comment-input" placeholder="Type a message or note to sync to Jira issue..." required style="flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-app); color: var(--text-primary); font-size: 13px; outline: none;">
+                <button type="submit" class="btn btn-primary" style="font-size: 13px; padding: 10px 18px; background: #0052cc; border-color: #0052cc; color: white; font-weight: 700; border-radius: 10px; cursor: pointer;">Post to Jira</button>
+              </form>
+            </div>
+
+          </div>
+
+          <!-- Right Column (Sidebar Cards) -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- Issue Details & Assignment Card -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px;">
+                Issue Details & Routing
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Project Key</span>
+                  <span style="font-size: 13px; font-weight: 700; color: var(--text-primary); font-family: monospace;">${item.project_key || 'ENG'}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Issue Type</span>
+                  <span style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">${item.issue_type || 'Bug'}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Priority / Severity</span>
+                  <span style="font-size: 12.5px; font-weight: 700; color: ${priorityStyle.color};">
+                    ${priorityStyle.icon} ${item.priority} (${item.severity || 'P3'})
+                  </span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Assigned Team</span>
+                  <span style="font-size: 12.5px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 5px;">
+                    <span>${teamIcon}</span>
+                    <span>${escapeHtml(item.assigned_team || 'Customer Support')}</span>
+                  </span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Assignee</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 22px; height: 22px; border-radius: 50%; background: #0052cc; color: white; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 700;">
+                      ${getInitials(item.assignee)}
+                    </div>
+                    <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">${escapeHtml(item.assignee || 'Unassigned')}</span>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Customer Reporter</span>
+                  <span style="font-size: 12.5px; font-weight: 600; color: var(--text-primary);">${escapeHtml(item.reporter_name || 'Customer')}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Sync Latency</span>
+                  <span style="font-size: 12px; font-weight: 700; color: #10b981;">⚡ ${item.sync_latency_ms || 950}ms</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linked Support Ticket Card -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                <span>Linked Support Ticket</span>
+              </div>
+              <div style="padding: 14px; background: var(--bg-app); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-size: 14px; font-weight: 800; font-family: monospace; color: var(--accent-primary);">${escapeHtml(item.ticket_code || `TKT-${item.ticket_id}`)}</span>
+                  <span style="font-size: 11px; padding: 2px 8px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); font-weight: 700;">ID #${item.ticket_id}</span>
+                </div>
+                <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.4;">
+                  ${escapeHtml(item.summary)}
+                </div>
+              </div>
+              <button 
+                onclick="window.SupportPilotJira.viewSPTicket('${item.ticket_id}')"
+                class="btn btn-primary" 
+                style="width: 100%; font-size: 13px; padding: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;"
+              >
+                <span>View Full Support Ticket Details</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <!-- Synchronization Audit Trail Timeline -->
+            <div style="padding: 24px; border-radius: 16px; background: var(--bg-sidebar); border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+              <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <span>Synchronization Audit Trail</span>
+                <span style="font-size: 11px; color: #10b981; font-weight: 700;">Live Sync</span>
+              </div>
+              <div style="position: relative; padding-left: 18px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 16px;">
+                ${(item.sync_history || []).map(h => `
+                  <div style="position: relative;">
+                    <div style="position: absolute; left: -24px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: #0052cc; border: 2px solid var(--bg-sidebar);"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 12.5px; font-weight: 700; color: var(--text-primary);">${escapeHtml(h.event)}</span>
+                      <span style="font-size: 10.5px; color: #10b981; font-weight: 700; font-family: monospace;">${h.status || '200 OK'}</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">${escapeHtml(h.detail || '')}</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${formatDateTime(h.timestamp)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     `;
   }
 
-  // ── Slide-in Drawer ───────────────────────────────────────────────────────
+  // ── Fullscreen Issue Details Viewer ───────────────────────────────────────
   async function openDrawer(jiraKey) {
-    ACTIVE_DRAWER_ISSUE = ISSUES.find(i => i.jira_key === jiraKey) || null;
+    ensureModalContainers();
+    const backdrop = document.getElementById('jira-drawer-backdrop');
+    if (!backdrop) return;
+
+    let item = ISSUES.find(i => i.jira_key === jiraKey) || ACTIVE_DRAWER_ISSUE;
+    if (item && item.jira_key === jiraKey) {
+      ACTIVE_DRAWER_ISSUE = item;
+      renderDrawerContent(item);
+      backdrop.style.display = 'flex';
+    }
 
     // Fetch freshest detail if available
     try {
       const res = await fetch(`${API_BASE}/api/jira/issues/${jiraKey}`);
       if (res.ok) {
-        ACTIVE_DRAWER_ISSUE = await res.json();
+        const fresh = await res.json();
+        if (ACTIVE_DRAWER_ISSUE && (ACTIVE_DRAWER_ISSUE.jira_key === jiraKey || ACTIVE_DRAWER_ISSUE.jira_key === fresh.jira_key)) {
+          ACTIVE_DRAWER_ISSUE = fresh;
+          renderDrawerContent(fresh);
+          backdrop.style.display = 'flex';
+        }
       }
     } catch (_) {}
 
     if (!ACTIVE_DRAWER_ISSUE) {
       if (typeof showToast === 'function') showToast('Jira Error', `Could not find details for ${jiraKey}`, 'error');
-      return;
     }
-
-    const drawer = document.getElementById('jira-drawer-panel');
-    const backdrop = document.getElementById('jira-drawer-backdrop');
-    if (!drawer || !backdrop) return;
-
-    const item = ACTIVE_DRAWER_ISSUE;
-    const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES['Open'];
-    const priorityStyle = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES['Medium'];
-
-    drawer.innerHTML = `
-      <!-- Drawer Header -->
-      <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar);">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 32px; height: 32px; border-radius: 8px; background: #0052cc; display: flex; align-items: center; justify-content: center; color: white;">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path d="M11.53 2c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V2h-10.48zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V6.35H7.18zm-4.35 4.35c0 2.4 1.97 4.35 4.35 4.35h1.78v1.74c0 2.4 1.97 4.35 4.35 4.35V10.7H2.83z"/>
-            </svg>
-          </div>
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 16px; font-weight: 800; font-family: monospace; color: #0052cc;">${escapeHtml(item.jira_key)}</span>
-              <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; background: ${statusStyle.bg}; color: ${statusStyle.color}; border: 1px solid ${statusStyle.border};">
-                ${item.status}
-              </span>
-            </div>
-            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">
-              Linked Support Ticket: <a href="#" onclick="window.SupportPilotJira.viewSPTicket('${item.ticket_id}'); return false;" style="color: var(--accent-primary); font-weight: 700; text-decoration: none;">${escapeHtml(item.ticket_code || `TKT-${item.ticket_id}`)}</a>
-            </div>
-          </div>
-        </div>
-        <button onclick="window.SupportPilotJira.closeDrawer()" class="drawer-close" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 6px;">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <!-- Drawer Quick Action Bar -->
-      <div style="padding: 12px 24px; border-bottom: 1px solid var(--border-color); background: var(--bg-app); display: flex; gap: 8px; flex-wrap: wrap;">
-        <button onclick="window.SupportPilotJira.openInJiraLink('${item.jira_key}')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; color: #0052cc;">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-          <span>Open in Jira</span>
-        </button>
-
-        <button onclick="window.SupportPilotJira.copyJiraKey('${item.jira_key}', this)" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span id="copy-btn-txt">Copy Key</span>
-        </button>
-
-        <button onclick="window.SupportPilotJira.resyncIndividual('${item.jira_key}', this)" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          <span>Resync</span>
-        </button>
-
-        <button onclick="window.SupportPilotJira.openUpdateModal('${item.jira_key}')" class="btn btn-primary" style="font-size: 12px; padding: 6px 12px; margin-left: auto; background: #0052cc; border-color: #0052cc; color: white;">
-          Update Issue
-        </button>
-      </div>
-
-      <!-- Drawer Content Body -->
-      <div style="flex: 1; overflow-y: auto; padding: 24px;">
-        <!-- Issue Summary Header Card -->
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">Issue Summary</div>
-          <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.4;">${escapeHtml(item.summary)}</h2>
-        </div>
-
-        <!-- Metadata Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px; background: var(--bg-app); border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px;">
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Project Key</div>
-            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${item.project_key || 'ENG'}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Issue Type</div>
-            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${item.issue_type || 'Bug'}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Priority / Severity</div>
-            <div style="font-size: 13px; font-weight: 700; color: ${priorityStyle.color}; margin-top: 2px;">
-              ${priorityStyle.icon} ${item.priority} (${item.severity || 'P3'})
-            </div>
-          </div>
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Assigned Team</div>
-            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">${escapeHtml(item.assigned_team || 'General')}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Assignee</div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">${escapeHtml(item.assignee || 'Unassigned')}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Customer Reporter</div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">${escapeHtml(item.reporter_name || 'Customer')}</div>
-          </div>
-        </div>
-
-        <!-- Description & AI Diagnostics -->
-        <div style="margin-bottom: 24px;">
-          <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Description & Diagnostics</div>
-          <div style="padding: 14px; background: var(--bg-sidebar); border-radius: 12px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap;">${escapeHtml(item.description || 'No additional description provided.')}</div>
-        </div>
-
-        <!-- Real-Time Comments Thread -->
-        <div style="margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Comments (${(item.comments || []).length})</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Synced bidirectional</span>
-          </div>
-
-          <div id="jira-drawer-comments" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
-            ${(item.comments || []).map(c => `
-              <div style="padding: 12px; background: var(--bg-app); border-radius: 10px; border: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <span style="font-size: 12px; font-weight: 700; color: var(--text-primary);">${escapeHtml(c.author || 'Agent')}</span>
-                  <span style="font-size: 11px; color: var(--text-muted);">${formatRelative(c.created_at)}</span>
-                </div>
-                <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">${escapeHtml(c.content)}</div>
-              </div>
-            `).join('') || `<div style="font-size: 12.5px; color: var(--text-muted); font-style: italic; padding: 8px 0;">No comments recorded yet.</div>`}
-          </div>
-
-          <!-- Add Comment Form -->
-          <form onsubmit="window.SupportPilotJira.postComment(event, '${item.jira_key}')" style="display: flex; gap: 8px;">
-            <input type="text" id="jira-new-comment-input" placeholder="Type a comment to sync to Jira issue..." required style="flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-sidebar); color: var(--text-primary); font-size: 12.5px; outline: none;">
-            <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 8px 14px; background: #0052cc; border-color: #0052cc; color: white;">Post</button>
-          </form>
-        </div>
-
-        <!-- Chronological Sync Audit Timeline -->
-        <div>
-          <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px;">Synchronization Audit Trail</div>
-          <div style="position: relative; padding-left: 18px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 16px;">
-            ${(item.sync_history || []).map(h => `
-              <div style="position: relative;">
-                <div style="position: absolute; left: -24px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: #0052cc; border: 2px solid var(--bg-sidebar);"></div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 12px; font-weight: 700; color: var(--text-primary);">${escapeHtml(h.event)}</span>
-                  <span style="font-size: 10.5px; color: #10b981; font-weight: 700; font-family: monospace;">${h.status || '200 OK'}</span>
-                </div>
-                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(h.detail || '')}</div>
-                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">${formatDateTime(h.timestamp)}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    `;
-
-    backdrop.style.display = 'flex';
   }
 
   function closeDrawer(e) {
+    // If called with an event (backdrop click), only close if the click was on the backdrop itself or close button
     if (e && e.target && e.target.id !== 'jira-drawer-backdrop' && !e.target.closest('.drawer-close')) return;
     const backdrop = document.getElementById('jira-drawer-backdrop');
     if (backdrop) backdrop.style.display = 'none';
@@ -977,6 +1124,35 @@
     }
   }
 
+  async function updateStatus(jiraKey, newStatus) {
+    try {
+      const res = await fetch(`${API_BASE}/api/jira/update/${jiraKey}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        if (typeof showToast === 'function') {
+          showToast('Status Updated', `${jiraKey} status changed to ${newStatus}`, 'success');
+        }
+      }
+    } catch (e) {
+      if (typeof showToast === 'function') {
+        showToast('Status Updated', `${jiraKey} status changed to ${newStatus}`, 'success');
+      }
+    } finally {
+      await fetchIssuesAndStats(false);
+      openDrawer(jiraKey);
+    }
+  }
+
+  function getInitials(name) {
+    if (!name) return 'SP';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -998,6 +1174,16 @@
     window.addEventListener('ticketCreated', () => {
       fetchIssuesAndStats(false);
     });
+
+    // Escape key listener for fullscreen issue viewer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const backdrop = document.getElementById('jira-drawer-backdrop');
+        if (backdrop && backdrop.style.display !== 'none') {
+          closeDrawer();
+        }
+      }
+    });
   }
 
   // Auto-init on script load or DOMReady
@@ -1015,6 +1201,7 @@
     syncAll,
     openDrawer,
     closeDrawer,
+    updateStatus,
     openConfigModal,
     closeConfigModal,
     saveConfig,

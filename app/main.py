@@ -12,10 +12,12 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 
-from . import models
-from .database import engine
+from . import models, database, crud
+from .database import engine, SessionLocal
 from .routers import (
     users,
     tickets,
@@ -29,6 +31,18 @@ from .routers import (
 
 # Creates all tables that don't exist yet. Safe to call on every startup.
 models.Base.metadata.create_all(bind=engine)
+
+# Safely check and add any extended columns to existing SQLite DB
+try:
+    with SessionLocal() as init_db:
+        crud.ensure_user_schema_columns(init_db)
+        crud.get_or_create_authenticated_user(init_db)
+        crud.triage_all_unclassified_tickets(init_db)
+except Exception as e:
+    print(f"[Init Warning] {e}")
+
+# Ensure upload directory exists
+os.makedirs("uploads/profiles", exist_ok=True)
 
 app = FastAPI(
     title="SupportPilot API",
@@ -45,6 +59,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(users.router)
 app.include_router(tickets.router)
@@ -113,4 +129,4 @@ class EmailPayload(BaseModel):
 def health_check():
     return {"status": "ok", "service": "SupportPilot API"}
 
-
+

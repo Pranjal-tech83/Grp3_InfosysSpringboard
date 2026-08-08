@@ -30,6 +30,16 @@
   let pollTimer = null;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function fmtRelative(d) {
     if (!d) return 'Recently';
     const dateObj = typeof d === 'string' ? new Date(d) : d;
@@ -396,30 +406,13 @@
                         <td style="text-align:right;">
                           <div style="display:inline-flex;align-items:center;gap:6px;">
                             <button 
-                              onclick="window.SupportPilotEmailEnhanced.viewEmail('${e.id}')"
+                              onclick="event.preventDefault(); event.stopPropagation(); window.SupportPilotEmailEnhanced.viewEmail('${e.id}'); return false;"
                               class="btn btn-secondary"
-                              style="padding:6px 12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;border-radius:8px;"
+                              style="padding:6px 12px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;border-radius:8px;cursor:pointer;"
+                              title="View Fullscreen Details"
                             >
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                               <span>View</span>
-                            </button>
-
-                            <button 
-                              onclick="window.SupportPilotEmailEnhanced.resendEmail('${e.id}')"
-                              class="btn btn-secondary"
-                              style="padding:6px 10px;font-size:12px;display:inline-flex;align-items:center;border-radius:8px;"
-                              title="Resend email to recipient"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-                            </button>
-
-                            <button 
-                              onclick="window.SupportPilotEmailEnhanced.downloadEmail('${e.id}')"
-                              class="btn btn-secondary"
-                              style="padding:6px 10px;font-size:12px;display:inline-flex;align-items:center;border-radius:8px;"
-                              title="Download email (.eml)"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             </button>
                           </div>
                         </td>
@@ -437,217 +430,56 @@
     `;
   }
 
-  // ── Right-Side View Email Drawer ──────────────────────────────────────────
+  // ── Fullscreen Email Detail Modal & DOM Management ────────────────────────
+  function ensureModalContainers() {
+    let backdrop = document.getElementById('email-drawer-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'email-drawer-backdrop';
+      backdrop.className = 'email-drawer-backdrop';
+      backdrop.style.display = 'none';
+      backdrop.onclick = function (e) {
+        if (e.target === backdrop) {
+          closeDrawer();
+        }
+      };
+
+      const panel = document.createElement('div');
+      panel.id = 'email-drawer-panel';
+      panel.className = 'email-drawer';
+      panel.onclick = function (e) {
+        e.stopPropagation();
+      };
+
+      backdrop.appendChild(panel);
+      document.body.appendChild(backdrop);
+    }
+  }
+
   function viewEmail(id) {
     activeEmailId = id;
-    const email = emails.find(e => e.id === id);
-    if (!email) return;
+    ensureModalContainers();
 
-    // Remove existing drawer elements if any
-    document.getElementById('email-drawer-backdrop')?.remove();
-    document.getElementById('email-drawer-panel')?.remove();
+    const email = emails.find(e => String(e.id) === String(id));
+    if (!email) {
+      console.warn(`Email with ID ${id} not found in outbox.`);
+      return;
+    }
 
-    const evt = getEventBadge(email.subject, email.event_type);
-    const statusCls = statusClass(email.status);
-    const avBg = avatarColor(email.recipient_name || email.to);
-    const initials = getInitials(email.recipient_name || email.to);
+    renderDrawerContent(email);
 
-    const timeline = email.timeline || [
-      { stage: 'Generated', time: email.sent_at, detail: 'Email generated automatically.', ok: true },
-      { stage: 'Queued', time: email.sent_at, detail: 'Placed into dispatch queue.', ok: true },
-      { stage: 'Sending', time: email.sent_at, detail: 'Dispatched via relay.', ok: true },
-      { stage: 'Delivered', time: email.delivered_at || email.sent_at, detail: 'Confirmed delivery receipt.', ok: true }
-    ];
+    const backdrop = document.getElementById('email-drawer-backdrop');
+    const panel = document.getElementById('email-drawer-panel');
+    if (backdrop && panel) {
+      backdrop.style.display = 'flex';
+      requestAnimationFrame(() => {
+        backdrop.classList.add('active');
+        panel.classList.add('active');
+        isDrawerOpen = true;
+      });
+    }
 
-    // Backdrop
-    const backdrop = document.createElement('div');
-    backdrop.id = 'email-drawer-backdrop';
-    backdrop.className = 'email-drawer-backdrop';
-    backdrop.onclick = closeDrawer;
-
-    // Panel
-    const panel = document.createElement('div');
-    panel.id = 'email-drawer-panel';
-    panel.className = 'email-drawer';
-
-    panel.innerHTML = `
-      <!-- Drawer Header -->
-      <div class="email-drawer-header">
-        <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:800;letter-spacing:0.4px;background:${evt.bg};color:${evt.color};">
-              ${evt.label}
-            </span>
-            <span class="status-pill ${statusCls}">
-              <span class="status-dot"></span>
-              <span>${email.status || 'Delivered'}</span>
-            </span>
-            <span style="font-family:monospace;font-size:12px;font-weight:700;color:var(--text-muted);">${email.id}</span>
-          </div>
-          <h2 style="font-size:17px;font-weight:800;color:var(--text-primary);margin:2px 0 0 0;line-height:1.35;">
-            ${email.subject}
-          </h2>
-        </div>
-
-        <button onclick="window.SupportPilotEmailEnhanced.closeDrawer()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <!-- Drawer Content -->
-      <div class="email-drawer-body">
-        
-        <!-- Metadata Grid -->
-        <div>
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);margin-bottom:8px;">
-            Email Metadata
-          </div>
-          <div class="email-meta-grid">
-            <div>
-              <div style="font-size:11px;color:var(--text-muted);font-weight:600;">To (Recipient)</div>
-              <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:2px;">
-                ${email.recipient_name || 'Customer'} &lt;${email.to}&gt;
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-muted);font-weight:600;">From (Sender)</div>
-              <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:2px;">
-                ${email.from || 'support@supportpilot.ai'}
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-muted);font-weight:600;">Linked Ticket</div>
-              <div style="margin-top:2px;">
-                <span 
-                  onclick="window.SupportPilotEmailEnhanced.openLinkedTicket('${email.ticket_id}')"
-                  style="color:var(--accent-primary);font-family:monospace;font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline;"
-                >
-                  ${email.ticket_id || 'TKT-General'}
-                </span>
-                <span style="font-size:11px;color:var(--text-muted);margin-left:6px;">(${email.ticket_status || 'Open'})</span>
-              </div>
-            </div>
-            <div>
-              <div style="font-size:11px;color:var(--text-muted);font-weight:600;">Sent Timestamp</div>
-              <div style="font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-top:2px;">
-                ${fmtFullTime(email.sent_at || email.created_at)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6-Stage Delivery Timeline -->
-        <div>
-          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);margin-bottom:12px;">
-            Delivery Timeline &amp; SLA Tracking
-          </div>
-          <div class="email-timeline-track">
-            ${timeline.map((t, idx) => {
-              const isOk = t.ok === true;
-              const isFail = t.ok === false;
-              const dotColor = isOk ? '#10b981' : (isFail ? '#ef4444' : '#f59e0b');
-              const dotBg = isOk ? 'rgba(16, 185, 129, 0.15)' : (isFail ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)');
-
-              return `
-                <div class="email-timeline-item">
-                  <div style="display:flex;flex-direction:column;align-items:center;">
-                    <div class="email-timeline-dot" style="background:${dotBg};color:${dotColor};border:1.5px solid ${dotColor};">
-                      ${isOk ? '✓' : (isFail ? '✕' : '•')}
-                    </div>
-                    ${idx < timeline.length - 1 ? '<div class="email-timeline-line"></div>' : ''}
-                  </div>
-                  <div class="email-timeline-content">
-                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                      <span style="font-size:13px;font-weight:700;color:var(--text-primary);">${t.stage}</span>
-                      <span style="font-size:11px;color:var(--text-muted);font-weight:600;">${t.time ? fmtFullTime(t.time) : 'Pending'}</span>
-                    </div>
-                    <div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px;line-height:1.4;">
-                      ${t.detail}
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        <!-- Email Body Previewer -->
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);">
-              Email Body Preview
-            </div>
-            <button onclick="window.SupportPilotEmailEnhanced.copyBody('${email.id}')" style="background:none;border:none;color:var(--accent-primary);font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Copy Body</span>
-            </button>
-          </div>
-
-          <div class="email-body-preview">
-            <div style="border-bottom:1px solid var(--border-color);padding-bottom:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-              <div style="font-weight:800;font-size:14px;color:var(--accent-primary);">SupportPilot Automated Dispatch</div>
-              <div style="font-size:11px;color:var(--text-muted);">ID: ${email.ticket_id || 'TKT-Auto'}</div>
-            </div>
-            <div>${(email.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-            <div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border-color);font-size:11.5px;color:var(--text-muted);">
-              This is an automated system dispatch from SupportPilot AI Ticket Engine. Do not reply directly to this message.
-            </div>
-          </div>
-        </div>
-
-        ${(email.attachments && email.attachments.length > 0) ? `
-          <div>
-            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);margin-bottom:8px;">
-              Attachments (${email.attachments.length})
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              ${email.attachments.map(att => `
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-app);border:1px solid var(--border-color);border-radius:8px;">
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <span style="font-size:16px;">📄</span>
-                    <span style="font-size:13px;font-weight:600;color:var(--text-primary);">${att}</span>
-                  </div>
-                  <button onclick="window.SupportPilotEmailEnhanced.downloadAttachment('${att}')" class="btn btn-secondary" style="padding:4px 10px;font-size:11.5px;">Download</button>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-
-      </div>
-
-      <!-- Drawer Footer Actions -->
-      <div class="email-drawer-footer">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onclick="window.SupportPilotEmailEnhanced.resendEmail('${email.id}')" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:8px 16px;border-radius:8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-            <span>Resend Email</span>
-          </button>
-
-          <button onclick="window.SupportPilotEmailEnhanced.downloadEmail('${email.id}')" class="btn btn-secondary" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:8px 14px;border-radius:8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            <span>Download EML</span>
-          </button>
-        </div>
-
-        <button onclick="window.SupportPilotEmailEnhanced.openLinkedTicket('${email.ticket_id}')" class="btn btn-secondary" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;padding:8px 14px;border-radius:8px;">
-          <span>Open Linked Ticket</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    `;
-
-    document.body.appendChild(backdrop);
-    document.body.appendChild(panel);
-
-    // Trigger animation
-    requestAnimationFrame(() => {
-      backdrop.classList.add('active');
-      panel.classList.add('active');
-      isDrawerOpen = true;
-    });
-
-    // Close on Escape key
+    // Close on Escape key handler
     const onKey = (e) => {
       if (e.key === 'Escape') {
         closeDrawer();
@@ -657,17 +489,271 @@
     document.addEventListener('keydown', onKey);
   }
 
+  function renderDrawerContent(email) {
+    const panel = document.getElementById('email-drawer-panel');
+    if (!panel || !email) return;
+
+    const evt = getEventBadge(email.subject, email.event_type);
+    const statusCls = statusClass(email.status);
+    const avBg = avatarColor(email.recipient_name || email.to);
+    const initials = getInitials(email.recipient_name || email.to);
+
+    const timeline = email.timeline || [
+      { stage: 'Trigger Event', time: email.created_at || email.sent_at, detail: 'Ticket event registered automated email sequence.', ok: true },
+      { stage: 'AI Compilation', time: email.created_at || email.sent_at, detail: 'AI generated response payload from ticket context.', ok: true },
+      { stage: 'Queue & Policy', time: email.sent_at || email.created_at, detail: 'Passed SPF/DKIM verification & dispatch queue.', ok: true },
+      { stage: 'SMTP Dispatch', time: email.sent_at, detail: 'Dispatched through enterprise email relay gateway.', ok: true },
+      { stage: 'Delivered', time: email.delivered_at || email.sent_at, detail: 'Delivery receipt confirmed by remote MX server (250 OK).', ok: true },
+      { stage: 'Client Read / Opened', time: email.status === 'opened' ? (email.delivered_at || email.sent_at) : null, detail: email.status === 'opened' ? 'Email open tracking pixel registered by recipient.' : 'Tracking pixel awaiting client interaction.', ok: email.status === 'opened' ? true : null }
+    ];
+
+    panel.innerHTML = `
+      <!-- Fullscreen Top Navigation Header Bar -->
+      <div style="padding: 16px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-sidebar); flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.06); z-index: 20;">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <button onclick="window.SupportPilotEmailEnhanced.closeDrawer()" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 8px 16px; border-radius: 10px; font-weight: 700; background: var(--bg-app); border: 1px solid var(--border-color); cursor: pointer;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Email Outbox</span>
+          </button>
+
+          <div style="width: 1px; height: 24px; background: var(--border-color);"></div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 17px; font-weight: 800; color: var(--text-primary); max-width: 520px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(email.subject)}">
+                  ${escapeHtml(email.subject)}
+                </span>
+                <span style="display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; background: ${evt.bg}; color: ${evt.color};">
+                  ${evt.label}
+                </span>
+                <span class="status-pill ${statusCls}">
+                  <span class="status-dot"></span>
+                  <span>${email.status || 'Delivered'}</span>
+                </span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 8px;">
+                <span>ID: <strong style="font-family: monospace;">${escapeHtml(email.id)}</strong></span>
+                <span>•</span>
+                <span>Linked Ticket: <a href="#" onclick="event.preventDefault(); window.SupportPilotEmailEnhanced.openLinkedTicket('${email.ticket_id}'); return false;" style="color: var(--accent-primary); font-weight: 700; text-decoration: none;">${escapeHtml(email.ticket_id || 'TKT-Auto')}</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fullscreen Top Actions -->
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button onclick="window.SupportPilotEmailEnhanced.closeDrawer()" class="drawer-close" style="background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 9px; cursor: pointer; color: var(--text-secondary); padding: 7px 12px; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;" title="Close Fullscreen (Esc)">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <span>Esc</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Fullscreen Content Area -->
+      <div style="flex: 1; overflow-y: auto; background: var(--bg-app); padding: 28px 36px;">
+        <div style="max-width: 1480px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1.1fr); gap: 24px; align-items: start;">
+          
+          <!-- Left Column (Primary Email Viewer) -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Email Header Details Card -->
+            <div class="card" style="padding: 24px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <div style="width: 44px; height: 44px; border-radius: 50%; background: ${avBg}; color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    ${initials}
+                  </div>
+                  <div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">
+                      ${escapeHtml(email.recipient_name || 'Customer')}
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                      To: <span style="color: var(--text-secondary); font-weight: 600;">${escapeHtml(email.to)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="text-align: right;">
+                  <div style="font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">
+                    ${fmtFullTime(email.sent_at || email.created_at)}
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Signed by supportpilot.ai</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- From / Sender Info -->
+              <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 12.5px; color: var(--text-secondary); background: var(--bg-app); padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);">
+                <div><strong>From:</strong> SupportPilot AI Engine &lt;${escapeHtml(email.from || 'support@supportpilot.ai')}&gt;</div>
+                <div>•</div>
+                <div><strong>Event Type:</strong> <span style="color: var(--accent-primary); font-weight: 700;">${escapeHtml(email.event_type || 'Notification')}</span></div>
+                <div>•</div>
+                <div><strong>Encryption:</strong> TLS 1.3 256-bit</div>
+              </div>
+            </div>
+
+            <!-- Email Body Card -->
+            <div class="card" style="padding: 24px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>Email Content Payload</span>
+                </div>
+                <button onclick="window.SupportPilotEmailEnhanced.copyBody('${email.id}')" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11.5px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy Body</span>
+                </button>
+              </div>
+
+              <!-- Formatted Email Body -->
+              <div class="email-body-preview" style="font-size: 14px; line-height: 1.7; padding: 22px; border-radius: 12px; background: var(--bg-app); border: 1px solid var(--border-color); color: var(--text-primary); white-space: pre-wrap;">
+                <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="font-weight: 800; font-size: 14px; color: var(--accent-primary);">SupportPilot Automated Customer Notification</div>
+                  <div style="font-size: 11.5px; color: var(--text-muted); font-family: monospace;">Ref: ${escapeHtml(email.ticket_id || 'TKT-Auto')}</div>
+                </div>
+                <div>${(email.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--border-color); font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                  This is an automated system dispatch transmitted by the SupportPilot AI Ticket Engine. Do not reply directly to this notification. If you have further questions, please access your SupportPilot customer portal.
+                </div>
+              </div>
+
+              <!-- Attachments if any -->
+              ${(email.attachments && email.attachments.length > 0) ? `
+                <div style="margin-top: 20px;">
+                  <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 10px;">
+                    Attachments (${email.attachments.length})
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${email.attachments.map(att => `
+                      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-app); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-size: 16px;">📄</span>
+                          <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">${escapeHtml(att)}</span>
+                        </div>
+                        <button onclick="window.SupportPilotEmailEnhanced.downloadAttachment('${escapeHtml(att)}')" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11.5px;">Download</button>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+          </div>
+
+          <!-- Right Column (Metadata, Delivery Timeline & SLA Tracking) -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Delivery Timeline & SLA Card -->
+            <div class="card" style="padding: 24px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>6-Stage Delivery Timeline</span>
+              </div>
+
+              <div class="email-timeline-track">
+                ${timeline.map((t, idx) => {
+                  const isOk = t.ok === true;
+                  const isFail = t.ok === false;
+                  const dotColor = isOk ? '#10b981' : (isFail ? '#ef4444' : '#f59e0b');
+                  const dotBg = isOk ? 'rgba(16, 185, 129, 0.15)' : (isFail ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)');
+
+                  return `
+                    <div class="email-timeline-item">
+                      <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="email-timeline-dot" style="background: ${dotBg}; color: ${dotColor}; border: 1.5px solid ${dotColor};">
+                          ${isOk ? '✓' : (isFail ? '✕' : '•')}
+                        </div>
+                        ${idx < timeline.length - 1 ? '<div class="email-timeline-line"></div>' : ''}
+                      </div>
+                      <div class="email-timeline-content">
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                          <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">${escapeHtml(t.stage)}</span>
+                          <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">${t.time ? fmtFullTime(t.time) : 'Pending'}</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
+                          ${escapeHtml(t.detail)}
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Linked Ticket Card -->
+            <div class="card" style="padding: 22px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 12px;">
+                Associated Support Ticket
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--bg-app); padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <div>
+                  <div style="font-family: monospace; font-size: 15px; font-weight: 800; color: var(--accent-primary);">
+                    ${escapeHtml(email.ticket_id || 'TKT-Auto')}
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                    Status: <strong style="color: var(--text-primary);">${escapeHtml(email.ticket_status || 'Open')}</strong>
+                  </div>
+                </div>
+                <button onclick="window.SupportPilotEmailEnhanced.openLinkedTicket('${email.ticket_id}')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                  <span>View Ticket</span>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Technical Transmission Details -->
+            <div class="card" style="padding: 22px; border-radius: 16px; background: var(--bg-card); border: 1px solid var(--border-color);">
+              <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 14px;">
+                Transmission Details
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+                  <span style="color: var(--text-muted);">Message-ID:</span>
+                  <span style="font-family: monospace; color: var(--text-primary); font-weight: 600;">&lt;${escapeHtml(email.id)}@sp.ai&gt;</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+                  <span style="color: var(--text-muted);">Relay Provider:</span>
+                  <span style="color: var(--text-primary); font-weight: 600;">Brevo / Postfix SMTP</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px;">
+                  <span style="color: var(--text-muted);">Delivery Latency:</span>
+                  <span style="color: #10b981; font-weight: 700;">${statistics.avg_delivery_time || '0.9s'}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Auth Signature:</span>
+                  <span style="color: var(--text-primary); font-weight: 600;">DKIM-Pass (2048-bit)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
   function closeDrawer() {
     const backdrop = document.getElementById('email-drawer-backdrop');
     const panel = document.getElementById('email-drawer-panel');
     if (backdrop) backdrop.classList.remove('active');
     if (panel) panel.classList.remove('active');
     setTimeout(() => {
-      backdrop?.remove();
-      panel?.remove();
+      if (backdrop) backdrop.style.display = 'none';
       isDrawerOpen = false;
       activeEmailId = null;
-    }, 280);
+    }, 200);
   }
 
   // ── Resend Email Action ───────────────────────────────────────────────────
@@ -986,6 +1072,12 @@
     } finally {
       isRefreshing = false;
       render();
+      if (isDrawerOpen && activeEmailId) {
+        const activeEmail = emails.find(e => String(e.id) === String(activeEmailId));
+        if (activeEmail) {
+          renderDrawerContent(activeEmail);
+        }
+      }
     }
   }
 

@@ -146,9 +146,11 @@ function initSidebarToggles() {
 // --- Notification Bell Alerts Trigger ---
 function initNotificationBadge() {
   const notifBtn = document.getElementById("notif-toggle");
+  if (!notifBtn) return;
 
   notifBtn.addEventListener("click", () => {
     const badge = document.getElementById("notif-badge");
+    if (!badge) return;
     let currentVal = parseInt(badge.textContent) || 0;
 
     if (currentVal > 0) {

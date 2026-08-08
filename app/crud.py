@@ -4,15 +4,106 @@ SQLAlchemy sessions directly — keeps the API layer thin and testable.
 """
 
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from . import models, schemas
 
 
-# ---------- Users ----------
+# ---------- Users & Profile ----------
+
+def ensure_user_schema_columns(db: Session):
+    """Safely adds new profile columns to SQLite users table if missing."""
+    try:
+        bind = db.get_bind()
+        with bind.connect() as conn:
+            result = conn.execute(text("PRAGMA table_info(users)")).fetchall()
+            existing_cols = {row[1] for row in result}
+            
+            if "phone" not in existing_cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(50)"))
+            if "bio" not in existing_cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN bio TEXT"))
+            if "profile_image" not in existing_cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN profile_image VARCHAR(500)"))
+            if "email_verified" not in existing_cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 1"))
+            conn.commit()
+    except Exception as e:
+        # If running Postgres or non-SQLite, table is already created with full schema
+        pass
+
+
+def serialize_user_profile(user: models.User) -> Dict[str, Any]:
+    """Serialize User model into standard SupportPilot format with both camelCase and snake_case."""
+    profile_img = getattr(user, "profile_image", None)
+    email_ver = getattr(user, "email_verified", True)
+    if email_ver is None:
+        email_ver = True
+    else:
+        email_ver = bool(email_ver)
+
+    return {
+        "id": user.user_id,
+        "user_id": user.user_id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role or "Support Agent",
+        "department": user.department or "Customer Support",
+        "phone": getattr(user, "phone", "") or "",
+        "bio": getattr(user, "bio", "") or "SupportPilot AI Ticket Resolution Specialist & Support Operations Lead.",
+        "profileImage": profile_img,
+        "profile_image": profile_img,
+        "emailVerified": email_ver,
+        "email_verified": email_ver,
+        "created_at": user.created_at.isoformat() if user.created_at else datetime.utcnow().isoformat(),
+    }
+
+
+def get_or_create_authenticated_user(db: Session) -> models.User:
+    """Returns currently authenticated agent profile, auto-initializing default if not present."""
+    ensure_user_schema_columns(db)
+
+    # Prefer finding agent by primary work email or role
+    user = (
+        db.query(models.User)
+        .filter(models.User.email.in_(["pranjal@example.com", "pranjal.kumar@supportpilot.ai"]))
+        .first()
+    )
+    if not user:
+        user = db.query(models.User).filter(models.User.role == "Support Agent").first()
+
+    if not user:
+        user = models.User(
+            name="Pranjal Kumar",
+            email="pranjal@example.com",
+            department="Customer Support",
+            role="Support Agent",
+            phone="+1 (555) 234-5678",
+            bio="Lead AI Support Specialist at SupportPilot. Resolving complex customer escalations with AI assistance.",
+            profile_image=None,
+            email_verified=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        # Ensure role/verified defaults
+        updated = False
+        if not getattr(user, "role", None):
+            user.role = "Support Agent"
+            updated = True
+        if getattr(user, "email_verified", None) is None:
+            user.email_verified = True
+            updated = True
+        if updated:
+            db.commit()
+            db.refresh(user)
+
+    return user
+
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.email == email).first()
@@ -28,6 +119,41 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_user_profile(db: Session, user: models.User, update_data: schemas.UserUpdate) -> models.User:
+    """Updates editable personal information on user profile."""
+    if update_data.name is not None and update_data.name.strip():
+        user.name = update_data.name.strip()
+    if update_data.department is not None:
+        user.department = update_data.department.strip()
+    if update_data.phone is not None:
+        user.phone = update_data.phone.strip()
+    if update_data.bio is not None:
+        user.bio = update_data.bio.strip()
+    if update_data.role is not None and update_data.role.strip():
+        user.role = update_data.role.strip()
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def update_user_profile_image(db: Session, user: models.User, image_path: Optional[str]) -> models.User:
+    """Sets or clears the profile image path for the user."""
+    user.profile_image = image_path
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def update_user_email(db: Session, user: models.User, new_email: str) -> models.User:
+    """Updates and marks verified user email."""
+    user.email = new_email.strip().lower()
+    user.email_verified = True
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 def get_or_create_user(db: Session, email: str, name: Optional[str] = None, department: Optional[str] = None) -> models.User:
@@ -56,21 +182,73 @@ def log_activity(db: Session, ticket_id: int, action: str, performed_by: str) ->
     return log
 
 
+from .triage import derive_ai_triage
+
+
 def create_ticket(db: Session, ticket_in: schemas.TicketCreate) -> models.Ticket:
     user = get_or_create_user(db, ticket_in.requester_email, ticket_in.requester_name, ticket_in.department)
+
+    # Automatically derive intelligent category, priority, severity, and confidence via AI triage
+    triage = derive_ai_triage(
+        title=ticket_in.subject,
+        description=ticket_in.description or "",
+        explicit_dept=ticket_in.department or (user.department if user else None)
+    )
 
     db_ticket = models.Ticket(
         user_id=user.user_id,
         subject=ticket_in.subject,
         description=ticket_in.description,
+        category=triage["category"],
+        priority=triage["priority"],
+        severity=triage["severity"],
+        classification_confidence=triage["confidence_score"],
         status=models.TicketStatus.open.value,
     )
     db.add(db_ticket)
     db.commit()
     db.refresh(db_ticket)
 
-    log_activity(db, db_ticket.ticket_id, "Ticket submitted", performed_by=ticket_in.requester_email)
+    log_activity(
+        db,
+        db_ticket.ticket_id,
+        f"Ticket submitted (AI Priority: {triage['priority']}, Category: {triage['category']})",
+        performed_by=ticket_in.requester_email
+    )
     return db_ticket
+
+
+def triage_all_unclassified_tickets(db: Session) -> int:
+    """
+    Finds all tickets in the database with missing priority or category and populates
+    them using the AI Triage classifier. Returns count of updated tickets.
+    """
+    tickets = db.query(models.Ticket).all()
+    updated_count = 0
+    for t in tickets:
+        needs_update = False
+        if not t.priority or t.priority.strip() == "" or t.priority == "None":
+            needs_update = True
+        if not t.category or t.category.strip() == "" or t.category == "None":
+            needs_update = True
+        if not t.severity or t.severity.strip() == "" or t.severity == "None":
+            needs_update = True
+
+        if needs_update:
+            triage = derive_ai_triage(t.subject, t.description or "")
+            if not t.priority or t.priority.strip() == "" or t.priority == "None":
+                t.priority = triage["priority"]
+            if not t.category or t.category.strip() == "" or t.category == "None":
+                t.category = triage["category"]
+            if not t.severity or t.severity.strip() == "" or t.severity == "None":
+                t.severity = triage["severity"]
+            if not t.classification_confidence:
+                t.classification_confidence = triage["confidence_score"]
+            updated_count += 1
+
+    if updated_count > 0:
+        db.commit()
+    return updated_count
 
 
 def get_ticket(db: Session, ticket_id: int) -> Optional[models.Ticket]:
@@ -301,6 +479,12 @@ def list_activity_logs(db: Session, ticket_id: Optional[int] = None, limit: int 
 def get_dashboard_summary(db: Session) -> dict:
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     
+    total_tickets = (
+        db.query(func.count(models.Ticket.ticket_id))
+        .scalar()
+        or 0
+    )
+
     total_tickets_today = (
         db.query(func.count(models.Ticket.ticket_id))
         .filter(models.Ticket.created_at >= today_start)
@@ -364,6 +548,7 @@ def get_dashboard_summary(db: Session) -> dict:
         user_satisfaction = 94.2
 
     return {
+        "total_tickets": total_tickets,
         "total_tickets_today": total_tickets_today,
         "open_tickets": open_tickets,
         "resolved_tickets": resolved_tickets,

@@ -7,7 +7,7 @@ let tableState = {
   deptFilter: "all",
   priorityFilter: "all",
   statusFilter: "all",
-  sortColumn: "id",
+  sortColumn: "createdDate",
   sortAsc: false,
   currentPage: 1,
   pageSize: 8,
@@ -47,8 +47,14 @@ function saveStoredTickets(ticketsList) {
 // INITIALIZATION
 // ---------------------------------------------------------------------------
 function initTicketsModule() {
-  // 1. Load initial cache
-  const localSaved = loadStoredTickets();
+  // 1. Clear stale localStorage tickets (older than 24h) — prevents ghost entries like TKT-67 from persisting
+  const staleCutoff = Date.now() - (24 * 60 * 60 * 1000);
+  const localSaved = loadStoredTickets().filter(t => {
+    const createdMs = t.createdDate ? new Date(t.createdDate).getTime() : 0;
+    return createdMs > staleCutoff;
+  });
+  saveStoredTickets(localSaved);
+
   const initial = (window.SupportPilotData && window.SupportPilotData.initialTickets)
     ? window.SupportPilotData.initialTickets
     : [];
@@ -63,6 +69,7 @@ function initTicketsModule() {
 
   // 2. Fetch live data from backend
   fetchLiveTickets();
+
 
   // 3. Setup Polling for Real-Time Sync (every 15s)
   if (livePollingInterval) clearInterval(livePollingInterval);
@@ -131,7 +138,7 @@ async function fetchLiveTickets(isBackground = false) {
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/tickets");
+    const response = await fetch("http://127.0.0.1:8000/api/tickets?limit=500");
     if (response.ok) {
       const backendTickets = await response.json();
       if (backendTickets && Array.isArray(backendTickets)) {
@@ -139,7 +146,7 @@ async function fetchLiveTickets(isBackground = false) {
 
         backendTickets.forEach((t, idx) => {
           const tId = typeof t.ticket_id === 'number' ? `TKT-${t.ticket_id}` : (t.ticket_id || `TKT-${idx + 1}`);
-          
+
           // Handle snake_case backend statuses → Display Title Case
           const rawStatus = (t.status || 'open').toLowerCase();
           let formattedStatus = "Open";
@@ -155,9 +162,11 @@ async function fetchLiveTickets(isBackground = false) {
           const rawPriority = t.priority;
           let displayPriority = "P3 Medium";
           if (rawPriority) {
-            if (rawPriority.toLowerCase().includes('urgent') || rawPriority === 'P1') displayPriority = "Urgent";
-            else if (rawPriority.toLowerCase().includes('high') || rawPriority === 'P2') displayPriority = "P2 High";
-            else if (rawPriority.toLowerCase().includes('low') || rawPriority === 'P4') displayPriority = "P4 Low";
+            const pLower = rawPriority.toLowerCase();
+            if (pLower.includes('urgent') || pLower.includes('critical') || pLower === 'p1') displayPriority = "P1 Urgent";
+            else if (pLower.includes('high') || pLower === 'p2') displayPriority = "P2 High";
+            else if (pLower.includes('low') || pLower === 'p4') displayPriority = "P4 Low";
+            else if (pLower.includes('medium') || pLower === 'p3') displayPriority = "P3 Medium";
             else displayPriority = rawPriority;
           }
 
@@ -193,15 +202,21 @@ async function fetchLiveTickets(isBackground = false) {
           });
         });
 
-        // Add local created tickets that might not be in backend yet
+        // Add local-only tickets (created recently) that are not yet in backend response
         const localSaved = loadStoredTickets();
+        const recentCutoff = Date.now() - (5 * 60 * 1000); // 5 minutes
         localSaved.forEach(lt => {
           if (!mergedMap.has(lt.id)) {
-            mergedMap.set(lt.id, lt);
+            // Only keep if created within last 5 minutes (prevents stale ghost tickets)
+            const createdMs = lt.createdDate ? new Date(lt.createdDate).getTime() : 0;
+            if (createdMs > recentCutoff) {
+              mergedMap.set(lt.id, lt);
+            }
           }
         });
 
         currentTickets = Array.from(mergedMap.values());
+        // Update localStorage to only have real backend-confirmed tickets
         saveStoredTickets(currentTickets);
       }
     }
@@ -244,13 +259,13 @@ function renderTicketsTable() {
       (t.id && t.id.toLowerCase().includes(searchQuery)) ||
       (t.category && t.category.toLowerCase().includes(searchQuery));
 
-    const matchesDept = tableState.deptFilter === "all" || 
+    const matchesDept = tableState.deptFilter === "all" ||
       (t.department && t.department.toLowerCase() === tableState.deptFilter.toLowerCase());
-    
-    const matchesPriority = tableState.priorityFilter === "all" || 
+
+    const matchesPriority = tableState.priorityFilter === "all" ||
       (t.priority && t.priority.toLowerCase().includes(tableState.priorityFilter.toLowerCase()));
-    
-    const matchesStatus = tableState.statusFilter === "all" || 
+
+    const matchesStatus = tableState.statusFilter === "all" ||
       (t.status && t.status.toLowerCase() === tableState.statusFilter.toLowerCase());
 
     const matchesDay = tableState.dayFilter === "all" || (function () {
@@ -643,8 +658,8 @@ async function handleRunAIPrediction(e) {
     if (predTeamEl) predTeamEl.textContent = prediction.suggested_team || "Engineering Operations";
 
     if (predTagsEl) {
-      const tags = Array.isArray(prediction.tags) && prediction.tags.length > 0 
-        ? prediction.tags 
+      const tags = Array.isArray(prediction.tags) && prediction.tags.length > 0
+        ? prediction.tags
         : [`#${(prediction.category || 'ticket').toLowerCase()}`, '#automated-triage'];
       predTagsEl.innerHTML = tags.map(t => `<span class="badge" style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700;">${t}</span>`).join('');
     }
@@ -757,9 +772,15 @@ async function handleNewTicketConfirmSubmit(e) {
       attachments: ["system_diagnostic_log.txt"]
     };
 
-    // Prepend to current ticket array & save
+    // Prepend to current ticket array & save immediately so it appears in the list right away
     currentTickets.unshift(newTicketObj);
     saveStoredTickets(currentTickets);
+
+    // Sort by createdDate descending so the newest ticket appears at the TOP of page 1
+    tableState.sortColumn = "createdDate";
+    tableState.sortAsc = false;
+    tableState.currentPage = 1;
+    renderTicketsTable();
 
     // 4. Trigger Jira Automation Integration
     if (window.SupportPilotJira && typeof window.SupportPilotJira.addActivity === "function") {
@@ -771,9 +792,16 @@ async function handleNewTicketConfirmSubmit(e) {
       window.SupportPilotEmailEnhanced.addEmail(newTicketObj, "Ticket Created");
     }
 
-    // 6. Refresh Live Tickets & Dispatch Real-Time Events
-    await fetchLiveTickets(true);
-    window.dispatchEvent(new CustomEvent('ticketsUpdated', { detail: [...currentTickets] }));
+    // 6. Refresh Live Tickets from backend & Dispatch Real-Time Events
+    // (The newly added ticket is already in the list; this sync ensures backend data is up to date)
+    fetchLiveTickets(true).then(() => {
+      // Keep sort by newest createdDate so the new ticket stays visible at top
+      tableState.sortColumn = "createdDate";
+      tableState.sortAsc = false;
+      tableState.currentPage = 1;
+      renderTicketsTable();
+      window.dispatchEvent(new CustomEvent('ticketsUpdated', { detail: [...currentTickets] }));
+    });
 
     // 7. Show success toast and close modal
     if (typeof showToast === "function") {
@@ -783,9 +811,13 @@ async function handleNewTicketConfirmSubmit(e) {
     closeNewTicketModal();
 
     // 8. Seamlessly navigate to Tickets Management View so user sees the newly created ticket
+    tableState.currentPage = 1;
     const ticketsNav = document.querySelector('.nav-item[data-target="tickets"]');
     if (ticketsNav) {
       ticketsNav.click();
+    } else {
+      // If already on tickets view, re-render directly
+      renderTicketsTable();
     }
 
   } catch (err) {
@@ -1148,7 +1180,7 @@ function handleExportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `supportpilot_tickets_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute("download", `supportpilot_tickets_${new Date().toISOString().slice(0, 10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
