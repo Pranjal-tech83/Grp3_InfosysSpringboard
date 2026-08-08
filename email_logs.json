@@ -1,5 +1,521 @@
 [
   {
+    "id": "EML-134",
+    "to": "roman838303@gmail.com",
+    "recipient_name": "Roman838303",
+    "from": "theman838303@gmail.com",
+    "subject": "RESOLVED: [TKT-30] password issue",
+    "ticket_id": "TKT-General",
+    "ticket_status": "Open",
+    "event_type": "custom",
+    "body": "Dear roman,\n\nYour support ticket #TKT-30 (password issue) has been resolved by SupportPilot AI.\n\nResolution Summary:\nAI triage complete. Review context and apply standard remediation runbook.\n\nBest regards,\nSupportPilot AI Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:41:48.737479+00:00",
+    "sent_at": "2026-08-08T17:41:48.737479+00:00",
+    "delivered_at": "2026-08-08T17:41:48.737479+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:41:46.737479+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:41:47.737479+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:41:48.737479+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:41:49.937479+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-133",
+    "to": "test@gmail.com",
+    "recipient_name": "Test",
+    "from": "theman838303@gmail.com",
+    "subject": "RESOLVED: [TKT-31] Payment deducted twice",
+    "ticket_id": "TKT-General",
+    "ticket_status": "Open",
+    "event_type": "custom",
+    "body": "Dear test,\n\nYour support ticket #TKT-31 (Payment deducted twice) has been resolved by SupportPilot AI.\n\nResolution Summary:\nAI triage complete. Review context and apply standard remediation runbook.\n\nBest regards,\nSupportPilot AI Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:41:40.956779+00:00",
+    "sent_at": "2026-08-08T17:41:40.956779+00:00",
+    "delivered_at": "2026-08-08T17:41:40.956779+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:41:38.956779+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:41:39.956779+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:41:40.956779+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:41:42.156779+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-132",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "Ravi raj",
+    "from": "theman838303@gmail.com",
+    "subject": "RECEIVED: We received your support request - password issue",
+    "ticket_id": "TKT-32",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear Ravi raj,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-32\n\u2022 Subject: password issue\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:40:04.796338+00:00",
+    "sent_at": "2026-08-08T17:40:04.796338+00:00",
+    "delivered_at": "2026-08-08T17:40:04.796338+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:40:02.796338+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:40:03.796338+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:40:04.796338+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:40:05.996338+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-131",
+    "to": "test@gmail.com",
+    "recipient_name": "test",
+    "from": "theman838303@gmail.com",
+    "subject": "CREATED: Payment deducted twice",
+    "ticket_id": "TKT-31",
+    "ticket_status": "Open",
+    "event_type": "created",
+    "body": "Automated update regarding TKT-31 (Payment deducted twice). Issue status updated to Open.",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:34:39.323068+00:00",
+    "sent_at": "2026-08-08T17:34:39.323068+00:00",
+    "delivered_at": "2026-08-08T17:34:39.323068+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:34:37.323068+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:34:38.323068+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:34:39.323068+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:34:40.523068+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-130",
+    "to": "test@gmail.com",
+    "recipient_name": "test",
+    "from": "theman838303@gmail.com",
+    "subject": "RECEIVED: We received your support request - Payment deducted twice",
+    "ticket_id": "TKT-31",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear test,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-31\n\u2022 Subject: Payment deducted twice\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:34:38.112898+00:00",
+    "sent_at": "2026-08-08T17:34:38.112898+00:00",
+    "delivered_at": "2026-08-08T17:34:38.112898+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:34:36.112898+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:34:37.112898+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:34:38.112898+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:34:39.312898+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-129",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "Pranjal838303",
+    "from": "theman838303@gmail.com",
+    "subject": "RESOLVED: [TKT-29] critacal vpn authentication loop failure",
+    "ticket_id": "TKT-General",
+    "ticket_status": "Open",
+    "event_type": "custom",
+    "body": "Dear ram,\n\nYour support ticket #TKT-29 (critacal vpn authentication loop failure) has been resolved by SupportPilot AI.\n\nResolution Summary:\nAI triage complete. Review context and apply standard remediation runbook.\n\nBest regards,\nSupportPilot AI Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:17:21.875860+00:00",
+    "sent_at": "2026-08-08T17:17:21.875860+00:00",
+    "delivered_at": "2026-08-08T17:17:21.875860+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:17:19.875860+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:17:20.875860+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:17:21.875860+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:17:23.075860+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-128",
+    "to": "roman838303@gmail.com",
+    "recipient_name": "roman",
+    "from": "theman838303@gmail.com",
+    "subject": "RECEIVED: We received your support request - password issue",
+    "ticket_id": "TKT-30",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear roman,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-30\n\u2022 Subject: password issue\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:16:53.097360+00:00",
+    "sent_at": "2026-08-08T17:16:53.097360+00:00",
+    "delivered_at": "2026-08-08T17:16:53.097360+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:16:51.097360+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:16:52.097360+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:16:53.097360+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:16:54.297360+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-127",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "ram",
+    "from": "theman838303@gmail.com",
+    "subject": "RECEIVED: We received your support request - critacal vpn authentication loop failure",
+    "ticket_id": "TKT-29",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear ram,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-29\n\u2022 Subject: critacal vpn authentication loop failure\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:14:35.893238+00:00",
+    "sent_at": "2026-08-08T17:14:35.893238+00:00",
+    "delivered_at": "2026-08-08T17:14:35.893238+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:14:33.893238+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:14:34.893238+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:14:35.893238+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:14:37.093238+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-126",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "pranjal",
+    "from": "support@supportpilot.ai",
+    "subject": "CREATED: critacal vpn authentication loop failure",
+    "ticket_id": "TKT-28",
+    "ticket_status": "Open",
+    "event_type": "created",
+    "body": "Automated update regarding TKT-28 (critacal vpn authentication loop failure). Issue status updated to Open.",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:09:57.557706+00:00",
+    "sent_at": "2026-08-08T17:09:57.557706+00:00",
+    "delivered_at": "2026-08-08T17:09:57.557706+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:09:55.557706+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:09:56.557706+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:09:57.557706+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:09:58.757706+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-125",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "pranjal",
+    "from": "support@supportpilot.ai",
+    "subject": "RECEIVED: We received your support request - critacal vpn authentication loop failure",
+    "ticket_id": "TKT-28",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear pranjal,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-28\n\u2022 Subject: critacal vpn authentication loop failure\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:09:57.322272+00:00",
+    "sent_at": "2026-08-08T17:09:57.322272+00:00",
+    "delivered_at": "2026-08-08T17:09:57.322272+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:09:55.322272+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:09:56.322272+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:09:57.322272+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:09:58.522272+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-124",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "Ravi raj",
+    "from": "support@supportpilot.ai",
+    "subject": "CREATED: password issue",
+    "ticket_id": "TKT-27",
+    "ticket_status": "Open",
+    "event_type": "created",
+    "body": "Automated update regarding TKT-27 (password issue). Issue status updated to Open.",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:08:38.759985+00:00",
+    "sent_at": "2026-08-08T17:08:38.759985+00:00",
+    "delivered_at": "2026-08-08T17:08:38.759985+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:08:36.759985+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:08:37.759985+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:08:38.759985+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:08:39.959985+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "id": "EML-123",
+    "to": "pranjal838303@gmail.com",
+    "recipient_name": "Ravi raj",
+    "from": "support@supportpilot.ai",
+    "subject": "RECEIVED: We received your support request - password issue",
+    "ticket_id": "TKT-27",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear Ravi raj,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-27\n\u2022 Subject: password issue\n\u2022 Department: Engineering\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "created_at": "2026-08-08T17:08:38.364053+00:00",
+    "sent_at": "2026-08-08T17:08:38.364053+00:00",
+    "delivered_at": "2026-08-08T17:08:38.364053+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-08T17:08:36.364053+00:00",
+        "detail": "Email template generated automatically from ticket event.",
+        "ok": true
+      },
+      {
+        "stage": "Queued",
+        "time": "2026-08-08T17:08:37.364053+00:00",
+        "detail": "Placed into SupportPilot outbound dispatch queue.",
+        "ok": true
+      },
+      {
+        "stage": "Sending",
+        "time": "2026-08-08T17:08:38.364053+00:00",
+        "detail": "Dispatched via SMTP/Brevo transactional relay.",
+        "ok": true
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-08T17:08:39.564053+00:00",
+        "detail": "Confirmed delivery receipt from destination mail server (250 OK).",
+        "ok": true
+      }
+    ]
+  },
+  {
     "id": "EML-122",
     "to": "pranjal838303@gmail.com",
     "recipient_name": "Ravi raj",

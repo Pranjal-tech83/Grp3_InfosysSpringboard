@@ -9,6 +9,9 @@ frontend team can use to see every endpoint and try requests live.
 """
 
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+load_dotenv()
+
 from typing import List, Dict, Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +30,7 @@ from .routers import (
     jira_tickets,
     analytics,
     email,
+    triage_router,
 )
 
 # Creates all tables that don't exist yet. Safe to call on every startup.
@@ -71,6 +75,7 @@ app.include_router(jira_tickets.router)
 app.include_router(analytics.router)
 app.include_router(analytics.dashboard_router)
 app.include_router(email.router)
+app.include_router(triage_router.router)
 
 
 # ---------------------------------------------------------------------------
