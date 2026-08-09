@@ -160,13 +160,13 @@ async function fetchLiveTickets(isBackground = false) {
 
           // Infer smart priority label from status or classification data
           const rawPriority = t.priority;
-          let displayPriority = "P3 Medium";
+          let displayPriority = "Medium";
           if (rawPriority) {
             const pLower = rawPriority.toLowerCase();
-            if (pLower.includes('urgent') || pLower.includes('critical') || pLower === 'p1') displayPriority = "P1 Urgent";
-            else if (pLower.includes('high') || pLower === 'p2') displayPriority = "P2 High";
-            else if (pLower.includes('low') || pLower === 'p4') displayPriority = "P4 Low";
-            else if (pLower.includes('medium') || pLower === 'p3') displayPriority = "P3 Medium";
+            if (pLower.includes('urgent') || pLower.includes('critical') || pLower === 'p1') displayPriority = "Urgent";
+            else if (pLower.includes('high') || pLower === 'p2') displayPriority = "High";
+            else if (pLower.includes('low') || pLower === 'p4') displayPriority = "Low";
+            else if (pLower.includes('medium') || pLower === 'p3') displayPriority = "Medium";
             else displayPriority = rawPriority;
           }
 
@@ -654,7 +654,7 @@ async function handleRunAIPrediction(e) {
     if (predConfEl) predConfEl.textContent = `${confPct}% Confidence`;
     if (predCatEl) predCatEl.textContent = prediction.category || "Software";
     if (predDeptEl) predDeptEl.textContent = prediction.department || (userSelectedDept || "Engineering");
-    if (predPriEl) predPriEl.textContent = `${prediction.priority || 'P2 High'} • Severity: ${prediction.severity || 'High'}`;
+    if (predPriEl) predPriEl.textContent = `${prediction.priority || 'High'} • Severity: ${prediction.severity || 'High'}`;
     if (predTeamEl) predTeamEl.textContent = prediction.suggested_team || "Engineering Operations";
 
     if (predTagsEl) {

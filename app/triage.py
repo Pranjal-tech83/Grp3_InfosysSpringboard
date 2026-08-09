@@ -20,7 +20,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Database Performance",
             "department": "Engineering",
-            "priority": "P1 Urgent",
+            "priority": "Urgent",
             "severity": "Critical",
             "confidence_score": 0.97,
             "suggested_team": "Database Reliability Engineering (DBA)",
@@ -37,7 +37,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Network",
             "department": "Engineering",
-            "priority": "P1 Urgent",
+            "priority": "Urgent",
             "severity": "Critical",
             "confidence_score": 0.98,
             "suggested_team": "Site Reliability Engineering (SRE)",
@@ -54,7 +54,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Network",
             "department": "Engineering",
-            "priority": "P2 High",
+            "priority": "High",
             "severity": "High",
             "confidence_score": 0.96,
             "suggested_team": "Network Operations (NetOps)",
@@ -72,7 +72,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Authentication",
             "department": "Customer Support",
-            "priority": "P2 High" if is_high else "P3 Medium",
+            "priority": "High" if is_high else "Medium",
             "severity": "High" if is_high else "Medium",
             "confidence_score": 0.94,
             "suggested_team": "Identity & Access Management (IAM)",
@@ -89,7 +89,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Payment Issues",
             "department": "Billing",
-            "priority": "P3 Medium",
+            "priority": "Medium",
             "severity": "Medium",
             "confidence_score": 0.93,
             "suggested_team": "Billing Operations Team",
@@ -106,7 +106,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Hardware",
             "department": "Customer Support",
-            "priority": "P4 Low",
+            "priority": "Low",
             "severity": "Low",
             "confidence_score": 0.91,
             "suggested_team": "IT Desktop Support",
@@ -120,7 +120,7 @@ def derive_ai_triage(title: str, description: str = "", explicit_dept: Optional[
         return {
             "category": "Software",
             "department": explicit_dept or "Customer Support",
-            "priority": "P3 Medium",
+            "priority": "Medium",
             "severity": "Medium",
             "confidence_score": 0.92,
             "suggested_team": "Customer Support Team",

@@ -654,7 +654,7 @@
             pointerEvents: 'none',
             zIndex: 10,
             minWidth: '130px',
-            transform: 'translateX(' + (hoveredIndex === 0 ? '40px' : (hoveredIndex === 6 ? '-40px' : '0')) + ')'
+            transform: 'translateX(' + (hoveredIndex === 0 ? '40px' : (hoveredIndex === 6 ? '-110px' : (hoveredIndex === 5 ? '-40px' : '0'))) + ')'
           }
         },
           h('div', { style: { fontWeight: 800, marginBottom: '4px', color: 'var(--text-primary)', borderBottom: '1px solid var(--border-color)', paddingBottom: '3px' } },
@@ -1075,8 +1075,7 @@
     },
       h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' } },
         h('div', null,
-          h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 'Quick Actions & Operational Tools'),
-          h('div', { style: { fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' } }, 'Instantly create tickets, invoke AI copilots, or export database snapshots')
+          h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 'Quick Actions & Operational Tools')
         ),
         h('button', {
           onClick: onRefresh,

@@ -19,7 +19,7 @@
         prompt: `Analyze the incident titled "${t.subject || 'Anomaly'}" and classify its category, root cause, and severity.`,
         reasoning: `Incident exhibits patterns matching ${t.category || 'Software'} domain. Evaluated error telemetry against historical incidents.`,
         retrievedDocs: [`System Taxonomy Catalog (v4.2)`, `Historical Cluster #${t.id || 'TKT-101'}`],
-        generatedResponse: `Category: ${t.category || 'Software'}\nPriority: ${t.priority || 'P2 High'}\nAssigned Domain: ${t.department || 'Engineering'}`,
+        generatedResponse: `Category: ${t.category || 'Software'}\nPriority: ${t.priority || 'High'}\nAssigned Domain: ${t.department || 'Engineering'}`,
         apiCalls: '1 LLM inference call (Ollama llama3.2)',
         duration: '210ms',
         status: 'Completed'

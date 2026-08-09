@@ -18,6 +18,7 @@ class TicketInput(BaseModel):
 class TicketClassificationResponse(BaseModel):
     reasoning_summary: str = Field(description="A concise one-sentence technical analysis justifying the category and severity.")
     category: Literal["Network", "Password Reset", "Hardware", "Software", "Email"] = Field(description="The IT domain classification matching corporate taxonomy.")
+    priority: Literal["Urgent", "High", "Medium", "Low"] = Field(description="The SLA priority level.")
     severity: Literal["Low", "Medium", "High"] = Field(description="The technical urgency level based on the issue description.")
     confidence_score: float = Field(description="Confidence score for this classification between 0.00 and 1.00.")
 
@@ -25,13 +26,13 @@ class TicketClassificationResponse(BaseModel):
 async def triage_ticket(ticket: TicketInput):
     system_prompt = (
         "You are an automated IT Triage Agent for SupportPilot. "
-        "Analyze the provided ticket and assign a Category and Severity based on these strict organizational rules:\n\n"
+        "Analyze the provided ticket and assign a Category, Priority, and Severity based on these strict organizational rules:\n\n"
         "Taxonomy Matrix:\n"
-        "- Category: 'Network' (e.g., VPN issues, Internet disconnections) -> Severity: 'High'\n"
-        "- Category: 'Password Reset' (e.g., Account lockouts, forgotten passwords) -> Severity: 'Low' or 'Medium'\n"
-        "- Category: 'Hardware' (e.g., Printer offline, blue screen errors) -> Severity: 'Medium' or 'High'\n"
-        "- Category: 'Software' (e.g., App crashes, MS Office installation failures) -> Severity: 'Medium' or 'High'\n"
-        "- Category: 'Email' (e.g., Login failures, unable to send emails) -> Severity: 'Medium'\n\n"
+        "- Category: 'Network' (e.g., VPN issues, Internet disconnections) -> Priority: 'Urgent' or 'High', Severity: 'High'\n"
+        "- Category: 'Password Reset' (e.g., Account lockouts) -> Priority: 'Medium', Severity: 'Low' or 'Medium'\n"
+        "- Category: 'Hardware' (e.g., Printer offline, blue screen errors) -> Priority: 'Low' or 'Medium', Severity: 'Medium' or 'High'\n"
+        "- Category: 'Software' (e.g., App crashes, install failures) -> Priority: 'Medium', Severity: 'Medium' or 'High'\n"
+        "- Category: 'Email' (e.g., Login failures, unable to send) -> Priority: 'Medium', Severity: 'Medium'\n\n"
         "Guidelines for High Confidence:\n"
         "1. Write the reasoning_summary FIRST by breaking down the core technical problem.\n"
         "2. Base the confidence_score on how clearly the user's text maps to the taxonomy rules.\n\n"
@@ -77,6 +78,7 @@ async def triage_ticket(ticket: TicketInput):
         fallback = {
             "reasoning_summary": "Auto-triaged via semantic token context heuristics mapping.",
             "category": "Network" if "vpn" in ticket.description.lower() or "network" in ticket.description.lower() else "Software",
+            "priority": "Urgent" if "critical" in ticket.title.lower() else ("High" if "vpn" in ticket.description.lower() else "Medium"),
             "severity": "High" if "vpn" in ticket.description.lower() or "critical" in ticket.title.lower() else "Medium",
             "confidence_score": 0.92
         }

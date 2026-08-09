@@ -210,6 +210,24 @@ function showToast(title, description, type = "info") {
   }, 4000);
 }
 
+// --- Trigger a Global Refresh across all Modules ---
+window.SupportPilotGlobalRefresh = async function() {
+  const btn = document.getElementById('global-refresh-btn');
+  const svg = btn ? btn.querySelector('svg') : null;
+  if (svg) svg.style.animation = 'spin 1s linear infinite';
+  
+  if (window.SupportPilotTickets) await window.SupportPilotTickets.refresh();
+  if (window.SupportPilotDashboardRefresh) window.SupportPilotDashboardRefresh();
+  if (window.SupportPilotEmailEnhanced) await window.SupportPilotEmailEnhanced.refresh();
+  if (window.SupportPilotJira) await window.SupportPilotJira.refresh(false);
+  
+  window.dispatchEvent(new Event('supportpilot:refresh'));
+  window.dispatchEvent(new Event('ticketsUpdated'));
+  
+  if (svg) svg.style.animation = 'none';
+  if (window.showToast) window.showToast("Data Sync", "All modules refreshed successfully.", "success");
+};
+
 // --- Global Dynamic Views Refresh (KPI Syncs & Recent Activity table) ---
 function refreshDynamicViewElements() {
   const tickets = window.SupportPilotTickets.getTickets();
