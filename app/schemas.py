@@ -15,18 +15,42 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     department: Optional[str] = None
-    role: str = "employee"
+    role: str = "Support Agent"
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+    email_verified: bool = True
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    department: Optional[str] = None
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    role: Optional[str] = None
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+    confirm_email: EmailStr
 
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     user_id: int
+    id: Optional[int] = None
     name: str
     email: EmailStr
-    department: Optional[str]
+    department: Optional[str] = None
     role: str
-    created_at: datetime
+    phone: Optional[str] = None
+    bio: Optional[str] = None
+    profile_image: Optional[str] = None
+    profileImage: Optional[str] = None
+    email_verified: bool = True
+    emailVerified: bool = True
+    created_at: Optional[datetime] = None
 
 
 # ---------- Tickets ----------
@@ -52,6 +76,17 @@ class TicketClassificationUpdate(BaseModel):
 
 class TicketStatusUpdate(BaseModel):
     status: str
+    performed_by: Optional[str] = "Operator"
+
+
+class TicketUpdate(BaseModel):
+    subject: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    priority: Optional[str] = None
+    severity: Optional[str] = None
+    status: Optional[str] = None
+    performed_by: Optional[str] = "Operator"
 
 
 class TicketOut(BaseModel):
@@ -166,6 +201,43 @@ class ActivityLogOut(BaseModel):
 
 # ---------- Analytics ----------
 
+class DashboardSummaryOut(BaseModel):
+    total_tickets: Optional[int] = None
+    total_tickets_today: int
+    open_tickets: int
+    resolved_tickets: int
+    ai_resolved_tickets: int
+    ai_resolution_rate: float
+    avg_resolution_time: Optional[float]
+    user_satisfaction: float
+
+class WeeklyData(BaseModel):
+    day: str
+    created: int
+    resolved: int
+
+class WorkflowStatus(BaseModel):
+    classified_today: int
+    resolved_automatically: int
+    escalated: int
+    pending_validation: int
+
+class PieChartData(BaseModel):
+    open: int
+    resolved: int
+    ai_resolved: int
+
+class RecentActivity(BaseModel):
+    id: int
+    description: str
+    timestamp: datetime
+
+class DashboardAnalyticsOut(BaseModel):
+    weekly_data: List[WeeklyData]
+    workflow_status: WorkflowStatus
+    pie_chart_data: PieChartData
+    recent_activities: List[RecentActivity]
+
 class DashboardStats(BaseModel):
     total_tickets: int
     tickets_today: int
@@ -173,6 +245,5 @@ class DashboardStats(BaseModel):
     avg_resolution_time_hours: Optional[float]
     tickets_by_status: dict
     tickets_by_category: dict
-
 
 TicketDetailOut.model_rebuild()

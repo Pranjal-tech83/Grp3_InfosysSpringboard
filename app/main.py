@@ -9,13 +9,18 @@ frontend team can use to see every endpoint and try requests live.
 """
 
 from datetime import datetime, timezone
-from typing import List, Dict, Any
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()
 
-from . import models
-from .database import engine
+from typing import List, Dict, Any
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+import os
+from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+
+from . import models, database, crud
+from .database import engine, SessionLocal
 from .routers import (
     users,
     tickets,
@@ -25,10 +30,23 @@ from .routers import (
     jira_tickets,
     analytics,
     email,
+    triage_router,
 )
 
 # Creates all tables that don't exist yet. Safe to call on every startup.
 models.Base.metadata.create_all(bind=engine)
+
+# Safely check and add any extended columns to existing SQLite DB
+try:
+    with SessionLocal() as init_db:
+        crud.ensure_user_schema_columns(init_db)
+        crud.get_or_create_authenticated_user(init_db)
+        crud.triage_all_unclassified_tickets(init_db)
+except Exception as e:
+    print(f"[Init Warning] {e}")
+
+# Ensure upload directory exists
+os.makedirs("uploads/profiles", exist_ok=True)
 
 app = FastAPI(
     title="SupportPilot API",
@@ -46,6 +64,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 app.include_router(users.router)
 app.include_router(tickets.router)
 app.include_router(knowledge_base.router)
@@ -53,8 +73,51 @@ app.include_router(responses.router)
 app.include_router(escalations.router)
 app.include_router(jira_tickets.router)
 app.include_router(analytics.router)
-app.include_router(analytics.router)
-app.include_router(email.router, prefix="/api/email", tags=["email"])
+app.include_router(analytics.dashboard_router)
+app.include_router(email.router)
+app.include_router(triage_router.router)
+
+
+# ---------------------------------------------------------------------------
+# WEBSOCKET REAL-TIME BROADCAST MANAGER FOR DASHBOARD
+# ---------------------------------------------------------------------------
+class DashboardConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in list(self.active_connections):
+            try:
+                await connection.send_json(message)
+            except Exception:
+                self.disconnect(connection)
+
+ws_manager = DashboardConnectionManager()
+
+
+@app.websocket("/ws/dashboard")
+async def websocket_dashboard_endpoint(websocket: WebSocket):
+    await ws_manager.connect(websocket)
+    try:
+        await websocket.send_json({"type": "connected", "message": "SupportPilot Real-time Dashboard Connected"})
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_json({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()})
+            elif data == "refresh":
+                await ws_manager.broadcast({"type": "ticketsUpdated", "timestamp": datetime.now(timezone.utc).isoformat()})
+    except WebSocketDisconnect:
+        ws_manager.disconnect(websocket)
+    except Exception:
+        ws_manager.disconnect(websocket)
 
 
 # In-memory storage for email automation logs
@@ -72,29 +135,3 @@ def health_check():
     return {"status": "ok", "service": "SupportPilot API"}
 
 
-# ---------------------------------------------------------------------------
-# EMAIL AUTOMATION SERVICE ENDPOINTS
-# ---------------------------------------------------------------------------
-@app.get("/api/email/logs", tags=["Email Automation"])
-def get_email_logs():
-    return email_logs_db
-
-
-@app.post("/api/email/send", tags=["Email Automation"])
-def send_email_notification(payload: EmailPayload):
-    now_iso = datetime.now(timezone.utc).isoformat()
-    email_entry = {
-        "id": f"EML-{len(email_logs_db) + 101}",
-        "to": payload.to,
-        "from": "support@supportpilot.ai",
-        "subject": payload.subject,
-        "body": payload.body,
-        "status": "Delivered",
-        "created_at": now_iso,
-        "history": [
-            {"date": now_iso, "status": "Dispatched", "details": "Triggered via LangGraph orchestrator node."},
-            {"date": now_iso, "status": "Delivered", "details": "Delivered successfully to target inbox."},
-        ],
-    }
-    email_logs_db.append(email_entry)
-    return {"status": "success", "email": email_entry}

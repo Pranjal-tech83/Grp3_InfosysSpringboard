@@ -219,8 +219,12 @@ def save_response(state: TicketState) -> TicketState:
     try:
         email_payload = {
             "to": state.get("user_email", "user@example.com"),
-            "subject": f"Resolved: Ticket #{state['ticket_id']} - {state['subject']}",
-            "body": f"Hello,\n\nYour support ticket has been automatically resolved:\n\n{state['generated_response']}\n\nBest regards,\nSupportPilot Team"
+            "name": state.get("user_name", "Customer"),
+            "ticket_id": f"TKT-{state['ticket_id']}",
+            "ticket_status": "Resolved",
+            "event_type": "resolved",
+            "subject": f"RESOLVED: [TKT-{state['ticket_id']}] {state['subject']}",
+            "body": f"Hello {state.get('user_name', 'Customer')},\n\nYour support ticket #{state['ticket_id']} has been automatically resolved:\n\n{state['generated_response']}\n\nBest regards,\nSupportPilot AI Team"
         }
         requests.post(f"{API_BASE_URL}/api/email/send", json=email_payload, timeout=5)
         _log(state, "Resolution email dispatch triggered via Email Service.")
@@ -289,8 +293,12 @@ def escalate_ticket(state: TicketState) -> TicketState:
     try:
         email_payload = {
             "to": state.get("user_email", "user@example.com"),
-            "subject": f"Escalated: Ticket #{state['ticket_id']} - Handed over to {assigned_team}",
-            "body": f"Hello,\n\nYour ticket '{state['subject']}' has been escalated to {assigned_team}.\nReason: {reason}\n\nOur engineering team will assist you shortly."
+            "name": state.get("user_name", "Customer"),
+            "ticket_id": f"TKT-{state['ticket_id']}",
+            "ticket_status": "Escalated",
+            "event_type": "escalated",
+            "subject": f"ESCALATED: [TKT-{state['ticket_id']}] Handed over to {assigned_team}",
+            "body": f"Hello {state.get('user_name', 'Customer')},\n\nYour ticket '{state['subject']}' has been escalated to {assigned_team}.\nReason: {reason}\n\nOur engineering team will assist you shortly."
         }
         requests.post(f"{API_BASE_URL}/api/email/send", json=email_payload, timeout=5)
         _log(state, "Escalation email dispatch triggered via Email Service.")

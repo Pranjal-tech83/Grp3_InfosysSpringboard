@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    Column, Integer, String, Text, Float, DateTime, ForeignKey, Enum
+    Column, Integer, String, Text, Float, DateTime, ForeignKey, Enum, Boolean
 )
 from sqlalchemy.orm import relationship
 
@@ -50,7 +50,11 @@ class User(Base):
     name = Column(String(120), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     department = Column(String(120), nullable=True)
-    role = Column(String(50), nullable=False, default="employee")  # employee, agent, admin
+    role = Column(String(50), nullable=False, default="Support Agent")  # Support Agent, employee, agent, admin
+    phone = Column(String(50), nullable=True)
+    bio = Column(Text, nullable=True)
+    profile_image = Column(String(500), nullable=True)
+    email_verified = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     tickets = relationship("Ticket", back_populates="user")
