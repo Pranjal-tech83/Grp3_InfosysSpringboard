@@ -387,18 +387,27 @@
   /* ── Dual-Line Ticket Volume & Resolution Chart ── */
   function ChartPanel({ analytics, loading }) {
     var [hoveredIndex, setHoveredIndex] = useState(null);
+    var [selectedWeek, setSelectedWeek] = useState('current');
 
-    var weekly = (analytics && analytics.weekly_data && analytics.weekly_data.length === 7)
+    var emptyWeekly = [
+      { day: 'Mon', created: 0, resolved: 0 },
+      { day: 'Tue', created: 0, resolved: 0 },
+      { day: 'Wed', created: 0, resolved: 0 },
+      { day: 'Thu', created: 0, resolved: 0 },
+      { day: 'Fri', created: 0, resolved: 0 },
+      { day: 'Sat', created: 0, resolved: 0 },
+      { day: 'Sun', created: 0, resolved: 0 }
+    ];
+
+    var currentWeekly = (analytics && analytics.weekly_data && analytics.weekly_data.length === 7)
       ? analytics.weekly_data
-      : [
-        { day: 'Mon', created: 0, resolved: 0 },
-        { day: 'Tue', created: 0, resolved: 0 },
-        { day: 'Wed', created: 0, resolved: 0 },
-        { day: 'Thu', created: 0, resolved: 0 },
-        { day: 'Fri', created: 0, resolved: 0 },
-        { day: 'Sat', created: 0, resolved: 0 },
-        { day: 'Sun', created: 0, resolved: 0 }
-      ];
+      : emptyWeekly;
+      
+    var prevWeekly = (analytics && analytics.previous_weekly_data && analytics.previous_weekly_data.length === 7)
+      ? analytics.previous_weekly_data
+      : emptyWeekly;
+
+    var weekly = selectedWeek === 'current' ? currentWeekly : prevWeekly;
 
     var totalCreatedWeek = weekly.reduce(function (acc, d) { return acc + (d.created || 0); }, 0);
     var totalResolvedWeek = weekly.reduce(function (acc, d) { return acc + (d.resolved || 0); }, 0);
@@ -461,9 +470,25 @@
     },
       // Header
       h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' } },
-        h('div', null,
-          h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 'Ticket Volume & Resolution Trend'),
-          h('div', { style: { fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' } }, '7-Day weekly lifecycle comparison (Live Database)')
+        h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } },
+          h('div', { 
+            style: { cursor: 'pointer', opacity: selectedWeek === 'previous' ? 0.5 : 1, padding: '4px' },
+            onClick: function() { setSelectedWeek('previous'); }
+          }, '⬅️'),
+          h('div', null,
+            h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 
+              selectedWeek === 'current' ? 'Ticket Volume & Resolution Trend' : 'Previous Week Trend'
+            ),
+            h('div', { style: { fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', fontWeight: 600 } }, 
+              selectedWeek === 'current' 
+                ? (analytics && analytics.current_week_label ? analytics.current_week_label : '') 
+                : (analytics && analytics.previous_week_label ? analytics.previous_week_label : '')
+            )
+          ),
+          h('div', { 
+            style: { cursor: 'pointer', opacity: selectedWeek === 'current' ? 0.5 : 1, padding: '4px' },
+            onClick: function() { setSelectedWeek('current'); }
+          }, '➡️')
         ),
         // Legend & live weekly totals
         h('div', { style: { display: 'flex', alignItems: 'center', gap: '18px', fontSize: '12.5px', fontWeight: 600 } },
