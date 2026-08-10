@@ -586,6 +586,30 @@ def get_dashboard_analytics_data(db: Session) -> dict:
             "resolved": resolved
         })
         
+    start_of_prev_week = start_of_week - timedelta(days=7)
+    previous_weekly_data = []
+    for i in range(7):
+        day_date = start_of_prev_week + timedelta(days=i)
+        next_day = day_date + timedelta(days=1)
+        day_name = day_labels[i]
+        
+        created = db.query(func.count(models.Ticket.ticket_id)).filter(
+            models.Ticket.created_at >= day_date,
+            models.Ticket.created_at < next_day
+        ).scalar() or 0
+        
+        resolved = db.query(func.count(models.Ticket.ticket_id)).filter(
+            models.Ticket.status.in_([models.TicketStatus.resolved.value, models.TicketStatus.closed.value]),
+            models.Ticket.updated_at >= day_date,
+            models.Ticket.updated_at < next_day
+        ).scalar() or 0
+        
+        previous_weekly_data.append({
+            "day": day_name,
+            "created": created,
+            "resolved": resolved
+        })
+        
     classified_today = db.query(func.count(models.Ticket.ticket_id)).filter(
         models.Ticket.status != models.TicketStatus.open.value,
         models.Ticket.created_at >= today
@@ -626,9 +650,14 @@ def get_dashboard_analytics_data(db: Session) -> dict:
         }
         for a in activities
     ]
+    current_week_label = f"{start_of_week.strftime('%b')} {start_of_week.day} - {(start_of_week + timedelta(days=6)).strftime('%b')} {(start_of_week + timedelta(days=6)).day}"
+    previous_week_label = f"{start_of_prev_week.strftime('%b')} {start_of_prev_week.day} - {(start_of_prev_week + timedelta(days=6)).strftime('%b')} {(start_of_prev_week + timedelta(days=6)).day}"
     
     return {
         "weekly_data": weekly_data,
+        "previous_weekly_data": previous_weekly_data,
+        "current_week_label": current_week_label,
+        "previous_week_label": previous_week_label,
         "workflow_status": {
             "classified_today": classified_today,
             "resolved_automatically": resolved_automatically,

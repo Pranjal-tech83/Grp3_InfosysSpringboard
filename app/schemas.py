@@ -234,6 +234,9 @@ class RecentActivity(BaseModel):
 
 class DashboardAnalyticsOut(BaseModel):
     weekly_data: List[WeeklyData]
+    previous_weekly_data: List[WeeklyData] = []
+    current_week_label: str = ""
+    previous_week_label: str = ""
     workflow_status: WorkflowStatus
     pie_chart_data: PieChartData
     recent_activities: List[RecentActivity]
