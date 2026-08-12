@@ -145,7 +145,6 @@ def get_ticket_activity(ticket_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Ticket not found")
     return crud.list_activity_logs(db, ticket_id)
 
-
 @router.delete("/{ticket_id}", status_code=200)
 def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):
     ticket = crud.get_ticket(db, ticket_id)

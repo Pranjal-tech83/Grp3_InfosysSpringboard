@@ -1,5 +1,395 @@
 [
   {
+    "id": "jira-57-3471",
+    "ticket_id": 57,
+    "ticket_code": "TKT-57",
+    "jira_key": "FIN-3471",
+    "project_key": "FIN",
+    "issue_type": "Task",
+    "summary": "Payment deducted twice",
+    "description": "payment issue",
+    "status": "Closed",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Finance Support Team",
+    "assignee": "Clara Oswald (Billing Ops)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-12T19:32:04.812651+00:00",
+    "last_updated": "2026-08-12T19:35:01.771340+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1187,
+    "jira_url": "https://supportpilot.atlassian.net/browse/FIN-3471",
+    "comments": [
+      {
+        "id": "c-auto-198",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-57 ingested. Automatically assigned to Finance Support Team (Clara Oswald (Billing Ops)).",
+        "created_at": "2026-08-12T19:32:04.812651+00:00"
+      },
+      {
+        "id": "c-4920",
+        "author": "SupportPilot Operator",
+        "content": "hii",
+        "created_at": "2026-08-12T19:34:43.195554+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-12T19:32:04.812651+00:00",
+        "status": "201 Created",
+        "detail": "Issue FIN-3471 created with intelligent team assignment: Finance Support Team"
+      },
+      {
+        "event": "Comment Added",
+        "timestamp": "2026-08-12T19:34:43.195554+00:00",
+        "status": "201 Created",
+        "detail": "Comment posted by SupportPilot Operator"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-12T19:35:01.771340+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      }
+    ]
+  },
+  {
+    "id": "jira-56-4252",
+    "ticket_id": 56,
+    "ticket_code": "TKT-56",
+    "jira_key": "NET-4252",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "issue vpn",
+    "status": "Closed",
+    "priority": "Urgent",
+    "severity": "Critical",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-12T19:24:04.108832+00:00",
+    "last_updated": "2026-08-12T19:27:42.641421+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 793,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-4252",
+    "comments": [
+      {
+        "id": "c-auto-929",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-56 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-12T19:24:04.108832+00:00"
+      },
+      {
+        "id": "c-4292",
+        "author": "SupportPilot Operator",
+        "content": "vpn issue",
+        "created_at": "2026-08-12T19:27:30.197871+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-12T19:24:04.108832+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-4252 created with intelligent team assignment: Network Support Team"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-12T19:26:12.911472+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-12T19:27:04.687234+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Open'}"
+      },
+      {
+        "event": "Comment Added",
+        "timestamp": "2026-08-12T19:27:30.197871+00:00",
+        "status": "201 Created",
+        "detail": "Comment posted by SupportPilot Operator"
+      },
+      {
+        "event": "Manual Field Update",
+        "timestamp": "2026-08-12T19:27:42.641421+00:00",
+        "status": "200 OK",
+        "detail": "Updated fields: {'status': 'Closed'}"
+      }
+    ]
+  },
+  {
+    "id": "jira-55-6746",
+    "ticket_id": 55,
+    "ticket_code": "TKT-55",
+    "jira_key": "SEC-6746",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-12T19:17:01.649867+00:00",
+    "last_updated": "2026-08-12T19:17:01.649867+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 865,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-6746",
+    "comments": [
+      {
+        "id": "c-auto-498",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-55 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-12T19:17:01.649867+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-12T19:17:01.649867+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-6746 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
+    "id": "jira-53-9189",
+    "ticket_id": 53,
+    "ticket_code": "TKT-53",
+    "jira_key": "FIN-9189",
+    "project_key": "FIN",
+    "issue_type": "Task",
+    "summary": "Payment deducted twice",
+    "description": "Description",
+    "status": "Open",
+    "priority": "High",
+    "severity": "P2",
+    "assigned_team": "Finance Support Team",
+    "assignee": "Clara Oswald (Billing Ops)",
+    "reporter_name": "Test",
+    "reporter_email": "test@example.com",
+    "created_at": "2026-08-12T18:13:17.875487+00:00",
+    "last_updated": "2026-08-12T18:13:17.875487+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 839,
+    "jira_url": "https://supportpilot.atlassian.net/browse/FIN-9189",
+    "comments": [
+      {
+        "id": "c-auto-603",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-53 ingested. Automatically assigned to Finance Support Team (Clara Oswald (Billing Ops)).",
+        "created_at": "2026-08-12T18:13:17.875487+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-12T18:13:17.875487+00:00",
+        "status": "201 Created",
+        "detail": "Issue FIN-9189 created with intelligent team assignment: Finance Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-50-3926",
+    "ticket_id": 50,
+    "ticket_code": "TKT-50",
+    "jira_key": "NET-3926",
+    "project_key": "NET",
+    "issue_type": "Task",
+    "summary": "firewall issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "High",
+    "severity": "High",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "test",
+    "reporter_email": "test@gmail.com",
+    "created_at": "2026-08-12T01:13:10.119240+00:00",
+    "last_updated": "2026-08-12T01:13:10.119240+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 952,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-3926",
+    "comments": [
+      {
+        "id": "c-auto-565",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-50 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-12T01:13:10.119240+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-12T01:13:10.119240+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-3926 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-49-3244",
+    "ticket_id": 49,
+    "ticket_code": "TKT-49",
+    "jira_key": "SW-3244",
+    "project_key": "SW",
+    "issue_type": "Task",
+    "summary": "Test backend",
+    "description": "Test description",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Software Support Team",
+    "assignee": "Devon Vance (Desktop Eng)",
+    "reporter_name": "Pranjal",
+    "reporter_email": "a66907656@gmail.com",
+    "created_at": "2026-08-11T18:12:22.203600+00:00",
+    "last_updated": "2026-08-11T18:12:22.203600+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1213,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SW-3244",
+    "comments": [
+      {
+        "id": "c-auto-329",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-49 ingested. Automatically assigned to Software Support Team (Devon Vance (Desktop Eng)).",
+        "created_at": "2026-08-11T18:12:22.203600+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-11T18:12:22.203600+00:00",
+        "status": "201 Created",
+        "detail": "Issue SW-3244 created with intelligent team assignment: Software Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-48-9984",
+    "ticket_id": 48,
+    "ticket_code": "TKT-48",
+    "jira_key": "NET-9984",
+    "project_key": "NET",
+    "issue_type": "Task",
+    "summary": "firewall issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "High",
+    "severity": "High",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "Pranjal kumar",
+    "reporter_email": "a66907656@gmail.com",
+    "created_at": "2026-08-11T17:35:58.300770+00:00",
+    "last_updated": "2026-08-11T17:35:58.300770+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1149,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-9984",
+    "comments": [
+      {
+        "id": "c-auto-925",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-48 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-11T17:35:58.300770+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-11T17:35:58.300770+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-9984 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-47-5664",
+    "ticket_id": 47,
+    "ticket_code": "TKT-47",
+    "jira_key": "NET-5664",
+    "project_key": "NET",
+    "issue_type": "Task",
+    "summary": "firewall issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "High",
+    "severity": "High",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "pranjal kumar",
+    "reporter_email": "theman838303@gmail.com",
+    "created_at": "2026-08-11T17:25:26.152988+00:00",
+    "last_updated": "2026-08-11T17:25:26.152988+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 915,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-5664",
+    "comments": [
+      {
+        "id": "c-auto-237",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-47 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-11T17:25:26.152988+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-11T17:25:26.152988+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-5664 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-46-2059",
+    "ticket_id": 46,
+    "ticket_code": "TKT-46",
+    "jira_key": "NET-2059",
+    "project_key": "NET",
+    "issue_type": "Task",
+    "summary": "firewall issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "High",
+    "severity": "High",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "test",
+    "reporter_email": "test@gmail.com",
+    "created_at": "2026-08-10T14:20:44.941632+00:00",
+    "last_updated": "2026-08-10T14:20:44.941632+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1151,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-2059",
+    "comments": [
+      {
+        "id": "c-auto-735",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-46 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-10T14:20:44.941632+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-10T14:20:44.941632+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-2059 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
     "id": "jira-45-6594",
     "ticket_id": 45,
     "ticket_code": "TKT-45",
@@ -322,7 +712,7 @@
     "issue_type": "Incident",
     "summary": "system failure",
     "description": "test",
-    "status": "Closed",
+    "status": "Resolved",
     "priority": "High",
     "severity": "Critical",
     "assigned_team": "Network Support Team",
@@ -330,7 +720,7 @@
     "reporter_name": "Riya singh",
     "reporter_email": "roman838303@gmail.com",
     "created_at": "2026-08-09T16:45:36.832256+00:00",
-    "last_updated": "2026-08-09T17:03:25.116587+00:00",
+    "last_updated": "2026-08-12T18:07:06.074955+00:00",
     "sync_status": "Synced",
     "sync_latency_ms": 892,
     "jira_url": "https://supportpilot.atlassian.net/browse/NET-2578",
@@ -354,6 +744,12 @@
         "timestamp": "2026-08-09T17:03:25.116587+00:00",
         "status": "200 OK",
         "detail": "Updated fields: {'status': 'Closed'}"
+      },
+      {
+        "event": "Status Updated: Resolved",
+        "timestamp": "2026-08-12T18:07:06.074955+00:00",
+        "status": "200 OK",
+        "detail": "Status set to Resolved by Operator"
       }
     ]
   },

@@ -185,14 +185,14 @@
           
           <div style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; padding: 4px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;" id="ap-log-list">
             ${state.log.length === 0
-              ? `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;">No activity logged yet</div>`
-              : state.log.map(e => `
+        ? `<div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px;">No activity logged yet</div>`
+        : state.log.map(e => `
                   <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 6px; font-size: 12px; background: ${e.type === 'success' ? '#ecfdf5' : e.type === 'error' ? '#fef2f2' : 'white'}; border: 1px solid ${e.type === 'success' ? '#a7f3d0' : '#f1f5f9'};">
                     <span style="font-weight: 700; color: #4338ca; font-size: 11px; white-space: nowrap;">${e.agent}</span>
                     <span style="color: #334155; font-size: 12px;">${e.msg}</span>
                     <span style="font-size: 10px; color: var(--text-muted); white-space: nowrap; font-family: monospace;">${e.time}</span>
                   </div>`).join('')
-            }
+      }
           </div>
         </div>
       </div>`;

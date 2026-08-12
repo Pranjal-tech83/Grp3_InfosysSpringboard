@@ -584,8 +584,19 @@ async function handleRunAIPrediction(e) {
   const descEl = document.getElementById("tkt-desc");
   const deptEl = document.getElementById("tkt-dept");
 
-  const requesterName = nameEl ? nameEl.value.trim() : "";
-  const requesterEmail = emailEl ? emailEl.value.trim() : "";
+  let sessionName = "Corporate Employee";
+  let sessionEmail = "employee@company.com";
+  try {
+    const sRaw = localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session');
+    if (sRaw) {
+      const s = JSON.parse(sRaw);
+      if (s.name) sessionName = s.name;
+      if (s.email) sessionEmail = s.email;
+    }
+  } catch(e) {}
+
+  const requesterName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : sessionName;
+  const requesterEmail = emailEl && emailEl.value.trim() ? emailEl.value.trim() : sessionEmail;
   const subject = subjectEl ? subjectEl.value.trim() : "";
   const description = descEl ? descEl.value.trim() : "";
   const userSelectedDept = deptEl ? deptEl.value : "";
@@ -704,8 +715,21 @@ async function handleNewTicketConfirmSubmit(e) {
   const confirmBtn = document.getElementById("btn-modal-confirm");
   if (confirmBtn) confirmBtn.disabled = true;
 
-  const requesterName = document.getElementById("tkt-name")?.value.trim() || "Corporate Employee";
-  const requesterEmail = document.getElementById("tkt-email")?.value.trim() || "employee@company.com";
+  let sessionName = "Corporate Employee";
+  let sessionEmail = "employee@company.com";
+  try {
+    const sRaw = localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session');
+    if (sRaw) {
+      const s = JSON.parse(sRaw);
+      if (s.name) sessionName = s.name;
+      if (s.email) sessionEmail = s.email;
+    }
+  } catch(e) {}
+
+  const nameEl = document.getElementById("tkt-name");
+  const emailEl = document.getElementById("tkt-email");
+  const requesterName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : sessionName;
+  const requesterEmail = emailEl && emailEl.value.trim() ? emailEl.value.trim() : sessionEmail;
   const subject = document.getElementById("tkt-subject")?.value.trim() || "Support Request";
   const description = document.getElementById("tkt-desc")?.value.trim() || "";
 

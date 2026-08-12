@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SupportPilot – Login</title>
-  <meta name="description"
-    content="Sign in to SupportPilot, the AI-powered ticket resolution platform. Access your account, create a new one, or reset your password." />
+  <title>SupportPilot – Admin Login</title>
+  <meta name="description" content="Sign in to SupportPilot Admin Dashboard." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <!-- React 18 via CDN (no build step) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -17,7 +17,6 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
- 
     :root {
       --bg-app: #f0f4ff;
       --bg-card: rgba(255, 255, 255, 0.82);
@@ -786,17 +785,17 @@
       phone: 'M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63 19.79 19.79 0 01.14 2.18 2 2 0 012.11 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.72 6.72l1.28-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z',
     };
 
-  /* ── Helpers ─────────────────────────────────────────────── */
-  function getStrength(pw) {
-    let s = 0;
-    if (pw.length >= 8) s++;
-    if (/[A-Z]/.test(pw)) s++;
-    if (/[0-9]/.test(pw)) s++;
-    if (/[^A-Za-z0-9]/.test(pw)) s++;
-    return s;
-  }
-  const slabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
-  const scls    = ['', 'active-weak', 'active-fair', 'active-good', 'active-strong'];
+    /* ── Helpers ─────────────────────────────────────────────── */
+    function getStrength(pw) {
+      let s = 0;
+      if (pw.length >= 8) s++;
+      if (/[A-Z]/.test(pw)) s++;
+      if (/[0-9]/.test(pw)) s++;
+      if (/[^A-Za-z0-9]/.test(pw)) s++;
+      return s;
+    }
+    const slabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const scls = ['', 'active-weak', 'active-fair', 'active-good', 'active-strong'];
 
     function StrengthMeter({ pw }) {
       const s = pw ? getStrength(pw) : 0;
@@ -853,28 +852,36 @@
     }
     function saveUsers(u) { localStorage.setItem('sp_users', JSON.stringify(u)); }
 
-  /* ─── Login View ────────────────────────────────────────── */
-  function LoginView({ onNav, onLoggedIn }) {
-    const [email, setEmail] = useState('');
-    const [pw, setPw] = useState('');
-    const [remember, setRemember] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    /* ─── Login View ────────────────────────────────────────── */
+    function LoginView({ onNav, onLoggedIn }) {
+      const [email, setEmail] = useState('theman838303@gmail.com');
+      const [pw, setPw] = useState('');
+      const [remember, setRemember] = useState(false);
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
 
       async function submit(e) {
         e.preventDefault(); setError('');
         if (!email || !pw) { setError('Please fill in all fields.'); return; }
         setLoading(true);
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/login', {
+          const body = new URLSearchParams();
+          body.append('username', email);
+          body.append('password', pw);
+
+          const res = await fetch('http://127.0.0.1:8000/api/admin/auth/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password: pw })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
           });
           if (res.ok) {
-            const u = await res.json();
+            const data = await res.json();
+            const u = data.user;
+            u.token = data.access_token;
             if (remember) localStorage.setItem('sp_session', JSON.stringify(u));
+            else sessionStorage.setItem('sp_session', JSON.stringify(u));
             onLoggedIn(u);
+            window.location.href = '../index.html';
           } else {
             const err = await res.json();
             setError(err.detail || 'Invalid email or password. Please try again.');
@@ -890,7 +897,7 @@
       return (
         <div className="card-inner" style={{ textAlign: 'center' }}>
           <div className="card-header" style={{ marginBottom: 32 }}>
-            <div className="card-title" style={{ fontSize: 26, marginBottom: 8 }}>Welcome Back</div>
+            <div className="card-title" style={{ fontSize: 26, marginBottom: 8 }}>Welcome Back, Admin</div>
           </div>
           <Msg type="error" text={error} />
           <form onSubmit={submit} noValidate style={{ textAlign: 'left' }}>
@@ -919,13 +926,13 @@
       );
     }
 
-  /* ─── Register View ─────────────────────────────────────── */
-  function RegisterView({ onNav }) {
-    const [f, setF] = useState({ name:'', email:'', phone:'', pw:'', confirm:'' });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [done, setDone] = useState(false);
-    const set = k => e => setF(p => ({ ...p, [k]: e.target.value }));
+    /* ─── Register View ─────────────────────────────────────── */
+    function RegisterView({ onNav }) {
+      const [f, setF] = useState({ name: '', email: '', phone: '', pw: '', confirm: '' });
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      const [done, setDone] = useState(false);
+      const set = k => e => setF(p => ({ ...p, [k]: e.target.value }));
 
       async function submit(e) {
         e.preventDefault(); setError('');
@@ -935,7 +942,7 @@
 
         setLoading(true);
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/register', {
+          const res = await fetch('http://127.0.0.1:8000/api/admin/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: f.name, email: f.email, password: f.pw, phone: f.phone })
@@ -990,17 +997,17 @@
       );
     }
 
-  /* ─── Forgot Password View ──────────────────────────────── */
-  function ForgotView({ onNav }) {
-    const [step, setStep] = useState(1);
-    const [email, setEmail] = useState('');
-    const [code, setCode] = useState('');
-    const [sentCode, setSentCode] = useState('');
-    const [newPw, setNewPw] = useState('');
-    const [confirmPw, setConfirmPw] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [done, setDone] = useState(false);
+    /* ─── Forgot Password View ──────────────────────────────── */
+    function ForgotView({ onNav }) {
+      const [step, setStep] = useState(1);
+      const [email, setEmail] = useState('');
+      const [code, setCode] = useState('');
+      const [sentCode, setSentCode] = useState('');
+      const [newPw, setNewPw] = useState('');
+      const [confirmPw, setConfirmPw] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+      const [done, setDone] = useState(false);
 
       function sendCode(e) {
         e.preventDefault(); setError('');
@@ -1083,26 +1090,26 @@
       );
     }
 
-  /* ─── Logout View ───────────────────────────────────────── */
-  function LogoutView({ user, onNav, onLoggedOut }) {
-    const [loading, setLoading] = useState(false);
-    function doLogout() {
-      setLoading(true);
-      setTimeout(() => { localStorage.removeItem('sp_session'); setLoading(false); onLoggedOut(); }, 700);
-    }
-    return (
-      <div className="card-inner" style={{ textAlign:'center' }}>
-        <div className="logout-icon"><Icon d={IC.logout} size={28} stroke="var(--danger)" strokeWidth={2} /></div>
-        <div className="card-title" style={{ marginBottom:8 }}>Sign out?</div>
-        <p className="card-subtitle" style={{ marginBottom:6 }}>You are signed in as <strong style={{ color:'var(--text-primary)' }}>{user?.name || user?.email}</strong>.</p>
-        <p className="card-subtitle" style={{ marginBottom:28 }}>Are you sure you want to sign out of SupportPilot?</p>
-        <div style={{ display:'flex', gap:10 }}>
-          <button id="logout-cancel" className="btn btn-ghost" onClick={() => onNav('dashboard')}>Cancel</button>
-          <button id="logout-confirm" className="btn btn-danger" onClick={doLogout} disabled={loading}>{loading ? <Spinner /> : 'Yes, Sign Out'}</button>
+    /* ─── Logout View ───────────────────────────────────────── */
+    function LogoutView({ user, onNav, onLoggedOut }) {
+      const [loading, setLoading] = useState(false);
+      function doLogout() {
+        setLoading(true);
+        setTimeout(() => { localStorage.removeItem('sp_session'); setLoading(false); onLoggedOut(); }, 700);
+      }
+      return (
+        <div className="card-inner" style={{ textAlign: 'center' }}>
+          <div className="logout-icon"><Icon d={IC.logout} size={28} stroke="var(--danger)" strokeWidth={2} /></div>
+          <div className="card-title" style={{ marginBottom: 8 }}>Sign out?</div>
+          <p className="card-subtitle" style={{ marginBottom: 6 }}>You are signed in as <strong style={{ color: 'var(--text-primary)' }}>{user?.name || user?.email}</strong>.</p>
+          <p className="card-subtitle" style={{ marginBottom: 28 }}>Are you sure you want to sign out of SupportPilot?</p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button id="logout-cancel" className="btn btn-ghost" onClick={() => onNav('dashboard')}>Cancel</button>
+            <button id="logout-confirm" className="btn btn-danger" onClick={doLogout} disabled={loading}>{loading ? <Spinner /> : 'Yes, Sign Out'}</button>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
     /* ─── Dashboard (post-login) ────────────────────────────── */
     function DashboardView({ user, onNav }) {
@@ -1111,10 +1118,10 @@
           <div className="success-icon" style={{ background: 'var(--accent-light)' }}>
             <Icon d={IC.user} size={28} stroke="var(--accent)" strokeWidth={2} />
           </div>
-          <div className="card-title" style={{ marginBottom: 8 }}>Welcome, {user?.name?.split(' ')[0] || 'User'}! 🚀</div>
-          <p className="card-subtitle" style={{ marginBottom: 28 }}>You're signed in as <strong style={{ color: 'var(--text-primary)' }}>{user?.email}</strong>. Redirecting you to the main app…</p>
+          <div className="card-title" style={{ marginBottom: 8 }}>Welcome Admin, {user?.name?.split(' ')[0] || 'User'}! 🚀</div>
+          <p className="card-subtitle" style={{ marginBottom: 28 }}>You're signed in as <strong style={{ color: 'var(--text-primary)' }}>{user?.email}</strong>. Redirecting you to the admin dashboard…</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <a id="open-app" href="index.html" className="btn btn-primary" style={{ textDecoration: 'none' }}>Open SupportPilot →</a>
+            <a id="open-app" href="../index.html" className="btn btn-primary" style={{ textDecoration: 'none' }}>Open Admin Dashboard →</a>
             <button id="logout-btn" className="btn btn-ghost" onClick={() => onNav('logout')}><Icon d={IC.logout} size={15} /> Sign Out</button>
           </div>
         </div>

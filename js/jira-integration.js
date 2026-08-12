@@ -130,7 +130,7 @@
       if (!ISSUES || ISSUES.length === 0) {
         try {
           ISSUES = JSON.parse(localStorage.getItem('jira_activity') || '[]');
-        } catch (_) {}
+        } catch (_) { }
       }
     } finally {
       IS_LOADING = false;
@@ -441,7 +441,7 @@
       backdrop.id = 'jira-drawer-backdrop';
       backdrop.className = 'jira-drawer-backdrop';
       backdrop.style.display = 'none';
-      backdrop.onclick = function(e) {
+      backdrop.onclick = function (e) {
         if (e.target === backdrop) {
           closeDrawer();
         }
@@ -450,7 +450,7 @@
       const panel = document.createElement('div');
       panel.id = 'jira-drawer-panel';
       panel.className = 'jira-drawer-panel';
-      panel.onclick = function(e) {
+      panel.onclick = function (e) {
         e.stopPropagation();
       };
 
@@ -466,7 +466,7 @@
       configModal.style.display = 'none';
       configModal.style.alignItems = 'center';
       configModal.style.justifyContent = 'center';
-      configModal.onclick = function(e) {
+      configModal.onclick = function (e) {
         if (e.target === configModal) {
           closeConfigModal();
         }
@@ -645,9 +645,9 @@
               </div>
               <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 ${['Open', 'In Progress', 'In Review', 'Resolved', 'Closed'].map(st => {
-                  const isActive = item.status === st;
-                  const stStyle = STATUS_STYLES[st] || STATUS_STYLES['Open'];
-                  return `
+      const isActive = item.status === st;
+      const stStyle = STATUS_STYLES[st] || STATUS_STYLES['Open'];
+      return `
                     <button 
                       onclick="window.SupportPilotJira.updateStatus('${item.jira_key}', '${st}')"
                       class="btn btn-secondary"
@@ -658,7 +658,7 @@
                       ${isActive ? '<span style="margin-left: 2px;">✓</span>' : ''}
                     </button>
                   `;
-                }).join('')}
+    }).join('')}
               </div>
             </div>
 
@@ -833,7 +833,7 @@
           backdrop.style.display = 'flex';
         }
       }
-    } catch (_) {}
+    } catch (_) { }
 
     if (!ACTIVE_DRAWER_ISSUE) {
       if (typeof showToast === 'function') showToast('Jira Error', `Could not find details for ${jiraKey}`, 'error');

@@ -28,13 +28,13 @@
   // Global user state store & synchronization engine
   window.SupportPilotUser = {
     _currentUser: null,
-    
+
     getUser: function () {
       if (this._currentUser) return this._currentUser;
       try {
         var raw = localStorage.getItem('supportpilot-user');
         if (raw) return JSON.parse(raw);
-      } catch (e) {}
+      } catch (e) { }
       return {
         id: 1,
         user_id: 1,
@@ -52,7 +52,7 @@
     setUser: function (userData) {
       if (!userData) return;
       this._currentUser = Object.assign({}, this._currentUser || {}, userData);
-      
+
       // Standardize fields
       if (userData.profile_image && !userData.profileImage) {
         this._currentUser.profileImage = userData.profile_image;
@@ -76,7 +76,7 @@
         } else if (userData.profileImage === null || userData.profile_image === null) {
           localStorage.removeItem('nova-profile-img');
         }
-      } catch (e) {}
+      } catch (e) { }
 
       // Apply to global DOM elements immediately
       this.syncGlobalDOM(this._currentUser);
@@ -84,7 +84,7 @@
       // Dispatch custom event
       try {
         window.dispatchEvent(new CustomEvent('supportpilot:userUpdated', { detail: this._currentUser }));
-      } catch (e) {}
+      } catch (e) { }
     },
 
     syncGlobalDOM: function (user) {
@@ -197,7 +197,7 @@
     return h('div', { className: 'sp-profile-banner-card' },
       // Banner decorative top
       h('div', { className: 'sp-profile-banner-bg' }),
-      
+
       // Main metadata banner body
       h('div', { className: 'sp-profile-banner-body' },
         h('div', { className: 'sp-profile-main-meta' },
@@ -225,7 +225,7 @@
             ),
             h('p', { className: 'sp-profile-header-email' },
               svgIcon('M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 14, 'var(--text-muted)'),
-              user.email || 'agent@supportpilot.ai'
+              (user.email === 'admin@company.com' ? 'theman838303@gmail.com' : user.email) || 'agent@supportpilot.ai'
             ),
             h('div', { className: 'sp-profile-badges-row' },
               h('span', { className: 'sp-role-pill' },
@@ -287,7 +287,7 @@
       // Validate format
       var validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       var isImg = validTypes.indexOf(file.type.toLowerCase()) !== -1 ||
-                  /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
+        /\.(jpg|jpeg|png|webp|gif)$/i.test(file.name);
 
       if (!isImg) {
         setAlertMsg({ type: 'error', text: 'Invalid file format. Please select a JPG, PNG, WebP, or GIF image.' });
@@ -505,63 +505,12 @@
   }
 
   /* ══════════════════════════════════════════════════════════════
-     ACCOUNT OVERVIEW CARD COMPONENT
-  ══════════════════════════════════════════════════════════════ */
-  function AccountOverviewCard(props) {
-    var user = props.user;
-    var formattedDate = 'August 2026';
-    if (user.created_at) {
-      try {
-        var d = new Date(user.created_at);
-        formattedDate = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      } catch (e) {}
-    }
-
-    return h('div', { className: 'sp-card' },
-      h('div', { className: 'sp-card-header' },
-        h('div', null,
-          h('h3', { className: 'sp-card-title' }, 'Account Overview'),
-          h('p', { className: 'sp-card-subtitle' }, 'Security & system authorization details.')
-        )
-      ),
-
-      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13 } },
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, borderBottom: '1px solid var(--border-color)' } },
-          h('span', { style: { color: 'var(--text-secondary)' } }, 'Agent ID'),
-          h('span', { style: { fontWeight: 700, fontFamily: 'monospace', color: 'var(--accent-primary)' } }, 'SP-AGENT-' + String(user.id || user.user_id || 1).padStart(3, '0'))
-        ),
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, borderBottom: '1px solid var(--border-color)' } },
-          h('span', { style: { color: 'var(--text-secondary)' } }, 'Account Status'),
-          h('span', { className: 'sp-active-pill' },
-            h('div', { className: 'sp-pulse-dot' }),
-            'Active (Online)'
-          )
-        ),
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, borderBottom: '1px solid var(--border-color)' } },
-          h('span', { style: { color: 'var(--text-secondary)' } }, 'Email Status'),
-          h('span', { style: { color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 } },
-            svgIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 15, '#059669'),
-            'Verified'
-          )
-        ),
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, borderBottom: '1px solid var(--border-color)' } },
-          h('span', { style: { color: 'var(--text-secondary)' } }, 'Access Level'),
-          h('span', { style: { fontWeight: 600, color: 'var(--text-primary)' } }, 'Enterprise Tier-2')
-        ),
-        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-          h('span', { style: { color: 'var(--text-secondary)' } }, 'Member Since'),
-          h('span', { style: { color: 'var(--text-muted)' } }, formattedDate)
-        )
-      )
-    );
-  }
-
-  /* ══════════════════════════════════════════════════════════════
      PERSONAL INFORMATION CARD COMPONENT
   ══════════════════════════════════════════════════════════════ */
   function PersonalInfoCard(props) {
     var user = props.user;
     var onUserUpdate = props.onUserUpdate;
+    var isEmployee = props.isEmployee;
 
     var nameState = useState(user.name || '');
     var deptState = useState(user.department || 'Customer Support');
@@ -676,17 +625,29 @@
             })
           ),
 
-          h('div', { className: 'sp-form-group' },
-            h('label', { className: 'sp-form-label' }, 'Account Role'),
-            h('input', {
-              type: 'text',
-              className: 'sp-input',
-              value: user.role || 'Support Agent',
-              readOnly: true,
-              disabled: true,
-              style: { cursor: 'not-allowed', background: 'rgba(148, 163, 184, 0.08)' }
-            })
-          )
+          isEmployee ?
+            h('div', { className: 'sp-form-group' },
+              h('label', { className: 'sp-form-label' }, 'Email Address'),
+              h('input', {
+                type: 'email',
+                className: 'sp-input',
+                value: (user.email === 'admin@company.com' ? 'theman838303@gmail.com' : user.email) || '',
+                readOnly: true,
+                disabled: true,
+                style: { cursor: 'not-allowed', background: 'rgba(148, 163, 184, 0.08)' }
+              })
+            ) :
+            h('div', { className: 'sp-form-group' },
+              h('label', { className: 'sp-form-label' }, 'Account Role'),
+              h('input', {
+                type: 'text',
+                className: 'sp-input',
+                value: user.role || 'Support Agent',
+                readOnly: true,
+                disabled: true,
+                style: { cursor: 'not-allowed', background: 'rgba(148, 163, 184, 0.08)' }
+              })
+            )
         ),
 
         // Grid Row: Department & Phone
@@ -707,7 +668,7 @@
             )
           ),
 
-          h('div', { className: 'sp-form-group' },
+          !isEmployee ? h('div', { className: 'sp-form-group' },
             h('label', { className: 'sp-form-label', htmlFor: 'sp-input-phone' }, 'Phone Number (Optional)'),
             h('input', {
               id: 'sp-input-phone',
@@ -717,11 +678,11 @@
               value: phone,
               onChange: function (e) { setPhone(e.target.value); }
             })
-          )
+          ) : null
         ),
 
         // Textarea: Bio
-        h('div', { className: 'sp-form-group' },
+        !isEmployee ? h('div', { className: 'sp-form-group' },
           h('label', { className: 'sp-form-label', htmlFor: 'sp-input-bio' },
             h('span', null, 'Professional Bio'),
             h('span', { style: { fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' } }, bio.length + ' / 300')
@@ -735,7 +696,7 @@
             value: bio,
             onChange: function (e) { setBio(e.target.value); }
           })
-        ),
+        ) : null,
 
         // Action Buttons Row
         h('div', { style: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 10, paddingTop: 16, borderTop: '1px solid var(--border-color)' } },
@@ -753,208 +714,13 @@
           },
             isSaving
               ? h('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-                  svgIcon('M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 15),
-                  'Saving...'
-                )
+                svgIcon('M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15', 15),
+                'Saving...'
+              )
               : h('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-                  svgIcon('M5 13l4 4L19 7', 15),
-                  'Save Changes'
-                )
-          )
-        )
-      )
-    );
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     ACCOUNT EMAIL CARD COMPONENT
-  ══════════════════════════════════════════════════════════════ */
-  function AccountEmailCard(props) {
-    var user = props.user;
-    var onUserUpdate = props.onUserUpdate;
-
-    var isChangingState = useState(false);
-    var newEmailState = useState('');
-    var confirmEmailState = useState('');
-    var sendingState = useState(false);
-    var alertState = useState(null);
-
-    var isChanging = isChangingState[0], setIsChanging = isChangingState[1];
-    var newEmail = newEmailState[0], setNewEmail = newEmailState[1];
-    var confirmEmail = confirmEmailState[0], setConfirmEmail = confirmEmailState[1];
-    var isSending = sendingState[0], setIsSending = sendingState[1];
-    var alertMsg = alertState[0], setAlertMsg = alertState[1];
-
-    function handleStartChange() {
-      setIsChanging(true);
-      setNewEmail('');
-      setConfirmEmail('');
-      setAlertMsg(null);
-    }
-
-    function handleCancelChange() {
-      setIsChanging(false);
-      setNewEmail('');
-      setConfirmEmail('');
-      setAlertMsg(null);
-    }
-
-    function handleSubmitChange(e) {
-      if (e) e.preventDefault();
-
-      var nEm = newEmail.trim().toLowerCase();
-      var cEm = confirmEmail.trim().toLowerCase();
-
-      if (!nEm || !cEm) {
-        setAlertMsg({ type: 'error', text: 'Please fill in both email fields.' });
-        return;
-      }
-
-      if (nEm !== cEm) {
-        setAlertMsg({ type: 'error', text: 'New email and confirmation email do not match.' });
-        return;
-      }
-
-      if (nEm === (user.email || '').toLowerCase()) {
-        setAlertMsg({ type: 'error', text: 'New email must be different from current email.' });
-        return;
-      }
-
-      // Basic regex check
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nEm)) {
-        setAlertMsg({ type: 'error', text: 'Please enter a valid email address format.' });
-        return;
-      }
-
-      setIsSending(true);
-      setAlertMsg(null);
-
-      fetch(getApiBase() + '/api/users/me/change-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_email: nEm, confirm_email: cEm })
-      })
-        .then(function (res) {
-          if (!res.ok) {
-            return res.json().then(function (d) {
-              throw new Error(d.detail || 'Email update failed');
-            });
-          }
-          return res.json();
-        })
-        .then(function (data) {
-          setIsSending(false);
-          setIsChanging(false);
-
-          var updated = data.user || Object.assign({}, user, { email: nEm, emailVerified: true, email_verified: true });
-          window.SupportPilotUser.setUser(updated);
-          onUserUpdate(updated);
-
-          setAlertMsg({ type: 'success', text: '✓ Email verified and account email updated successfully.' });
-          if (window.showToast) {
-            window.showToast('Email Updated', 'Account email address has been updated.', 'success');
-          }
-        })
-        .catch(function (err) {
-          setIsSending(false);
-          console.error('[Change Email Error]:', err);
-          setAlertMsg({ type: 'error', text: err.message || 'Unable to update email. Please try again.' });
-          if (window.showToast) {
-            window.showToast('Change Email Failed', err.message || 'Unable to update email.', 'error');
-          }
-        });
-    }
-
-    return h('div', { className: 'sp-card' },
-      h('div', { className: 'sp-card-header' },
-        h('div', null,
-          h('h3', { className: 'sp-card-title' }, 'Account Email'),
-          h('p', { className: 'sp-card-subtitle' }, 'Your email address is used for critical ticket alerts, Jira sync, and customer communication.')
-        )
-      ),
-
-      // Status Alert Message
-      alertMsg && h('div', { className: 'sp-alert-banner sp-alert-' + alertMsg.type },
-        alertMsg.type === 'success'
-          ? svgIcon('M5 13l4 4L19 7', 18, '#059669', 2.5)
-          : svgIcon('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 18, '#dc2626', 2),
-        h('span', null, alertMsg.text)
-      ),
-
-      // Display current email card content
-      !isChanging && h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', padding: '16px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '12px' } },
-        h('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
-          h('div', { style: { width: 40, height: 40, borderRadius: 10, background: 'rgba(37, 99, 235, 0.1)', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
-            svgIcon('M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 20)
-          ),
-          h('div', null,
-            h('div', { style: { fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' } }, user.email || 'pranjal.kumar@supportpilot.ai'),
-            h('div', { style: { fontSize: 12, color: '#059669', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 } },
-              svgIcon('M5 13l4 4L19 7', 13, '#059669', 2.5),
-              'Verified Account Email'
-            )
-          )
-        ),
-        h('button', {
-          type: 'button',
-          className: 'sp-btn sp-btn-secondary',
-          onClick: handleStartChange
-        },
-          svgIcon('M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', 14),
-          'Change Email'
-        )
-      ),
-
-      // Change Email Form
-      isChanging && h('form', { onSubmit: handleSubmitChange, style: { animation: 'spFadeIn 0.25s ease' } },
-        h('div', { className: 'sp-form-grid-2' },
-          h('div', { className: 'sp-form-group' },
-            h('label', { className: 'sp-form-label', htmlFor: 'sp-new-email' },
-              h('span', null, 'New Email Address', h('span', { className: 'sp-form-required' }, '*'))
-            ),
-            h('input', {
-              id: 'sp-new-email',
-              type: 'email',
-              className: 'sp-input',
-              placeholder: 'name@supportpilot.ai',
-              required: true,
-              value: newEmail,
-              onChange: function (e) { setNewEmail(e.target.value); }
-            })
-          ),
-
-          h('div', { className: 'sp-form-group' },
-            h('label', { className: 'sp-form-label', htmlFor: 'sp-confirm-email' },
-              h('span', null, 'Confirm New Email', h('span', { className: 'sp-form-required' }, '*'))
-            ),
-            h('input', {
-              id: 'sp-confirm-email',
-              type: 'email',
-              className: 'sp-input',
-              placeholder: 'name@supportpilot.ai',
-              required: true,
-              value: confirmEmail,
-              onChange: function (e) { setConfirmEmail(e.target.value); }
-            })
-          )
-        ),
-
-        h('div', { style: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 } },
-          h('button', {
-            type: 'button',
-            className: 'sp-btn sp-btn-secondary',
-            onClick: handleCancelChange,
-            disabled: isSending
-          }, 'Cancel'),
-
-          h('button', {
-            type: 'submit',
-            className: 'sp-btn sp-btn-primary',
-            disabled: isSending
-          },
-            isSending
-              ? 'Sending Verification...'
-              : 'Send Verification Email'
+                svgIcon('M5 13l4 4L19 7', 15),
+                'Save Changes'
+              )
           )
         )
       )
@@ -1013,11 +779,13 @@
       );
     }
 
+    var isEmployee = user && user.role && user.role.toLowerCase() === 'employee';
+
     return h('div', { className: 'sp-settings-container' },
       // Page Top Title & Subtitle
       h('div', { style: { marginBottom: 6 } },
-        h('h1', { style: { margin: '0 0 6px 0', fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' } }, 'Settings'),
-        h('p', { style: { margin: 0, fontSize: 14, color: 'var(--text-secondary)' } }, 'Manage your SupportPilot profile and account information.')
+        h('h1', { style: { margin: '0 0 6px 0', fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' } }, isEmployee ? 'Profile' : 'Settings'),
+        h('p', { style: { margin: 0, fontSize: 14, color: 'var(--text-secondary)' } }, isEmployee ? 'Manage your personal profile information.' : 'Manage your SupportPilot profile and account information.')
       ),
 
       // Profile Header Banner Card
@@ -1027,14 +795,12 @@
       h('div', { className: 'sp-settings-layout' },
         // Left Column (Profile Photo + Overview)
         h('div', { className: 'sp-col-left' },
-          h(ProfilePhotoCard, { user: user, onUserUpdate: handleUserUpdate }),
-          h(AccountOverviewCard, { user: user })
+          h(ProfilePhotoCard, { user: user, onUserUpdate: handleUserUpdate })
         ),
 
-        // Right Column (Personal Info + Account Email)
+        // Right Column (Personal Info)
         h('div', { className: 'sp-col-right' },
-          h(PersonalInfoCard, { user: user, onUserUpdate: handleUserUpdate }),
-          h(AccountEmailCard, { user: user, onUserUpdate: handleUserUpdate })
+          h(PersonalInfoCard, { user: user, onUserUpdate: handleUserUpdate, isEmployee: isEmployee })
         )
       )
     );
@@ -1078,6 +844,6 @@
   // Pre-fetch and synchronize user immediately on startup
   try {
     window.SupportPilotUser.fetchUser();
-  } catch (e) {}
+  } catch (e) { }
 
 })();
