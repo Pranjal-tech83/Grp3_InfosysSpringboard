@@ -30,6 +30,8 @@ def ensure_user_schema_columns(db: Session):
                 conn.execute(text("ALTER TABLE users ADD COLUMN profile_image VARCHAR(500)"))
             if "email_verified" not in existing_cols:
                 conn.execute(text("ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT 1"))
+            if "password_hash" not in existing_cols:
+                conn.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR(255)"))
             conn.commit()
     except Exception as e:
         # If running Postgres or non-SQLite, table is already created with full schema

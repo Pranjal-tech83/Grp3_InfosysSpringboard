@@ -331,15 +331,15 @@
                 </thead>
                 <tbody>
                   ${filtered.map((e, idx) => {
-                    const evt = getEventBadge(e.subject, e.event_type);
-                    const avBg = avatarColor(e.recipient_name || e.to);
-                    const initials = getInitials(e.recipient_name || e.to);
-                    const statusCls = statusClass(e.status);
-                    const relativeTime = fmtRelative(e.created_at || e.sent_at);
-                    const fullTime = fmtFullTime(e.created_at || e.sent_at);
-                    const isSelected = activeEmailId === e.id;
+      const evt = getEventBadge(e.subject, e.event_type);
+      const avBg = avatarColor(e.recipient_name || e.to);
+      const initials = getInitials(e.recipient_name || e.to);
+      const statusCls = statusClass(e.status);
+      const relativeTime = fmtRelative(e.created_at || e.sent_at);
+      const fullTime = fmtFullTime(e.created_at || e.sent_at);
+      const isSelected = activeEmailId === e.id;
 
-                    return `
+      return `
                       <tr class="outbox-row ${isSelected ? 'outbox-row-new' : ''}">
                         
                         <!-- Recipient -->
@@ -419,7 +419,7 @@
 
                       </tr>
                     `;
-                  }).join('')}
+    }).join('')}
                 </tbody>
               </table>
             </div>
@@ -663,12 +663,12 @@
 
               <div class="email-timeline-track">
                 ${timeline.map((t, idx) => {
-                  const isOk = t.ok === true;
-                  const isFail = t.ok === false;
-                  const dotColor = isOk ? '#10b981' : (isFail ? '#ef4444' : '#f59e0b');
-                  const dotBg = isOk ? 'rgba(16, 185, 129, 0.15)' : (isFail ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)');
+      const isOk = t.ok === true;
+      const isFail = t.ok === false;
+      const dotColor = isOk ? '#10b981' : (isFail ? '#ef4444' : '#f59e0b');
+      const dotBg = isOk ? 'rgba(16, 185, 129, 0.15)' : (isFail ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)');
 
-                  return `
+      return `
                     <div class="email-timeline-item">
                       <div style="display: flex; flex-direction: column; align-items: center;">
                         <div class="email-timeline-dot" style="background: ${dotBg}; color: ${dotColor}; border: 1.5px solid ${dotColor};">
@@ -687,7 +687,7 @@
                       </div>
                     </div>
                   `;
-                }).join('')}
+    }).join('')}
               </div>
             </div>
 
@@ -923,14 +923,14 @@
             <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">Automated Notification Triggers</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
               ${[
-                'Ticket Created — "We received your support request"',
-                'Ticket Assigned — "Your ticket has been assigned"',
-                'AI Classified — "AI classified your issue"',
-                'AI Resolution — "Suggested solution is ready"',
-                'Ticket Escalated — "Your ticket has been escalated"',
-                'Ticket Resolved — "Your issue has been resolved"',
-                'Ticket Closed — "Support ticket closed"'
-              ].map(rule => `
+        'Ticket Created — "We received your support request"',
+        'Ticket Assigned — "Your ticket has been assigned"',
+        'AI Classified — "AI classified your issue"',
+        'AI Resolution — "Suggested solution is ready"',
+        'Ticket Escalated — "Your ticket has been escalated"',
+        'Ticket Resolved — "Your issue has been resolved"',
+        'Ticket Closed — "Support ticket closed"'
+      ].map(rule => `
                 <label style="display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--text-primary);cursor:pointer;">
                   <input type="checkbox" checked style="accent-color:var(--accent-primary);width:15px;height:15px;">
                   <span>${rule}</span>
@@ -1122,13 +1122,13 @@
           if (msg.type === 'emailsUpdated' || msg.type === 'ticketsUpdated' || msg.type === 'dashboard_update') {
             refresh(false);
           }
-        } catch (e) {}
+        } catch (e) { }
       };
 
       socket.onclose = function () {
         setTimeout(initWebSocket, 4000);
       };
-    } catch (e) {}
+    } catch (e) { }
   }
 
   function init() {

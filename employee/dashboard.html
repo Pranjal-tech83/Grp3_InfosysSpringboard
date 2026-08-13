@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupportPilot – Employee Dashboard</title>
+  <meta name="description" content="SupportPilot Employee Portal – manage your support tickets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-app: #f0f4ff;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: rgba(37,99,235,0.10);
+      --accent-glow: rgba(37,99,235,0.22);
+      --success: #10b981;
+      --success-light: rgba(16,185,129,0.12);
+      --warning: #f59e0b;
+      --warning-light: rgba(245,158,11,0.12);
+      --danger: #ef4444;
+      --danger-light: rgba(239,68,68,0.10);
+      --purple: #8b5cf6;
+      --purple-light: rgba(139,92,246,0.12);
+      --border: #e2e8f0;
+      --sidebar-w: 240px;
+      --header-h: 64px;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 24px rgba(37,99,235,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    [data-theme="dark"] {
+      --bg-app: #070d1a;
+      --bg-sidebar: #0d1526;
+      --bg-card: #111827;
+      --bg-input: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: rgba(59,130,246,0.15);
+      --border: #1e293b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ─── LAYOUT ─── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      transition: transform var(--transition), background var(--transition);
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none; color: var(--text-primary);
+    }
+    .sidebar-logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .sidebar-logo-name {
+      font-size: 15px; font-weight: 800;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 16px 20px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; margin: 2px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer; border: none; background: none;
+      color: var(--text-secondary); font-size: 13.5px; font-weight: 600;
+      font-family: inherit; text-align: left; width: calc(100% - 16px);
+      transition: all var(--transition);
+    }
+    .nav-item:hover { background: var(--accent-light); color: var(--accent); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent); }
+    .nav-item .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 16px 8px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-input);
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+      overflow: hidden;
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+    /* ─── MAIN ─── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      height: var(--header-h); background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; position: sticky; top: 0; z-index: 40;
+      transition: background var(--transition);
+    }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-title { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+    .topbar-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      cursor: pointer; display: grid; place-items: center;
+      color: var(--text-secondary); transition: all var(--transition);
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ─── CONTENT ─── */
+    .content { flex: 1; padding: 28px; overflow-y: auto; }
+
+    /* ─── STATS GRID ─── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 16px;
+      transition: transform var(--transition), box-shadow var(--transition);
+      animation: fadeUp 0.4s ease both;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: var(--accent-light); color: var(--accent); }
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.yellow { background: var(--warning-light); color: var(--warning); }
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ─── TWO COLUMNS ─── */
+    .two-col { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden; animation: fadeUp 0.45s ease both;
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 16px; border-bottom: 1px solid var(--border);
+    }
+    .card-head-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .card-head-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .card-body { padding: 20px; }
+
+    /* ─── BTN ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 16px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 700; font-family: inherit;
+      transition: all var(--transition); white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(37,99,235,0.4); }
+    .btn-ghost { background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: rgba(37,99,235,0.25); }
+    .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.25); }
+    .btn-danger:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    /* ─── TICKET TABLE ─── */
+    .ticket-table { width: 100%; border-collapse: collapse; }
+    .ticket-table th {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted); padding: 10px 14px; text-align: left;
+      background: var(--bg-input); border-bottom: 1px solid var(--border);
+    }
+    .ticket-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); font-size: 13.5px; vertical-align: middle; }
+    .ticket-table tr:last-child td { border-bottom: none; }
+    .ticket-table tr:hover td { background: var(--accent-light); }
+
+    .ticket-id { font-weight: 700; color: var(--accent); font-size: 13px; white-space: nowrap; }
+    .ticket-subject { color: var(--text-primary); font-weight: 600; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ticket-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    /* ─── BADGES ─── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      text-transform: capitalize; white-space: nowrap;
+    }
+    .badge-open { background: var(--accent-light); color: var(--accent); }
+    .badge-resolved, .badge-closed { background: var(--success-light); color: var(--success); }
+    .badge-in_progress { background: var(--warning-light); color: var(--warning); }
+    .badge-escalated { background: var(--danger-light); color: var(--danger); }
+    .badge-pending { background: var(--purple-light); color: var(--purple); }
+    .badge-high { background: var(--danger-light); color: var(--danger); }
+    .badge-medium { background: var(--warning-light); color: var(--warning); }
+    .badge-low { background: var(--success-light); color: var(--success); }
+    .badge-critical { background: #fde8e8; color: #b91c1c; }
+
+    /* ─── ACTIVITY FEED ─── */
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex; gap: 12px; padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .activity-desc { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+    .activity-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+    /* ─── FORM ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 14px; font-size: 13.5px; font-family: inherit; font-weight: 500;
+      background: var(--bg-input); color: var(--text-primary);
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-select { cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ─── MODAL OVERLAY ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      animation: fadeIn 0.2s ease both;
+    }
+    .modal {
+      background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);
+      width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      animation: fadeUp 0.3s ease both;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 17px; font-weight: 800; }
+    .modal-body { padding: 20px 24px; }
+    .modal-foot { display: flex; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); justify-content: flex-end; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state { text-align: center; padding: 48px 20px; }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .empty-state-sub { font-size: 13px; color: var(--text-muted); }
+
+    /* ─── LOADING ─── */
+    .skeleton { background: linear-gradient(90deg, var(--bg-input) 25%, var(--border) 50%, var(--bg-input) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner-dark { border-color: rgba(37,99,235,0.25); border-top-color: var(--accent); }
+
+    /* ─── ALERTS ─── */
+    .alert {
+      display: flex; align-items: center; gap: 8px; padding: 11px 14px;
+      border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 16px;
+    }
+    .alert-error { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .alert-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+
+    /* ─── PROFILE TAB ─── */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .profile-grid { grid-template-columns: 1fr; } }
+    .profile-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .profile-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center;
+      font-size: 30px; font-weight: 800; color: #fff;
+      overflow: hidden; position: relative;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─── PAGE SECTIONS ─── */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* ─── TOAST ─── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast {
+      background: var(--text-primary); color: var(--bg-card);
+      padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); min-width: 240px;
+      animation: slideInRight 0.3s ease both; pointer-events: auto;
+    }
+    .toast.success { background: #10b981; color: #fff; }
+    .toast.error { background: #ef4444; color: #fff; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .two-col { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="#">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <span class="sidebar-logo-name">SupportPilot</span>
+    </a>
+
+    <div class="sidebar-section-label">Overview</div>
+    <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+
+    <div class="sidebar-section-label">Tickets</div>
+    <button class="nav-item" id="nav-tickets" onclick="showSection('tickets')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      My Tickets
+    </button>
+    <button class="nav-item" id="nav-new" onclick="openNewTicketModal()">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      New Ticket
+    </button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="nav-item" id="nav-assistant" onclick="showSection('assistant')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      Ask AI Assistant
+    </button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="nav-item" id="nav-profile" onclick="showSection('profile')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </button>
+    <button class="nav-item" onclick="confirmLogout()">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Loading…</div>
+          <div class="user-role">Employee</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-sub" id="topbar-sub">Welcome back 👋</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Ticket
+        </button>
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme" onclick="toggleTheme()">
+          <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- DASHBOARD SECTION -->
+      <section class="page-section active" id="section-dashboard">
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card" style="animation-delay:0s">
+            <div class="stat-icon blue">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-total">—</div>
+              <div class="stat-label">Total Tickets</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.05s">
+            <div class="stat-icon yellow">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-open">—</div>
+              <div class="stat-label">Open Tickets</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.1s">
+            <div class="stat-icon green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-resolved">—</div>
+              <div class="stat-label">Resolved</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.15s">
+            <div class="stat-icon purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-satisfaction">—</div>
+              <div class="stat-label">Satisfaction</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK ACTIONS / AI ASSISTANT -->
+        <div style="margin-bottom: 24px;">
+           <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; color:var(--text-primary); display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:var(--shadow); transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s" onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'; this.style.borderColor='var(--purple)'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'; this.style.borderColor='var(--border)'" onclick="showSection('assistant')">
+             <div style="background:var(--purple-light); color:var(--purple); border-radius:12px; padding:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                 <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+               </svg>
+             </div>
+             <div style="display:flex; flex-direction:column; gap:3px;">
+               <span style="font-size:16px; font-weight:800; color:var(--text-primary);">Ask AI Assistant</span>
+               <span style="font-size:12.5px; color:var(--text-secondary); line-height:1.4;">Troubleshoot VPNs, passwords, network firewalls, and knowledge base.</span>
+             </div>
+           </div>
+        </div>
+
+        <!-- Two columns: recent tickets + activity -->
+        <div class="two-col">
+          <!-- Recent Tickets -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-head-title">Recent Tickets</div>
+                <div class="card-head-sub">Your last 5 support requests</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="showSection('tickets')">View All</button>
+            </div>
+            <div id="recent-tickets-wrap">
+              <div style="padding:20px">
+                <div class="skeleton" style="height:40px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:40px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:40px"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-head-title">Activity</div>
+                <div class="card-head-sub">Recent ticket events</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="activity-list">
+                <div class="skeleton" style="height:32px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:32px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:32px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TICKETS SECTION -->
+      <section class="page-section" id="section-tickets">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-head-title">My Tickets</div>
+              <div class="card-head-sub" id="tickets-count-sub">All your support requests</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Ticket
+            </button>
+          </div>
+
+          <!-- Filter bar -->
+          <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px" id="filter-status" onchange="renderTicketTable()">
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+              <option value="escalated">Escalated</option>
+            </select>
+            <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px" id="filter-priority" onchange="renderTicketTable()">
+              <option value="">All Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+
+          <div style="overflow-x:auto" id="tickets-table-wrap">
+            <div style="padding:24px">
+              <div class="skeleton" style="height:36px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:36px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:36px"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE SECTION -->
+      <section class="page-section" id="section-profile">
+        <div class="card" style="max-width:620px">
+          <div class="card-head">
+            <div class="card-head-title">My Profile</div>
+          </div>
+          <div class="card-body">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar" id="profile-avatar-big">?</div>
+              <div>
+                <div style="font-size:17px;font-weight:800;text-align:center" id="profile-fullname">—</div>
+                <div style="font-size:13px;color:var(--text-muted);text-align:center" id="profile-email-disp">—</div>
+              </div>
+            </div>
+
+            <div id="profile-msg"></div>
+
+            <form id="profile-form" onsubmit="saveProfile(event)">
+              <div class="profile-grid">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input class="form-input" id="p-name" type="text" placeholder="Jane Smith" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" id="p-email" type="email" placeholder="you@company.com" disabled style="opacity:0.6;cursor:not-allowed" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input class="form-input" id="p-phone" type="tel" placeholder="+1 555 000 0000" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input class="form-input" id="p-dept" type="text" placeholder="Engineering" />
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="loadProfile()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="profile-save-btn">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ASSISTANT SECTION -->
+      <section class="page-section" id="section-assistant">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+          <div style="margin-bottom:20px;">
+            <h2 style="font-size:20px;font-weight:800;">Smart IT Helpdesk Assistant</h2>
+            <p style="color:var(--text-secondary);font-size:14px;margin-top:4px;">Ask our local AI model for immediate troubleshooting guides, server status checkups, or policy rules lookup.</p>
+          </div>
+          <div id="chat-messages" style="height:400px; overflow-y:auto; padding:16px; background:var(--bg-app); border-radius:8px; margin-bottom:16px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+            <!-- Messages go here -->
+          </div>
+          <div style="display:flex; gap:12px; align-items:center; padding:16px; background:var(--bg-input); border-radius:8px; border:1px solid var(--border);">
+            <input type="text" id="chat-input" class="form-input" style="flex-grow:1;" placeholder="E.g., How do I map the corporate network printer to my local workstation?...">
+            <button id="btn-send-message" class="btn btn-primary" style="padding:10px 24px;background:#8b5cf6;border:none;">Send</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ─── NEW TICKET MODAL ─── -->
+<div class="modal-overlay" id="new-ticket-modal" style="display:none" onclick="handleModalBgClick(event)">
+  <div class="modal" style="max-width:680px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.1);border:1px solid var(--border)" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head" style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px">
+      <div style="width:40px;height:40px;border-radius:8px;background:#8b5cf6;color:white;display:grid;place-items:center;flex-shrink:0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><path d="M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:var(--text-primary)" id="modal-title">Create Support Ticket</div>
+        <div style="font-size:13px;color:var(--text-muted);font-weight:500" id="modal-subtitle">Step 1 of 2: Fill Ticket Details & Run AI Prediction</div>
+      </div>
+      <button onclick="closeNewTicketModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:24px">
+      <div id="new-ticket-msg"></div>
+      
+      <!-- STEP 1 -->
+      <form id="new-ticket-form" onsubmit="runAIPrediction(event)">
+        <div id="nt-step-1">
+        <div class="form-row" style="margin-bottom:20px;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Customer Name <span style="color:var(--danger)">*</span></label>
+            <input class="form-input" id="nt-name" type="text" placeholder="e.g. Sneh Singh" style="border-radius:8px;padding:10px 14px" required />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Customer Email <span style="color:var(--danger)">*</span></label>
+            <input class="form-input" id="nt-email" type="email" placeholder="e.g. sneh.singh@gmail.com" style="border-radius:8px;padding:10px 14px" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Subject Header <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" id="nt-subject" type="text" placeholder="e.g. VPN gateway connection timeout on office router" style="border-radius:8px;padding:10px 14px" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Detailed Description <span style="color:var(--danger)">*</span></label>
+          <textarea class="form-textarea" id="nt-desc" placeholder="Describe steps to reproduce, error codes, logs, impact..." style="border-radius:8px;padding:10px 14px;min-height:100px" required></textarea>
+        </div>
+
+        <div class="form-row" style="margin-bottom:20px;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Department (Optional Override)</label>
+            <select class="form-select" id="nt-dept" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="IT">IT</option>
+              <option value="HR">HR</option>
+              <option value="Finance">Finance</option>
+              <option value="Operations">Operations</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Category (Optional Override)</label>
+            <select class="form-select" id="nt-category" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="Network">Network</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Software">Software</option>
+              <option value="Billing">Billing</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:0;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Priority (Optional Override)</label>
+            <select class="form-select" id="nt-priority" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Attachment (Optional)</label>
+            <input class="form-input" id="nt-attachment" type="file" style="border-radius:8px;padding:7px 10px;font-size:13px" />
+          </div>
+        </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="nt-step-2" style="display:none;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px;background:var(--accent-light);border-radius:8px;border:1px solid rgba(37,99,235,0.2)">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--accent)">AI Analysis Complete</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Review the intelligent classification below before submitting.</div>
+            </div>
+          </div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Predicted Category</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-cat">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Predicted Priority</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-pri">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Severity</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-sev">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Confidence Score</div>
+              <div style="font-size:14px;font-weight:700;color:var(--success)" id="ai-res-conf">—</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);background:var(--bg-input);padding:14px;border-radius:8px;border:1px solid var(--border)">
+            <strong style="color:var(--text-primary)">AI Reasoning:</strong> <span id="ai-res-reason"></span>
+          </div>
+        </div>
+
+      </form>
+    </div>
+    <div class="modal-foot" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;background:var(--bg-input);border-bottom-left-radius:12px;border-bottom-right-radius:12px">
+      <button class="btn btn-ghost" onclick="closeNewTicketModal()" style="border-radius:8px;padding:10px 20px;font-weight:600">Cancel</button>
+      
+      <button class="btn btn-primary" id="nt-run-btn" onclick="runAIPrediction(event)" style="border-radius:8px;padding:10px 20px;font-weight:600;background:#8b5cf6;border:none;box-shadow:none;display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><path d="M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
+        Run AI Prediction
+      </button>
+
+      <button class="btn btn-primary" id="nt-submit-btn" onclick="submitNewTicket(event)" style="display:none;border-radius:8px;padding:10px 20px;font-weight:600;background:var(--success);border:none;box-shadow:none;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Confirm & Submit Ticket
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── LOGOUT CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="logout-modal" style="display:none" onclick="handleLogoutBgClick(event)">
+  <div class="modal" style="max-width:380px" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div style="font-size:17px;font-weight:800">Sign Out</div>
+      <button class="icon-btn" onclick="document.getElementById('logout-modal').style.display='none'" style="width:32px;height:32px;border-radius:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:24px">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--danger-light);display:grid;place-items:center;margin:0 auto 16px">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Are you sure?</div>
+      <div style="font-size:13px;color:var(--text-muted)">You'll be signed out of SupportPilot Employee Portal.</div>
+    </div>
+    <div class="modal-foot" style="justify-content:center">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('logout-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="logout-confirm-btn" onclick="doLogout()">Yes, Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+  /* ────────────────────────────────────────────────────────────────
+     CONSTANTS
+  ──────────────────────────────────────────────────────────────── */
+  const API = 'http://127.0.0.1:8000';
+
+  /* ────────────────────────────────────────────────────────────────
+     AUTH GUARD
+  ──────────────────────────────────────────────────────────────── */
+  let currentUser = null;
+  let authToken = null;
+
+  function getSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem('sp_session')) || JSON.parse(sessionStorage.getItem('sp_session'));
+      return s;
+    } catch { return null; }
+  }
+
+  (function authGuard() {
+    const session = getSession();
+    if (!session || !session.token) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = session;
+    authToken = session.token;
+    applyUser(session);
+    loadDashboard();
+  })();
+
+  function applyUser(u) {
+    const initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebar-name').textContent = u.name || u.email;
+    const av = document.getElementById('sidebar-avatar');
+    av.textContent = initials;
+
+    // Profile section
+    document.getElementById('profile-fullname').textContent = u.name || '—';
+    document.getElementById('profile-email-disp').textContent = u.email || '—';
+
+    const bigAv = document.getElementById('profile-avatar-big');
+    bigAv.textContent = initials;
+
+    document.getElementById('p-name').value = u.name || '';
+    document.getElementById('p-email').value = u.email || '';
+    document.getElementById('p-phone').value = u.phone || '';
+    document.getElementById('p-dept').value = u.department || '';
+    document.getElementById('topbar-sub').textContent = `Welcome back, ${u.name?.split(' ')[0] || 'Employee'} 👋`;
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     THEME
+  ──────────────────────────────────────────────────────────────── */
+  const DARK_SVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  const LIGHT_SVG = `<line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/><circle cx="12" cy="12" r="5"/>`;
+
+  let savedTheme = localStorage.getItem('sp_theme');
+  let isDark = savedTheme ? savedTheme === 'dark' : false;
+  applyTheme();
+
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.getElementById('theme-icon').innerHTML = isDark ? LIGHT_SVG : DARK_SVG;
+    localStorage.setItem('sp_theme', isDark ? 'dark' : 'light');
+  }
+  function toggleTheme() { isDark = !isDark; applyTheme(); }
+
+  /* ────────────────────────────────────────────────────────────────
+     NAVIGATION
+  ──────────────────────────────────────────────────────────────── */
+  function showSection(name) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    const nb = document.getElementById('nav-' + name);
+    if (nb) nb.classList.add('active');
+
+    const titles = { dashboard: 'Dashboard', tickets: 'My Tickets', profile: 'My Profile', assistant: 'AI Assistant' };
+    document.getElementById('topbar-title').textContent = titles[name] || name;
+
+    if (name === 'tickets') loadTickets();
+    if (name === 'profile') loadProfile();
+    if (name === 'assistant' && window.SupportPilotAssistant) {
+      window.SupportPilotAssistant.init();
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     API HELPERS
+  ──────────────────────────────────────────────────────────────── */
+  async function apiFetch(path, opts = {}) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: {
+        'Authorization': 'Bearer ' + authToken,
+        'Content-Type': 'application/json',
+        ...(opts.headers || {})
+      }
+    });
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('sp_session');
+      sessionStorage.removeItem('sp_session');
+      window.location.href = 'login.html';
+      return null;
+    }
+    return res;
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     DASHBOARD
+  ──────────────────────────────────────────────────────────────── */
+  async function loadDashboard() {
+    await Promise.all([loadStats(), loadRecentTickets(), loadActivity()]);
+  }
+
+  async function loadStats() {
+    try {
+      const res = await apiFetch('/api/employee/dashboard/summary');
+      if (!res || !res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-total').textContent = d.total_tickets ?? 0;
+      document.getElementById('stat-open').textContent = d.open_tickets ?? 0;
+      document.getElementById('stat-resolved').textContent = d.resolved_tickets ?? 0;
+      document.getElementById('stat-satisfaction').textContent = (d.user_satisfaction ?? 100) + '%';
+    } catch (e) {
+      console.error('Stats error:', e);
+    }
+  }
+
+  async function loadRecentTickets() {
+    const wrap = document.getElementById('recent-tickets-wrap');
+    try {
+      const res = await apiFetch('/api/employee/tickets/?limit=5');
+      if (!res || !res.ok) { wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Could not load tickets.</div>'; return; }
+      const tickets = await res.json();
+      if (!tickets.length) {
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎫</div><div class="empty-state-title">No tickets yet</div><div class="empty-state-sub">Submit your first support request</div></div>`;
+        return;
+      }
+      wrap.innerHTML = `<div style="overflow-x:auto"><table class="ticket-table"><thead><tr><th>ID</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead><tbody>${tickets.slice(0,5).map(t => `
+        <tr>
+          <td><span class="ticket-id">TKT-${t.ticket_id}</span></td>
+          <td><span class="ticket-subject" title="${esc(t.subject)}">${esc(t.subject)}</span></td>
+          <td>${badgeHtml(t.status)}</td>
+          <td><span class="ticket-date">${fmtDate(t.created_at)}</span></td>
+        </tr>`).join('')}</tbody></table></div>`;
+    } catch(e) {
+      wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--danger);font-size:13px">Failed to load tickets.</div>';
+    }
+  }
+
+  async function loadActivity() {
+    const el = document.getElementById('activity-list');
+    try {
+      const res = await apiFetch('/api/employee/dashboard/activity');
+      if (!res || !res.ok) { el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:12px 0">No activity data.</div>'; return; }
+      const d = await res.json();
+      const activities = d.recent_activities || [];
+      if (!activities.length) {
+        el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:12px 0">No recent activity.</div>';
+        return;
+      }
+      el.innerHTML = `<div class="activity-list">${activities.map(a => `
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <div class="activity-desc">${esc(a.description)}</div>
+            <div class="activity-time">${fmtDate(a.timestamp)}</div>
+          </div>
+        </div>`).join('')}</div>`;
+    } catch(e) {
+      el.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:13px;padding:12px 0">Failed to load activity.</div>';
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     TICKETS TABLE
+  ──────────────────────────────────────────────────────────────── */
+  let allTickets = [];
+
+  async function loadTickets() {
+    const wrap = document.getElementById('tickets-table-wrap');
+    wrap.innerHTML = '<div style="padding:24px"><div class="skeleton" style="height:36px;margin-bottom:8px"></div><div class="skeleton" style="height:36px;margin-bottom:8px"></div><div class="skeleton" style="height:36px"></div></div>';
+    try {
+      const res = await apiFetch('/api/employee/tickets/?limit=100');
+      if (!res || !res.ok) { wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">Failed to load tickets.</div>'; return; }
+      allTickets = await res.json();
+      document.getElementById('tickets-count-sub').textContent = `${allTickets.length} total ticket${allTickets.length !== 1 ? 's' : ''}`;
+      renderTicketTable();
+    } catch(e) {
+      wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">Network error.</div>';
+    }
+  }
+
+  function renderTicketTable() {
+    const statusF = document.getElementById('filter-status').value;
+    const priorityF = document.getElementById('filter-priority').value;
+    let filtered = allTickets.filter(t => {
+      if (statusF && t.status !== statusF) return false;
+      if (priorityF && t.priority !== priorityF) return false;
+      return true;
+    });
+
+    const wrap = document.getElementById('tickets-table-wrap');
+    if (!filtered.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎫</div><div class="empty-state-title">No tickets found</div><div class="empty-state-sub">Try adjusting your filters, or submit a new ticket.</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div style="overflow-x:auto"><table class="ticket-table">
+      <thead><tr><th>ID</th><th>Subject</th><th>Dept</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead>
+      <tbody>${filtered.map(t => `
+        <tr>
+          <td><span class="ticket-id">TKT-${t.ticket_id}</span></td>
+          <td><span class="ticket-subject" title="${esc(t.subject)}">${esc(t.subject)}</span></td>
+          <td style="font-size:12px;color:var(--text-muted);font-weight:600">${esc(t.department || '—')}</td>
+          <td>${priorityBadge(t.priority)}</td>
+          <td>${badgeHtml(t.status)}</td>
+          <td><span class="ticket-date">${fmtDate(t.created_at)}</span></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     NEW TICKET MODAL
+  ──────────────────────────────────────────────────────────────── */
+  function openNewTicketModal() {
+    document.getElementById('new-ticket-form').reset();
+    document.getElementById('new-ticket-msg').innerHTML = '';
+    
+    // Pre-fill Name and Email
+    if (currentUser) {
+      document.getElementById('nt-name').value = currentUser.name || '';
+      document.getElementById('nt-email').value = currentUser.email || '';
+    }
+
+    // Reset UI to step 1
+    document.getElementById('nt-step-1').style.display = 'block';
+    document.getElementById('nt-step-2').style.display = 'none';
+    document.getElementById('nt-run-btn').style.display = 'flex';
+    document.getElementById('nt-submit-btn').style.display = 'none';
+    document.getElementById('modal-subtitle').textContent = 'Step 1 of 2: Fill Ticket Details & Run AI Prediction';
+
+    document.getElementById('new-ticket-modal').style.display = 'flex';
+  }
+  function closeNewTicketModal() {
+    document.getElementById('new-ticket-modal').style.display = 'none';
+  }
+  function handleModalBgClick(e) {
+    if (e.target === e.currentTarget) closeNewTicketModal();
+  }
+
+  async function runAIPrediction(e) {
+    e.preventDefault();
+    const subject = document.getElementById('nt-subject').value.trim();
+    const desc = document.getElementById('nt-desc').value.trim();
+    const reqName = document.getElementById('nt-name').value.trim();
+    const reqEmail = document.getElementById('nt-email').value.trim();
+
+    if (!subject || !desc || !reqName || !reqEmail) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Please fill in all required fields.</div>`;
+      return;
+    }
+
+    const btn = document.getElementById('nt-run-btn');
+    btn.disabled = true;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('new-ticket-msg').innerHTML = '';
+
+    try {
+      const res = await apiFetch('/api/employee/ai/triage', {
+        method: 'POST',
+        body: JSON.stringify({ title: subject, description: desc })
+      });
+
+      if (res && res.ok) {
+        const aiData = await res.json();
+        
+        // Show AI data in UI
+        document.getElementById('ai-res-cat').textContent = aiData.category || 'Unknown';
+        document.getElementById('ai-res-pri').textContent = aiData.priority || 'Unknown';
+        document.getElementById('ai-res-sev').textContent = aiData.severity || 'Unknown';
+        document.getElementById('ai-res-conf').textContent = aiData.confidence_score ? (aiData.confidence_score * 100).toFixed(0) + '%' : 'N/A';
+        document.getElementById('ai-res-reason').textContent = aiData.reasoning_summary || 'Analyzed successfully.';
+
+        // Switch to Step 2
+        document.getElementById('nt-step-1').style.display = 'none';
+        document.getElementById('nt-step-2').style.display = 'block';
+        document.getElementById('nt-run-btn').style.display = 'none';
+        document.getElementById('nt-submit-btn').style.display = 'flex';
+        document.getElementById('modal-subtitle').textContent = 'Step 2 of 2: Review AI Classification & Submit';
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to run AI prediction.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Network error during AI prediction.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+    }
+  }
+
+  async function submitNewTicket(e) {
+    e.preventDefault();
+    const subject = document.getElementById('nt-subject').value.trim();
+    const desc = document.getElementById('nt-desc').value.trim();
+    const dept = document.getElementById('nt-dept').value || null;
+    const reqName = document.getElementById('nt-name').value.trim();
+    const reqEmail = document.getElementById('nt-email').value.trim();
+
+    const btn = document.getElementById('nt-submit-btn');
+    btn.disabled = true;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('new-ticket-msg').innerHTML = '';
+
+    try {
+      const payload = {
+        subject,
+        description: desc,
+        requester_email: reqEmail,
+        requester_name: reqName
+      };
+      if (dept) payload.department = dept;
+
+      const res = await apiFetch('/api/employee/tickets/', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (res && res.ok) {
+        closeNewTicketModal();
+        showToast('Ticket submitted successfully! 🎉', 'success');
+        await loadDashboard();
+        if (document.getElementById('section-tickets').classList.contains('active')) loadTickets();
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to submit ticket.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Network error.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     PROFILE
+  ──────────────────────────────────────────────────────────────── */
+  async function loadProfile() {
+    try {
+      const res = await apiFetch('/api/employee/profile');
+      if (!res || !res.ok) return;
+      const d = await res.json();
+      const u = d.user || d;
+      document.getElementById('p-name').value = u.name || '';
+      document.getElementById('p-email').value = u.email || '';
+      document.getElementById('p-phone').value = u.phone || '';
+      document.getElementById('p-dept').value = u.department || '';
+      document.getElementById('profile-fullname').textContent = u.name || '—';
+      document.getElementById('profile-email-disp').textContent = u.email || '—';
+      const initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+      document.getElementById('profile-avatar-big').textContent = initials;
+    } catch(e) { console.error('Profile load error:', e); }
+  }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    const btn = document.getElementById('profile-save-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('profile-msg').innerHTML = '';
+
+    try {
+      const res = await apiFetch('/api/employee/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          name: document.getElementById('p-name').value.trim(),
+          phone: document.getElementById('p-phone').value.trim(),
+          department: document.getElementById('p-dept').value.trim()
+        })
+      });
+
+      if (res && res.ok) {
+        const d = await res.json();
+        const u = d.user || d;
+        // Update session
+        currentUser = { ...currentUser, name: u.name, phone: u.phone, department: u.department };
+        const sessionKey = localStorage.getItem('sp_session') ? 'sp_session' : null;
+        if (sessionKey) localStorage.setItem('sp_session', JSON.stringify({ ...currentUser, token: authToken }));
+        else sessionStorage.setItem('sp_session', JSON.stringify({ ...currentUser, token: authToken }));
+
+        applyUser(currentUser);
+        document.getElementById('profile-msg').innerHTML = `<div class="alert alert-success">Profile updated successfully!</div>`;
+        showToast('Profile saved!', 'success');
+        setTimeout(() => { document.getElementById('profile-msg').innerHTML = ''; }, 3000);
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('profile-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to save profile.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('profile-msg').innerHTML = `<div class="alert alert-error">Network error.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Save Changes';
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     LOGOUT
+  ──────────────────────────────────────────────────────────────── */
+  function confirmLogout() {
+    document.getElementById('logout-modal').style.display = 'flex';
+  }
+  function handleLogoutBgClick(e) {
+    if (e.target === e.currentTarget) document.getElementById('logout-modal').style.display = 'none';
+  }
+
+  async function doLogout() {
+    const btn = document.getElementById('logout-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    try {
+      await apiFetch('/api/employee/auth/logout', { method: 'POST' });
+    } catch(e) {}
+    localStorage.removeItem('sp_session');
+    sessionStorage.removeItem('sp_session');
+    window.location.href = 'login.html';
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     TOAST
+  ──────────────────────────────────────────────────────────────── */
+  function showToast(msg, type = '') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 3000);
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     UTILS
+  ──────────────────────────────────────────────────────────────── */
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function fmtDate(ds) {
+    if (!ds) return '—';
+    try {
+      const d = new Date(ds);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch { return ds; }
+  }
+
+  function badgeHtml(status) {
+    const s = (status || 'open').toLowerCase().replace(' ', '_');
+    const labels = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', closed: 'Closed', escalated: 'Escalated', pending: 'Pending' };
+    return `<span class="badge badge-${s}">${labels[s] || status}</span>`;
+  }
+
+  function priorityBadge(priority) {
+    const p = (priority || 'medium').toLowerCase();
+    return `<span class="badge badge-${p}">${priority || 'Medium'}</span>`;
+  }
+</script>
+<script src="../js/assistant.js"></script>
+</body>
+</html>

@@ -402,7 +402,7 @@
     var currentWeekly = (analytics && analytics.weekly_data && analytics.weekly_data.length === 7)
       ? analytics.weekly_data
       : emptyWeekly;
-      
+
     var prevWeekly = (analytics && analytics.previous_weekly_data && analytics.previous_weekly_data.length === 7)
       ? analytics.previous_weekly_data
       : emptyWeekly;
@@ -471,23 +471,23 @@
       // Header
       h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' } },
         h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } },
-          h('div', { 
+          h('div', {
             style: { cursor: 'pointer', opacity: selectedWeek === 'previous' ? 0.5 : 1, padding: '4px' },
-            onClick: function() { setSelectedWeek('previous'); }
+            onClick: function () { setSelectedWeek('previous'); }
           }, '⬅️'),
           h('div', null,
-            h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 
+            h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } },
               selectedWeek === 'current' ? 'Ticket Volume & Resolution Trend' : 'Previous Week Trend'
             ),
-            h('div', { style: { fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', fontWeight: 600 } }, 
-              selectedWeek === 'current' 
-                ? (analytics && analytics.current_week_label ? analytics.current_week_label : '') 
+            h('div', { style: { fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px', fontWeight: 600 } },
+              selectedWeek === 'current'
+                ? (analytics && analytics.current_week_label ? analytics.current_week_label : '')
                 : (analytics && analytics.previous_week_label ? analytics.previous_week_label : '')
             )
           ),
-          h('div', { 
+          h('div', {
             style: { cursor: 'pointer', opacity: selectedWeek === 'current' ? 0.5 : 1, padding: '4px' },
-            onClick: function() { setSelectedWeek('current'); }
+            onClick: function () { setSelectedWeek('current'); }
           }, '➡️')
         ),
         // Legend & live weekly totals
@@ -872,6 +872,62 @@
             )
           );
         })
+      )
+    );
+  }
+
+  /* ── Employee Recent Ticket Activity Component ── */
+  function EmployeeRecentActivity({ analytics, loading }) {
+    var activities = (analytics && analytics.recent_activities) ? analytics.recent_activities : [];
+
+    return h('div', {
+      className: 'card workflow-card-react',
+      style: {
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '16px',
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: 'var(--shadow-md)',
+        height: '100%',
+        maxHeight: '430px',
+        overflowY: 'auto'
+      }
+    },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } },
+        h('div', null,
+          h('div', { style: { fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' } }, 'Recent Ticket Activity'),
+          h('div', { style: { fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' } }, 'Live updates on your recent support tickets')
+        ),
+        h('div', {
+          style: {
+            background: 'var(--accent-primary-light)',
+            color: 'var(--accent-primary)',
+            padding: '4px 10px',
+            borderRadius: '8px',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }
+        }, ico(ICONS.clock, 14), 'Live Feed')
+      ),
+
+      loading ? h(Skeleton, { height: '240px' }) : (
+        activities.length === 0 ? h('div', { style: { padding: '20px', textAlign: 'center', color: 'var(--text-secondary)' } }, 'No recent activity found.') :
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } },
+            activities.map(function (act) {
+              return h('div', { key: act.id, style: { display: 'flex', alignItems: 'center', gap: '15px', paddingBottom: '15px', borderBottom: '1px solid var(--border-color)' } },
+                h('div', { style: { flexShrink: 0, width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-app)', border: '1px solid var(--border-color)', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' } }, ico(ICONS.ticket, 18)),
+                h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1 } },
+                  h('span', { style: { fontSize: '14.5px', fontWeight: 600, color: 'var(--text-primary)' } }, act.description),
+                  h('span', { style: { fontSize: '12.5px', color: 'var(--text-secondary)', marginTop: '4px' } }, new Date(act.timestamp).toLocaleDateString())
+                )
+              );
+            })
+          )
       )
     );
   }
@@ -1473,7 +1529,7 @@
           alignItems: 'stretch'
         }
       },
-        h(EscalationTimeline, { analytics: analytics, loading: loading }),
+        h(window.location.pathname.includes('/employee') ? EmployeeRecentActivity : EscalationTimeline, { analytics: analytics, loading: loading }),
         h(TicketStatusDistribution, { analytics: analytics, loading: loading })
       ),
 

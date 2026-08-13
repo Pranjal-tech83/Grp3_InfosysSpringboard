@@ -211,19 +211,19 @@ function showToast(title, description, type = "info") {
 }
 
 // --- Trigger a Global Refresh across all Modules ---
-window.SupportPilotGlobalRefresh = async function() {
+window.SupportPilotGlobalRefresh = async function () {
   const btn = document.getElementById('global-refresh-btn');
   const svg = btn ? btn.querySelector('svg') : null;
   if (svg) svg.style.animation = 'spin 1s linear infinite';
-  
+
   if (window.SupportPilotTickets) await window.SupportPilotTickets.refresh();
   if (window.SupportPilotDashboardRefresh) window.SupportPilotDashboardRefresh();
   if (window.SupportPilotEmailEnhanced) await window.SupportPilotEmailEnhanced.refresh();
   if (window.SupportPilotJira) await window.SupportPilotJira.refresh(false);
-  
+
   window.dispatchEvent(new Event('supportpilot:refresh'));
   window.dispatchEvent(new Event('ticketsUpdated'));
-  
+
   if (svg) svg.style.animation = 'none';
   if (window.showToast) window.showToast("Data Sync", "All modules refreshed successfully.", "success");
 };
@@ -247,18 +247,18 @@ function refreshDynamicViewElements() {
   previewList.forEach(t => {
     const tr = document.createElement("tr");
     const prioStr = (t.priority || '').toLowerCase();
-      let prioClass = 'badge-priority-medium';
-      if (prioStr.includes('urgent') || prioStr.includes('p1')) prioClass = 'badge-priority-urgent';
-      else if (prioStr.includes('high') || prioStr.includes('p2')) prioClass = 'badge-priority-high';
-      else if (prioStr.includes('low') || prioStr.includes('p4')) prioClass = 'badge-priority-low';
+    let prioClass = 'badge-priority-medium';
+    if (prioStr.includes('urgent') || prioStr.includes('p1')) prioClass = 'badge-priority-urgent';
+    else if (prioStr.includes('high') || prioStr.includes('p2')) prioClass = 'badge-priority-high';
+    else if (prioStr.includes('low') || prioStr.includes('p4')) prioClass = 'badge-priority-low';
 
-      const statusStr = (t.status || '').toLowerCase();
-      let statusClass = 'badge-status-open';
-      if (statusStr.includes('progress')) statusClass = 'badge-status-inprogress';
-      else if (statusStr.includes('pending')) statusClass = 'badge-status-pending';
-      else if (statusStr.includes('escalat')) statusClass = 'badge-status-escalated';
-      else if (statusStr.includes('resolve')) statusClass = 'badge-status-resolved';
-      else if (statusStr.includes('close')) statusClass = 'badge-status-closed';
+    const statusStr = (t.status || '').toLowerCase();
+    let statusClass = 'badge-status-open';
+    if (statusStr.includes('progress')) statusClass = 'badge-status-inprogress';
+    else if (statusStr.includes('pending')) statusClass = 'badge-status-pending';
+    else if (statusStr.includes('escalat')) statusClass = 'badge-status-escalated';
+    else if (statusStr.includes('resolve')) statusClass = 'badge-status-resolved';
+    else if (statusStr.includes('close')) statusClass = 'badge-status-closed';
 
     tr.innerHTML = `
       <td><strong style="color: var(--accent-primary); font-family: monospace;">${t.id}</strong></td>

@@ -55,6 +55,7 @@ class User(Base):
     bio = Column(Text, nullable=True)
     profile_image = Column(String(500), nullable=True)
     email_verified = Column(Boolean, default=True)
+    password_hash = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     tickets = relationship("Ticket", back_populates="user")

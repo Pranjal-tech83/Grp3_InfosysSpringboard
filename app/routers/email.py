@@ -454,6 +454,9 @@ def send_automated_email(payload: EmailSendRequest):
         if not body:
             body = gen_body
 
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+    
     email_from = os.getenv("EMAIL_FROM", "support@supportpilot.ai")
     brevo_api_key = os.getenv("BREVO_API_KEY")
     delivery_status = payload.status or "Delivered"

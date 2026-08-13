@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from typing import List, Dict, Any
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from pydantic import BaseModel
@@ -21,6 +21,8 @@ from fastapi.staticfiles import StaticFiles
 
 from . import models, database, crud
 from .database import engine, SessionLocal
+from .security.security_gateway import require_role
+from .security.rbac import Role
 from .routers import (
     users,
     tickets,
@@ -31,6 +33,12 @@ from .routers import (
     analytics,
     email,
     triage_router,
+    employee_auth,
+    admin_auth,
+    employee_dashboard,
+    employee_tickets,
+    employee_ai,
+    employee_profile,
 )
 
 # Creates all tables that don't exist yet. Safe to call on every startup.
@@ -66,16 +74,24 @@ app.add_middleware(
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-app.include_router(users.router)
-app.include_router(tickets.router)
-app.include_router(knowledge_base.router)
-app.include_router(responses.router)
-app.include_router(escalations.router)
-app.include_router(jira_tickets.router)
-app.include_router(analytics.router)
-app.include_router(analytics.dashboard_router)
-app.include_router(email.router)
-app.include_router(triage_router.router)
+admin_deps = [Depends(require_role(Role.ADMIN))]
+
+app.include_router(users.router, dependencies=admin_deps)
+app.include_router(tickets.router, dependencies=admin_deps)
+app.include_router(knowledge_base.router, dependencies=admin_deps)
+app.include_router(responses.router, dependencies=admin_deps)
+app.include_router(escalations.router, dependencies=admin_deps)
+app.include_router(jira_tickets.router, dependencies=admin_deps)
+app.include_router(analytics.router, dependencies=admin_deps)
+app.include_router(analytics.dashboard_router, dependencies=admin_deps)
+app.include_router(email.router, dependencies=admin_deps)
+app.include_router(triage_router.router, dependencies=admin_deps)
+app.include_router(employee_auth.router)
+app.include_router(admin_auth.router)
+app.include_router(employee_dashboard.router)
+app.include_router(employee_tickets.router)
+app.include_router(employee_ai.router)
+app.include_router(employee_profile.router)
 
 
 # ---------------------------------------------------------------------------
@@ -133,5 +149,4 @@ class EmailPayload(BaseModel):
 @app.get("/", tags=["Health"])
 def health_check():
     return {"status": "ok", "service": "SupportPilot API"}
-
 

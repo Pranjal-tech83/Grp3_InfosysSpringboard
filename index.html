@@ -5,6 +5,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SupportPilot - AI Ticket Resolution Platform</title>
+  <script>
+    // --- Admin Authentication Check & Fetch Interceptor ---
+    (function() {
+        let session = null;
+        try {
+            session = JSON.parse(localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session'));
+        } catch (e) {}
+
+        if (!session || !session.token) {
+            window.location.href = 'admin/login.html';
+        } else {
+            // Intercept fetch to add Authorization header
+            const originalFetch = window.fetch;
+            window.fetch = async function() {
+                let [resource, config] = arguments;
+                if (typeof resource === 'string' && resource.includes('/api/')) {
+                    config = config || {};
+                    config.headers = config.headers || {};
+                    if (config.headers instanceof Headers) {
+                        config.headers.append('Authorization', 'Bearer ' + session.token);
+                    } else {
+                        config.headers['Authorization'] = 'Bearer ' + session.token;
+                    }
+                }
+                const response = await originalFetch(resource, config);
+                if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('sp_session');
+                    sessionStorage.removeItem('sp_session');
+                    window.location.href = 'admin/login.html';
+                }
+                return response;
+            };
+        }
+        
+        // Handle logout
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('#sidebar-logout-btn') || e.target.closest('#logout-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (session && session.token) {
+                    fetch('http://127.0.0.1:8000/api/admin/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + session.token }
+                    }).finally(() => {
+                        localStorage.removeItem('sp_session');
+                        sessionStorage.removeItem('sp_session');
+                        window.location.href = 'admin/login.html';
+                    });
+                } else {
+                    localStorage.removeItem('sp_session');
+                    sessionStorage.removeItem('sp_session');
+                    window.location.href = 'admin/login.html';
+                }
+            }
+        });
+    })();
+  </script>
   <link rel="stylesheet" href="css/styles.css?v=14">
   <style>
     .dock-menu {
@@ -233,7 +291,7 @@
               <path d="M4 4h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm0 0l8 7 8-7" />
             </svg>
           </div>
-          <span class="dock-name">Email Automation</span>
+          <span class="dock-name">Email</span>
         </div>
 
         <!-- NEW: Integrations Menu Item -->
@@ -261,6 +319,23 @@
           </div>
           <span class="dock-name">Settings</span>
         </div>
+        
+        <!-- Spacer to push logout to bottom if needed, or just let it sit at the end -->
+        <div style="flex: 1;"></div>
+
+        <div class="dock-item nav-item" id="sidebar-logout-btn" style="margin-top: auto;">
+          <span class="dock-dot"></span>
+          <div class="dock-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </div>
+          <span class="dock-name">Logout</span>
+        </div>
+
       </div>
     </nav>
 
@@ -283,9 +358,13 @@
             <span>SupportPilot Engine Active</span>
           </div>
 
-          <button onclick="if(window.SupportPilotGlobalRefresh) window.SupportPilotGlobalRefresh(); else window.location.reload();" class="nav-action-btn" id="global-refresh-btn" aria-label="Refresh Data" style="display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; font-size: 14px; font-weight: 600; width: auto; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface);">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+          <button
+            onclick="if(window.SupportPilotGlobalRefresh) window.SupportPilotGlobalRefresh(); else window.location.reload();"
+            class="nav-action-btn" id="global-refresh-btn" aria-label="Refresh Data"
+            style="display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; font-size: 14px; font-weight: 600; width: auto; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
             </svg>
             Refresh
           </button>
@@ -303,6 +382,9 @@
           </button>
 
 
+          <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Admin</span>
+          </div>
           <button class="nav-action-btn" id="navbar-profile-btn" aria-label="User Profile"
             style="border-radius: 50%; padding: 0; overflow: hidden; width: 36px; height: 36px; border: 1px solid var(--border-color); cursor: pointer;">
             <div class="user-avatar" id="navbar-avatar"
