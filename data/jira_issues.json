@@ -1,5 +1,119 @@
 [
   {
+    "id": "jira-60-2056",
+    "ticket_id": 60,
+    "ticket_code": "TKT-60",
+    "jira_key": "NET-2056",
+    "project_key": "NET",
+    "issue_type": "Incident",
+    "summary": "critacal vpn authentication loop failure",
+    "description": "test",
+    "status": "Open",
+    "priority": "Urgent",
+    "severity": "Critical",
+    "assigned_team": "Network Support Team",
+    "assignee": "Alex Rivera (NetOps Lead)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-13T01:32:29.171864+00:00",
+    "last_updated": "2026-08-13T01:32:29.171864+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1204,
+    "jira_url": "https://supportpilot.atlassian.net/browse/NET-2056",
+    "comments": [
+      {
+        "id": "c-auto-960",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-60 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
+        "created_at": "2026-08-13T01:32:29.171864+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-13T01:32:29.171864+00:00",
+        "status": "201 Created",
+        "detail": "Issue NET-2056 created with intelligent team assignment: Network Support Team"
+      }
+    ]
+  },
+  {
+    "id": "jira-59-5346",
+    "ticket_id": 59,
+    "ticket_code": "TKT-59",
+    "jira_key": "SEC-5346",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-13T01:32:01.255071+00:00",
+    "last_updated": "2026-08-13T01:32:01.255071+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1266,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-5346",
+    "comments": [
+      {
+        "id": "c-auto-142",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-59 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-13T01:32:01.255071+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-13T01:32:01.255071+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-5346 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
+    "id": "jira-58-6629",
+    "ticket_id": 58,
+    "ticket_code": "TKT-58",
+    "jira_key": "SEC-6629",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "Aryan singh",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-13T01:27:27.787779+00:00",
+    "last_updated": "2026-08-13T01:27:27.787779+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 911,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-6629",
+    "comments": [
+      {
+        "id": "c-auto-876",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-58 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-13T01:27:27.787779+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-13T01:27:27.787779+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-6629 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
     "id": "jira-57-3471",
     "ticket_id": 57,
     "ticket_code": "TKT-57",
@@ -2178,142 +2292,6 @@
         "timestamp": "2026-08-05T16:52:18.271742+00:00",
         "status": "201 Created",
         "detail": "Issue NET-5042 created with intelligent team assignment: Network Support Team"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-05T17:46:06.323860+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-08T10:23:14.748657+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
-      }
-    ]
-  },
-  {
-    "id": "jira-60-3847",
-    "ticket_id": 60,
-    "ticket_code": "TKT-60",
-    "jira_key": "SEC-3847",
-    "project_key": "SEC",
-    "issue_type": "Task",
-    "summary": "password issue",
-    "description": "test",
-    "status": "Resolved",
-    "priority": "Medium",
-    "severity": "P3",
-    "assigned_team": "Identity & Access / SecOps",
-    "assignee": "Marcus Brody (SecOps Lead)",
-    "reporter_name": "test",
-    "reporter_email": "test@gmail.com",
-    "created_at": "2026-08-05T15:41:55.544593+00:00",
-    "last_updated": "2026-08-08T10:23:14.748657+00:00",
-    "sync_status": "Synced",
-    "sync_latency_ms": 1153,
-    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-3847",
-    "comments": [
-      {
-        "id": "c-auto-976",
-        "author": "SupportPilot Jira Engine",
-        "content": "Ticket TKT-60 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
-        "created_at": "2026-08-05T15:41:55.544593+00:00"
-      }
-    ],
-    "sync_history": [
-      {
-        "event": "Created in Jira",
-        "timestamp": "2026-08-05T15:41:55.544593+00:00",
-        "status": "201 Created",
-        "detail": "Issue SEC-3847 created with intelligent team assignment: Identity & Access / SecOps"
-      },
-      {
-        "event": "Status Updated: Resolved",
-        "timestamp": "2026-08-05T15:43:06.552655+00:00",
-        "status": "200 OK",
-        "detail": "Status set to Resolved by Operator"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-05T15:44:26.534200+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-05T17:46:06.323860+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-08T10:23:14.748657+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
-      }
-    ]
-  },
-  {
-    "id": "jira-59-7963",
-    "ticket_id": 59,
-    "ticket_code": "TKT-59",
-    "jira_key": "SW-7963",
-    "project_key": "SW",
-    "issue_type": "Task",
-    "summary": "Database cluster deadlocking during invoice batch run",
-    "description": "PostgreSQL deadlock on table payments_queue with thread lock wait timeout",
-    "status": "In Progress",
-    "priority": "Medium",
-    "severity": "P3",
-    "assigned_team": "Software Support Team",
-    "assignee": "Devon Vance (Desktop Eng)",
-    "reporter_name": "DevOps Lead",
-    "reporter_email": "devops@enterprise.com",
-    "created_at": "2026-08-05T15:38:38.438088+00:00",
-    "last_updated": "2026-08-08T10:23:14.748657+00:00",
-    "sync_status": "Synced",
-    "sync_latency_ms": 1176,
-    "jira_url": "https://supportpilot.atlassian.net/browse/SW-7963",
-    "comments": [
-      {
-        "id": "c-auto-913",
-        "author": "SupportPilot Jira Engine",
-        "content": "Ticket TKT-59 ingested. Automatically assigned to Software Support Team (Devon Vance (Desktop Eng)).",
-        "created_at": "2026-08-05T15:38:38.438088+00:00"
-      },
-      {
-        "id": "c-8778",
-        "author": "DevOps Lead",
-        "content": "Investigated pg_locks: isolated deadlock to concurrent update in worker thread 4.",
-        "created_at": "2026-08-05T15:38:53.151459+00:00"
-      }
-    ],
-    "sync_history": [
-      {
-        "event": "Created in Jira",
-        "timestamp": "2026-08-05T15:38:38.438088+00:00",
-        "status": "201 Created",
-        "detail": "Issue SW-7963 created with intelligent team assignment: Software Support Team"
-      },
-      {
-        "event": "Status Updated: In Progress",
-        "timestamp": "2026-08-05T15:38:53.087825+00:00",
-        "status": "200 OK",
-        "detail": "Status set to In Progress by Senior SRE"
-      },
-      {
-        "event": "Comment Added",
-        "timestamp": "2026-08-05T15:38:53.151459+00:00",
-        "status": "201 Created",
-        "detail": "Comment posted by DevOps Lead"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-05T15:44:26.534200+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
       },
       {
         "event": "Bulk Synchronization",

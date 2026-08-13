@@ -593,7 +593,7 @@ async function handleRunAIPrediction(e) {
       if (s.name) sessionName = s.name;
       if (s.email) sessionEmail = s.email;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   const requesterName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : sessionName;
   const requesterEmail = emailEl && emailEl.value.trim() ? emailEl.value.trim() : sessionEmail;
@@ -724,7 +724,7 @@ async function handleNewTicketConfirmSubmit(e) {
       if (s.name) sessionName = s.name;
       if (s.email) sessionEmail = s.email;
     }
-  } catch(e) {}
+  } catch (e) { }
 
   const nameEl = document.getElementById("tkt-name");
   const emailEl = document.getElementById("tkt-email");

@@ -1,1479 +1,1301 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SupportPilot - AI Ticket Resolution Platform</title>
-  <script>
-    // --- Admin Authentication Check & Fetch Interceptor ---
-    (function() {
-        let session = null;
-        try {
-            session = JSON.parse(localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session'));
-        } catch (e) {}
-
-        if (!session || !session.token) {
-            window.location.href = 'admin/login.html';
-        } else {
-            // Intercept fetch to add Authorization header
-            const originalFetch = window.fetch;
-            window.fetch = async function() {
-                let [resource, config] = arguments;
-                if (typeof resource === 'string' && resource.includes('/api/')) {
-                    config = config || {};
-                    config.headers = config.headers || {};
-                    if (config.headers instanceof Headers) {
-                        config.headers.append('Authorization', 'Bearer ' + session.token);
-                    } else {
-                        config.headers['Authorization'] = 'Bearer ' + session.token;
-                    }
-                }
-                const response = await originalFetch(resource, config);
-                if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('sp_session');
-                    sessionStorage.removeItem('sp_session');
-                    window.location.href = 'admin/login.html';
-                }
-                return response;
-            };
-        }
-        
-        // Handle logout
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('#sidebar-logout-btn') || e.target.closest('#logout-btn');
-            if (btn) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (session && session.token) {
-                    fetch('http://127.0.0.1:8000/api/admin/auth/logout', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + session.token }
-                    }).finally(() => {
-                        localStorage.removeItem('sp_session');
-                        sessionStorage.removeItem('sp_session');
-                        window.location.href = 'admin/login.html';
-                    });
-                } else {
-                    localStorage.removeItem('sp_session');
-                    sessionStorage.removeItem('sp_session');
-                    window.location.href = 'admin/login.html';
-                }
-            }
-        });
-    })();
-  </script>
-  <link rel="stylesheet" href="../css/styles.css?v=14">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupportPilot – Employee Dashboard</title>
+  <meta name="description" content="SupportPilot Employee Portal – manage your support tickets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    .dock-menu {
-      position: fixed;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1000;
+    :root {
+      --bg-app: #f0f4ff;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: rgba(37,99,235,0.10);
+      --accent-glow: rgba(37,99,235,0.22);
+      --success: #10b981;
+      --success-light: rgba(16,185,129,0.12);
+      --warning: #f59e0b;
+      --warning-light: rgba(245,158,11,0.12);
+      --danger: #ef4444;
+      --danger-light: rgba(239,68,68,0.10);
+      --purple: #8b5cf6;
+      --purple-light: rgba(139,92,246,0.12);
+      --border: #e2e8f0;
+      --sidebar-w: 240px;
+      --header-h: 64px;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 24px rgba(37,99,235,0.10), 0 1px 4px rgba(0,0,0,0.06);
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
     }
 
-    .dock-container {
+    [data-theme="dark"] {
+      --bg-app: #070d1a;
+      --bg-sidebar: #0d1526;
+      --bg-card: #111827;
+      --bg-input: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: rgba(59,130,246,0.15);
+      --border: #1e293b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ─── LAYOUT ─── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 24px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      width: 68px;
-      /* Collapsed width */
-      overflow: hidden;
-      transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      transition: transform var(--transition), background var(--transition);
     }
 
-    .dock-menu.expanded .dock-container {
-      width: 220px;
-      /* Expanded width */
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none; color: var(--text-primary);
+    }
+    .sidebar-logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .sidebar-logo-name {
+      font-size: 15px; font-weight: 800;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
-    .dock-toggle-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: none;
-      background: transparent;
-      color: #475569;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.2s;
-      flex-shrink: 0;
-      margin-bottom: 8px;
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 16px 20px 6px;
     }
 
-    .dock-toggle-btn:hover {
-      background: rgba(0, 0, 0, 0.05);
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; margin: 2px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer; border: none; background: none;
+      color: var(--text-secondary); font-size: 13.5px; font-weight: 600;
+      font-family: inherit; text-align: left; width: calc(100% - 16px);
+      transition: all var(--transition);
+    }
+    .nav-item:hover { background: var(--accent-light); color: var(--accent); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent); }
+    .nav-item .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 16px 8px 12px;
+      border-top: 1px solid var(--border);
     }
 
-    .dock-toggle-btn svg {
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-input);
     }
-
-    .dock-toggle-btn:hover svg {
-      transform: scale(1.15);
-      color: #3b82f6;
-    }
-
-    .dock-menu.expanded .dock-toggle-btn svg {
-      transform: rotate(180deg);
-    }
-
-    .dock-menu.expanded .dock-toggle-btn:hover svg {
-      transform: rotate(180deg) scale(1.15);
-    }
-
-    .dock-item {
-      position: relative;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      cursor: pointer;
-      width: 100%;
-      border-radius: 12px;
-      transition: background-color 0.2s;
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center;
+      font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
       overflow: hidden;
     }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: var(--text-muted); font-weight: 500; }
 
-    .dock-item:hover {
-      background-color: rgba(59, 130, 246, 0.1);
+    /* ─── MAIN ─── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      height: var(--header-h); background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; position: sticky; top: 0; z-index: 40;
+      transition: background var(--transition);
     }
+    .topbar-left { display: flex; flex-direction: column; }
+    .topbar-title { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+    .topbar-sub { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
 
-    .dock-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      background: transparent;
-      border-radius: 12px;
-      color: #475569;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-card);
+      cursor: pointer; display: grid; place-items: center;
+      color: var(--text-secondary); transition: all var(--transition);
     }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
-    .dock-icon svg {
-      width: 20px;
-      height: 20px;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* ─── CONTENT ─── */
+    .content { flex: 1; padding: 28px; overflow-y: auto; }
+
+    /* ─── STATS GRID ─── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 16px;
+      transition: transform var(--transition), box-shadow var(--transition);
+      animation: fadeUp 0.4s ease both;
     }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 
-    .dock-item:hover .dock-icon svg {
-      transform: scale(1.25) translateY(-2px) rotate(-5deg);
-      color: #3b82f6;
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: grid; place-items: center; flex-shrink: 0;
     }
+    .stat-icon.blue { background: var(--accent-light); color: var(--accent); }
+    .stat-icon.green { background: var(--success-light); color: var(--success); }
+    .stat-icon.yellow { background: var(--warning-light); color: var(--warning); }
+    .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
 
-    .dock-name {
-      margin-left: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #475569;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.2s ease;
+    .stat-value { font-size: 28px; font-weight: 800; color: var(--text-primary); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ─── TWO COLUMNS ─── */
+    .two-col { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden; animation: fadeUp 0.45s ease both;
     }
-
-    .dock-menu.expanded .dock-name {
-      opacity: 1;
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 16px; border-bottom: 1px solid var(--border);
     }
+    .card-head-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .card-head-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .card-body { padding: 20px; }
 
-    .dock-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: #3b82f6;
-      position: absolute;
-      left: 6px;
-      /* Move dot to left */
-      opacity: 0;
-      transition: opacity 0.3s ease;
+    /* ─── BTN ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 16px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 700; font-family: inherit;
+      transition: all var(--transition); white-space: nowrap;
     }
-
-
-    .dock-item.active .dock-icon {
-      color: #3b82f6;
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,0.3);
     }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(37,99,235,0.4); }
+    .btn-ghost { background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: rgba(37,99,235,0.25); }
+    .btn-danger { background: var(--danger); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.25); }
+    .btn-danger:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-    .dock-item.active .dock-name {
-      color: #3b82f6;
+    /* ─── TICKET TABLE ─── */
+    .ticket-table { width: 100%; border-collapse: collapse; }
+    .ticket-table th {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--text-muted); padding: 10px 14px; text-align: left;
+      background: var(--bg-input); border-bottom: 1px solid var(--border);
     }
+    .ticket-table td { padding: 13px 14px; border-bottom: 1px solid var(--border); font-size: 13.5px; vertical-align: middle; }
+    .ticket-table tr:last-child td { border-bottom: none; }
+    .ticket-table tr:hover td { background: var(--accent-light); }
 
-    .dock-item.active .dock-dot {
-      opacity: 1;
+    .ticket-id { font-weight: 700; color: var(--accent); font-size: 13px; white-space: nowrap; }
+    .ticket-subject { color: var(--text-primary); font-weight: 600; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ticket-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+    /* ─── BADGES ─── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      text-transform: capitalize; white-space: nowrap;
     }
+    .badge-open { background: var(--accent-light); color: var(--accent); }
+    .badge-resolved, .badge-closed { background: var(--success-light); color: var(--success); }
+    .badge-in_progress { background: var(--warning-light); color: var(--warning); }
+    .badge-escalated { background: var(--danger-light); color: var(--danger); }
+    .badge-pending { background: var(--purple-light); color: var(--purple); }
+    .badge-high { background: var(--danger-light); color: var(--danger); }
+    .badge-medium { background: var(--warning-light); color: var(--warning); }
+    .badge-low { background: var(--success-light); color: var(--success); }
+    .badge-critical { background: #fde8e8; color: #b91c1c; }
 
-    @media (prefers-color-scheme: dark) {
-      .dock-container {
-        background: rgba(30, 41, 59, 0.7);
-        border-color: rgba(255, 255, 255, 0.1);
-      }
+    /* ─── ACTIVITY FEED ─── */
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex; gap: 12px; padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+      flex-shrink: 0; margin-top: 5px;
+    }
+    .activity-desc { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+    .activity-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
 
-      .dock-icon {
-        color: #94a3b8;
-      }
+    /* ─── FORM ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 14px; font-size: 13.5px; font-family: inherit; font-weight: 500;
+      background: var(--bg-input); color: var(--text-primary);
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-select { cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-      .dock-name,
-      .dock-toggle-btn {
-        color: #94a3b8;
-      }
+    /* ─── MODAL OVERLAY ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      animation: fadeIn 0.2s ease both;
+    }
+    .modal {
+      background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);
+      width: 100%; max-width: 500px; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+      animation: fadeUp 0.3s ease both;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 17px; font-weight: 800; }
+    .modal-body { padding: 20px 24px; }
+    .modal-foot { display: flex; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); justify-content: flex-end; }
 
-      .dock-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.05);
-      }
+    /* ─── EMPTY STATE ─── */
+    .empty-state { text-align: center; padding: 48px 20px; }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .empty-state-sub { font-size: 13px; color: var(--text-muted); }
+
+    /* ─── LOADING ─── */
+    .skeleton { background: linear-gradient(90deg, var(--bg-input) 25%, var(--border) 50%, var(--bg-input) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner-dark { border-color: rgba(37,99,235,0.25); border-top-color: var(--accent); }
+
+    /* ─── ALERTS ─── */
+    .alert {
+      display: flex; align-items: center; gap: 8px; padding: 11px 14px;
+      border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 16px;
+    }
+    .alert-error { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .alert-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+
+    /* ─── PROFILE TAB ─── */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .profile-grid { grid-template-columns: 1fr; } }
+    .profile-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .profile-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: grid; place-items: center;
+      font-size: 30px; font-weight: 800; color: #fff;
+      overflow: hidden; position: relative;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─── PAGE SECTIONS ─── */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* ─── TOAST ─── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast {
+      background: var(--text-primary); color: var(--bg-card);
+      padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); min-width: 240px;
+      animation: slideInRight 0.3s ease both; pointer-events: auto;
+    }
+    .toast.success { background: #10b981; color: #fff; }
+    .toast.error { background: #ef4444; color: #fff; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .two-col { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
-
-  <script>
-    (function() {
-        const originalFetch = window.fetch;
-        const apiMap = {
-            '/api/users/me/profile-image': '/api/employee/profile/image',
-            '/api/users/me': '/api/employee/profile',
-            '/api/analytics/dashboard/analytics': '/api/employee/dashboard/activity',
-            '/api/analytics/dashboard/summary': '/api/employee/dashboard/summary',
-            '/api/dashboard/analytics': '/api/employee/dashboard/activity',
-            '/api/dashboard/summary': '/api/employee/dashboard/summary',
-            '/api/assistant/chat': '/api/employee/ai/assistant',
-            '/api/tickets': '/api/employee/tickets',
-            '/api/triage': '/api/employee/ai/triage'
-        };
-
-        window.fetch = async function() {
-            let url = arguments[0];
-            let options = arguments[1] || {};
-            
-            // Map the exact URLs and also catch subpaths
-            for (const [adminPath, employeePath] of Object.entries(apiMap)) {
-                if (typeof url === 'string' && url.includes(adminPath)) {
-                    url = url.replace(adminPath, employeePath);
-                    break;
-                }
-            }
-            arguments[0] = url;
-
-            const sessionRaw = localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session');
-            if (sessionRaw) {
-                try {
-                    const session = JSON.parse(sessionRaw);
-                    if (session && session.token) {
-                        options.headers = options.headers || {};
-                        // Convert to standard object if it's Headers
-                        if (options.headers instanceof Headers) {
-                            options.headers.set('Authorization', 'Bearer ' + session.token);
-                        } else {
-                            options.headers['Authorization'] = 'Bearer ' + session.token;
-                        }
-                    }
-                } catch(e) {}
-            }
-            arguments[1] = options;
-
-            const response = await originalFetch.apply(this, arguments);
-            if (response.status === 401 || response.status === 403) {
-                localStorage.removeItem('sp_session');
-                sessionStorage.removeItem('sp_session');
-                window.location.href = 'login.html';
-            }
-            return response;
-        };
-        
-        // Fix logout route map in HTML
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('#sidebar-logout-btn') || e.target.closest('#logout-btn');
-            if (btn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const sessionRaw = localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session');
-                if (sessionRaw) {
-                    const session = JSON.parse(sessionRaw);
-                    fetch('http://127.0.0.1:8000/api/employee/auth/logout', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + session.token }
-                    }).finally(() => {
-                        localStorage.removeItem('sp_session');
-                        sessionStorage.removeItem('sp_session');
-                        window.location.href = 'login.html';
-                    });
-                } else {
-                    window.location.href = 'login.html';
-                }
-            }
-        });
-    })();
-  </script>
-
 </head>
-
 <body>
-  <div id="app-container" style="display: flex;">
-    <!-- Dock Menu -->
-    <nav class="dock-menu">
-      <div class="dock-container">
-        <button class="dock-toggle-btn" id="dock-toggle-btn" aria-label="Toggle Menu">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="#">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <span class="sidebar-logo-name">SupportPilot</span>
+    </a>
+
+    <div class="sidebar-section-label">Overview</div>
+    <button class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+
+    <div class="sidebar-section-label">Tickets</div>
+    <button class="nav-item" id="nav-tickets" onclick="showSection('tickets')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      My Tickets
+    </button>
+    <button class="nav-item" id="nav-new" onclick="openNewTicketModal()">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      New Ticket
+    </button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="nav-item" id="nav-assistant" onclick="showSection('assistant')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      Ask AI Assistant
+    </button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="nav-item" id="nav-profile" onclick="showSection('profile')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </button>
+    <button class="nav-item" onclick="confirmLogout()">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Loading…</div>
+          <div class="user-role">Employee</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-sub" id="topbar-sub">Welcome back 👋</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Ticket
         </button>
-
-        <div class="dock-item nav-item active" data-target="dashboard">
-          <span class="dock-dot"></span>
-          <div class="dock-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1" />
-              <rect x="14" y="3" width="7" height="5" rx="1" />
-              <rect x="14" y="12" width="7" height="9" rx="1" />
-              <rect x="3" y="16" width="7" height="5" rx="1" />
-            </svg>
-          </div>
-          <span class="dock-name">Dashboard</span>
-        </div>
-
-        <div class="dock-item nav-item" data-target="tickets">
-          <span class="dock-dot"></span>
-          <div class="dock-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M20 12V8H4v4m16 0v8H4v-8m16 0H4M8 4h8" />
-            </svg>
-          </div>
-          <span class="dock-name">Tickets</span>
-        </div>
-
-        <div class="dock-item nav-item" data-target="assistant">
-          <span class="dock-dot"></span>
-          <div class="dock-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path
-                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-          </div>
-          <span class="dock-name">AI Assistant</span>
-        </div>
-
-        <div class="dock-item nav-item" data-target="settings">
-          <span class="dock-dot"></span>
-          <div class="dock-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <span class="dock-name">Profile</span>
-        </div>
-
-        <div class="dock-item" id="sidebar-logout-btn" style="margin-top: auto; cursor: pointer; color: #ef4444;">
-          <span class="dock-dot"></span>
-          <div class="dock-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-          </div>
-          <span class="dock-name">Logout</span>
-        </div>
-
-        
-    </nav>
-
-    <!-- Main Section Content Area -->
-    <main id="main-content">
-
-      <!-- Top Sticky Navbar -->
-      <header class="navbar">
-        <button class="nav-action-btn" id="navbar-sidebar-toggle" aria-label="Toggle Sidebar"
-          style="margin-right: 12px; display: none; align-items: center; justify-content: center;">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme" onclick="toggleTheme()">
+          <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
+      </div>
+    </header>
 
+    <!-- CONTENT -->
+    <main class="content">
 
-        <div class="navbar-actions">
-          <div class="ai-status-badge">
-            <span class="ai-indicator-dot"></span>
-            <span>SupportPilot Engine Active</span>
-          </div>
-
-          <button
-            onclick="if(window.SupportPilotGlobalRefresh) window.SupportPilotGlobalRefresh(); else window.location.reload();"
-            class="nav-action-btn" id="global-refresh-btn" aria-label="Refresh Data"
-            style="display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; font-size: 14px; font-weight: 600; width: auto; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface);">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
-            </svg>
-            Refresh
-          </button>
-
-          <button class="nav-action-btn" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
-            <svg viewBox="0 0 24 24" id="theme-sun-icon">
-              <circle cx="12" cy="12" r="5" />
-              <path
-                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M16.96 16.96l1.42 1.42M1 12h2M21 12h2M4.22 19.07l1.42-1.42M16.96 7.04l1.42-1.42"
-                stroke="currentColor" />
-            </svg>
-            <svg viewBox="0 0 24 24" id="theme-moon-icon" style="display: none;">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" />
-            </svg>
-          </button>
-
-
-          <div style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 4px;">
-            <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Employee</span>
-          </div>
-          <button class="nav-action-btn" id="navbar-profile-btn" aria-label="User Profile"
-            style="border-radius: 50%; padding: 0; overflow: hidden; width: 36px; height: 36px; border: 1px solid var(--border-color); cursor: pointer;">
-            <div class="user-avatar" id="navbar-avatar"
-              style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background-color: var(--accent-primary); color: white; position: relative;">
-              <img id="navbar-avatar-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-              <span id="navbar-avatar-txt">PC</span>
+      <!-- DASHBOARD SECTION -->
+      <section class="page-section active" id="section-dashboard">
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card" style="animation-delay:0s">
+            <div class="stat-icon blue">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/></svg>
             </div>
-          </button>
+            <div>
+              <div class="stat-value" id="stat-total">—</div>
+              <div class="stat-label">Total Tickets</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.05s">
+            <div class="stat-icon yellow">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-open">—</div>
+              <div class="stat-label">Open Tickets</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.1s">
+            <div class="stat-icon green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-resolved">—</div>
+              <div class="stat-label">Resolved</div>
+            </div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.15s">
+            <div class="stat-icon purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-satisfaction">—</div>
+              <div class="stat-label">Satisfaction</div>
+            </div>
+          </div>
         </div>
-      </header>
 
-      <!-- View Containers -->
+        <!-- QUICK ACTIONS / AI ASSISTANT -->
+        <div style="margin-bottom: 24px;">
+           <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 22px; color:var(--text-primary); display:flex; align-items:center; gap:16px; cursor:pointer; box-shadow:var(--shadow); transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s" onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'; this.style.borderColor='var(--purple)'" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow)'; this.style.borderColor='var(--border)'" onclick="showSection('assistant')">
+             <div style="background:var(--purple-light); color:var(--purple); border-radius:12px; padding:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                 <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+               </svg>
+             </div>
+             <div style="display:flex; flex-direction:column; gap:3px;">
+               <span style="font-size:16px; font-weight:800; color:var(--text-primary);">Ask AI Assistant</span>
+               <span style="font-size:12.5px; color:var(--text-secondary); line-height:1.4;">Troubleshoot VPNs, passwords, network firewalls, and knowledge base.</span>
+             </div>
+           </div>
+        </div>
 
-      <!-- VIEW 1: DASHBOARD -->
-      <section class="view-section active-view" id="dashboard-view">
-        <div id="dashboard-react-root"></div>
-        <div style="display: none;" id="legacy-dashboard-hide">
-          <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Overview
-          </h1>
-          <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Real-time diagnostics and
-            resolution telemetry for SupportPilot.</p>
-
-          <!-- KPI Metrics Grid -->
-          <div class="kpi-container">
-            <div class="card kpi-card">
-              <div class="kpi-header">
-                <span>TOTAL TICKETS</span>
-                <div class="kpi-icon">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M20 12V8H4v4m16 0v8H4v-8m16 0H4" stroke="currentColor" />
-                  </svg>
-                </div>
+        <!-- Two columns: recent tickets + activity -->
+        <div class="two-col">
+          <!-- Recent Tickets -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-head-title">Recent Tickets</div>
+                <div class="card-head-sub">Your last 5 support requests</div>
               </div>
-              <div class="kpi-value" id="kpi-total">1,248</div>
-              <div class="kpi-trend trend-up">
-                <span>+12.4%</span> vs last week
-              </div>
+              <button class="btn btn-ghost btn-sm" onclick="showSection('tickets')">View All</button>
             </div>
-            <div class="card kpi-card">
-              <div class="kpi-header">
-                <span>OPEN TICKETS</span>
-                <div class="kpi-icon">
-                  <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" stroke="currentColor" />
-                  </svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="kpi-open" style="color: var(--badge-open-text);">52</div>
-              <div class="kpi-trend trend-down">
-                <span>-3.1%</span> vs last week
-              </div>
-            </div>
-            <div class="card kpi-card">
-              <div class="kpi-header">
-                <span>RESOLVED TICKETS</span>
-                <div class="kpi-icon">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" stroke="currentColor" />
-                  </svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="kpi-resolved" style="color: var(--badge-resolved-text);">1,196</div>
-              <div class="kpi-trend trend-up">
-                <span>+15.3%</span> vs last week
-              </div>
-            </div>
-            <div class="card kpi-card">
-              <div class="kpi-header">
-                <span>AI RESOLUTION RATE</span>
-                <div class="kpi-icon">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83" stroke="currentColor" />
-                  </svg>
-                </div>
-              </div>
-              <div class="kpi-value" id="kpi-ai-rate">86.4%</div>
-              <div class="kpi-trend trend-up">
-                <span>+1.8%</span> target > 85%
+            <div id="recent-tickets-wrap">
+              <div style="padding:20px">
+                <div class="skeleton" style="height:40px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:40px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:40px"></div>
               </div>
             </div>
           </div>
 
-          <!-- Dashboard Grid (CSS Charts & Quick Actions) -->
-          <div class="dashboard-grid">
-            <div class="card">
-              <div class="card-title">
-                <span>AI Resolution Performance</span>
-                <div style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Weekly SLA Targets</div>
-              </div>
-              <!-- Custom CSS Chart -->
-              <div class="chart-container-box" id="dashboard-bar-chart">
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 60%;" data-value="60%"></div>
-                  <span class="bar-label">Mon</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 75%;" data-value="75%"></div>
-                  <span class="bar-label">Tue</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 85%;" data-value="85%"></div>
-                  <span class="bar-label">Wed</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 94%;" data-value="94%"></div>
-                  <span class="bar-label">Thu</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 80%;" data-value="80%"></div>
-                  <span class="bar-label">Fri</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 98%;" data-value="98%"></div>
-                  <span class="bar-label">Sat</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-fill" style="height: 92%;" data-value="92%"></div>
-                  <span class="bar-label">Sun</span>
-                </div>
+          <!-- Activity Feed -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-head-title">Activity</div>
+                <div class="card-head-sub">Recent ticket events</div>
               </div>
             </div>
-
-            <div class="card">
-              <div class="card-title">Quick Tasks</div>
-              <div class="quick-actions-list">
-                <button class="quick-action-btn" id="dash-action-new-tkt">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  </svg>
-                  <span>Create New Ticket</span>
-                </button>
-
-                <button class="quick-action-btn" id="dash-action-assistant">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" />
-                  </svg>
-                  <span>Ask AI Assistant</span>
-                </button>
+            <div class="card-body">
+              <div id="activity-list">
+                <div class="skeleton" style="height:32px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:32px;margin-bottom:10px"></div>
+                <div class="skeleton" style="height:32px"></div>
               </div>
-            </div>
-          </div>
-
-          <!-- Latest Tickets Panel -->
-          <div class="card" style="margin-bottom: 24px;">
-            <div class="card-title">Recent System Activity</div>
-            <div class="table-container" style="border: none;">
-              <table id="dash-activity-table">
-                <thead>
-                  <tr>
-                    <th>Ticket ID</th>
-                    <th>Subject</th>
-                    <th>Priority</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="dash-activity-tbody">
-                  <!-- Populated dynamically via JS -->
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 2: TICKETS TABLE -->
-      <section class="view-section" id="tickets-view">
-        <div class="table-controls">
-          <div class="table-filters" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <div style="position: relative; width: 280px;">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
-                style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              <input type="text" class="table-filter-select" id="tkt-search-bar"
-                placeholder="Search ID, customer, subject..." style="width: 100%; padding-left: 36px;">
+      <!-- TICKETS SECTION -->
+      <section class="page-section" id="section-tickets">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-head-title">My Tickets</div>
+              <div class="card-head-sub" id="tickets-count-sub">All your support requests</div>
             </div>
-            <select class="table-filter-select" id="filter-dept">
-              <option value="all">All Departments</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Billing">Billing</option>
-              <option value="Customer Support">Customer Support</option>
-              <option value="IT Security">IT Security</option>
-            </select>
-            <select class="table-filter-select" id="filter-priority">
-              <option value="all">All Priorities</option>
-              <option value="Urgent">Urgent (P1)</option>
-              <option value="High">High (P2)</option>
-              <option value="Medium">Medium (P3)</option>
-              <option value="Low">Low (P4)</option>
-            </select>
-            <select class="table-filter-select" id="filter-status">
-              <option value="all">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
-              <option value="Escalated">Escalated</option>
-              <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
-            </select>
-            <div id="live-refresh-badge"
-              style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 20px; font-size: 11px; font-weight: 700; color: #059669;">
-              <span
-                style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; animation: pulse 1.5s infinite;"></span>
-              Live Sync
-            </div>
-          </div>
-
-          <div class="table-actions-right" style="display: flex; gap: 10px; align-items: center;">
-            <style>
-              #main-tickets-table td:last-child { display: none !important; }
-              #main-tickets-table th:last-child { display: none !important; }
-            </style>
-            <button class="btn btn-primary" id="btn-create-ticket-modal"
-              style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              <span>+ New Ticket</span>
+            <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Ticket
             </button>
           </div>
-        </div>
 
-        <div class="table-container" style="position: relative;">
-          <table id="main-tickets-table">
-            <thead>
-              <tr>
-                <th data-sort="id" style="cursor: pointer;">Ticket ID <span class="sort-icon">↕</span></th>
-                <th data-sort="user" style="cursor: pointer;">Customer <span class="sort-icon">↕</span></th>
-                <th data-sort="email" style="cursor: pointer;">Email <span class="sort-icon">↕</span></th>
-                <th data-sort="department" style="cursor: pointer;">Department <span class="sort-icon">↕</span></th>
-                <th data-sort="subject" style="cursor: pointer;">Subject <span class="sort-icon">↕</span></th>
-                <th data-sort="category" style="cursor: pointer;">Category <span class="sort-icon">↕</span></th>
-                <th data-sort="priority" style="cursor: pointer;">Priority <span class="sort-icon">↕</span></th>
-                <th data-sort="status" style="cursor: pointer;">Status <span class="sort-icon">↕</span></th>
-                <th data-sort="createdDate" style="cursor: pointer;">Created Date <span class="sort-icon">↕</span></th>
-              </tr>
-            </thead>
-            <tbody id="tickets-tbody">
-              <!-- Populated dynamically via JS -->
-            </tbody>
-          </table>
+          <!-- Filter bar -->
+          <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px" id="filter-status" onchange="renderTicketTable()">
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+              <option value="escalated">Escalated</option>
+            </select>
+            <select class="form-select" style="width:auto;padding:7px 12px;font-size:13px" id="filter-priority" onchange="renderTicketTable()">
+              <option value="">All Priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
 
-          <div class="table-pagination">
-            <span id="pagination-info">Showing 1 to 8 of 12 entries</span>
-            <div class="pagination-btn-group" id="pagination-controls">
-              <!-- Rendered dynamically -->
+          <div style="overflow-x:auto" id="tickets-table-wrap">
+            <div style="padding:24px">
+              <div class="skeleton" style="height:36px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:36px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:36px"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 3: AI ASSISTANT -->
-      <section class="view-section" id="assistant-view">
-        <div class="view-header">
-          <div>
-            <h2>Smart IT Helpdesk Assistant</h2>
-            <p>Ask our local AI model for immediate troubleshooting guides, server status checkups, or policy rules
-              lookup.</p>
+      <!-- PROFILE SECTION -->
+      <section class="page-section" id="section-profile">
+        <div class="card" style="max-width:620px">
+          <div class="card-head">
+            <div class="card-head-title">My Profile</div>
           </div>
-        </div>
-        <div id="chat-messages"
-          style="flex-grow: 1; overflow-y: auto; padding: 16px; background-color: var(--bg-primary); border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px;">
-          <!-- Messages go here -->
-        </div>
-        <div
-          style="display: flex; gap: 12px; align-items: center; padding: 16px; background-color: var(--bg-sidebar); border-radius: 8px; border: 1px solid var(--border-color);">
-          <input type="text" id="chat-input" class="form-control" style="flex-grow: 1;"
-            placeholder="E.g., How do I map the corporate network printer to my local workstation?...">
-          <button id="btn-send-message" class="btn btn-primary" style="padding: 10px 24px;">Send</button>
-        </div>
-      </section>
-
-      <!-- VIEW 6: ANALYTICS -->
-      <section class="view-section" id="analytics-view">
-        <div class="workflow-control-bar">
-          <div>
-            <h1 style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Platform Analytics</h1>
-            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Service Level Agreement (SLA)
-              conformance and execution latency logs.</p>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary active" id="btn-report-weekly">Weekly Report</button>
-            <button class="btn btn-secondary" id="btn-report-monthly">Monthly Report</button>
-          </div>
-        </div>
-
-        <!-- Analytics widget rows -->
-        <div class="dashboard-grid">
-          <div class="card">
-            <div class="card-title">Daily Ticket Volumes</div>
-            <div class="chart-container-box" id="analytics-chart-vol">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">SLA Performance Target</div>
-            <div class="circle-chart-box">
-              <div class="circle-chart-ring" id="analytics-sla-ring">
-                <div class="circle-chart-inner">
-                  <span style="font-size: 24px; font-weight: 800; color: var(--accent-primary);"
-                    id="sla-percentage-text">94.8%</span>
-                  <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">SLA Conformed</span>
-                </div>
+          <div class="card-body">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar" id="profile-avatar-big">?</div>
+              <div>
+                <div style="font-size:17px;font-weight:800;text-align:center" id="profile-fullname">—</div>
+                <div style="font-size:13px;color:var(--text-muted);text-align:center" id="profile-email-disp">—</div>
               </div>
             </div>
+
+            <div id="profile-msg"></div>
+
+            <form id="profile-form" onsubmit="saveProfile(event)">
+              <div class="profile-grid">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input class="form-input" id="p-name" type="text" placeholder="Jane Smith" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" id="p-email" type="email" placeholder="you@company.com" disabled style="opacity:0.6;cursor:not-allowed" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone</label>
+                  <input class="form-input" id="p-phone" type="tel" placeholder="+1 555 000 0000" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input class="form-input" id="p-dept" type="text" placeholder="Engineering" />
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="loadProfile()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm" id="profile-save-btn">Save Changes</button>
+              </div>
+            </form>
           </div>
         </div>
+      </section>
 
-        <div class="kpi-container">
-          <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>AVG RESOLUTION TIME</span>
-            </div>
-            <div class="kpi-value" style="font-size: 22px;">4m 32s</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Target &lt; 10 minutes</span>
+      <!-- ASSISTANT SECTION -->
+      <section class="page-section" id="section-assistant">
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+          <div style="margin-bottom:20px;">
+            <h2 style="font-size:20px;font-weight:800;">Smart IT Helpdesk Assistant</h2>
+            <p style="color:var(--text-secondary);font-size:14px;margin-top:4px;">Ask our local AI model for immediate troubleshooting guides, server status checkups, or policy rules lookup.</p>
           </div>
-          <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>CUSTOMER SATISFACTION</span>
-            </div>
-            <div class="kpi-value" style="font-size: 22px;">4.92 / 5.0</div>
-            <span style="font-size: 11px; color: #10b981;">Excellent (98.4% favorable)</span>
+          <div id="chat-messages" style="height:400px; overflow-y:auto; padding:16px; background:var(--bg-app); border-radius:8px; margin-bottom:16px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+            <!-- Messages go here -->
           </div>
-          <div class="card kpi-card">
-            <div class="kpi-header">
-              <span>INTEGRATION STATUS</span>
-            </div>
-            <div class="kpi-value" style="font-size: 22px; color: #10b981;">100% Online</div>
-            <span style="font-size: 11px; color: var(--text-muted);">9 webhook nodes active</span>
+          <div style="display:flex; gap:12px; align-items:center; padding:16px; background:var(--bg-input); border-radius:8px; border:1px solid var(--border);">
+            <input type="text" id="chat-input" class="form-input" style="flex-grow:1;" placeholder="E.g., How do I map the corporate network printer to my local workstation?...">
+            <button id="btn-send-message" class="btn btn-primary" style="padding:10px 24px;background:#8b5cf6;border:none;">Send</button>
           </div>
         </div>
-      </section>
-
-      <!-- VIEW 7: EMAIL AUTOMATION -->
-      <section class="view-section" id="email-view">
-        <!-- Populated dynamically by email-enhanced.js -->
-      </section>
-
-      <!-- VIEW 9: INTEGRATIONS -->
-      <section class="view-section" id="integrations-view">
-        <!-- Populated dynamically by jira-integration.js -->
-      </section>
-
-      <!-- VIEW 8: SETTINGS & PROFILE (React-powered) -->
-      <section class="view-section" id="settings-view" style="padding: 0; max-width: 1200px; margin: 0 auto;">
-        <!-- React Settings Panel mounts here -->
-        <div id="settings-react-root"></div>
       </section>
 
     </main>
   </div>
+</div>
 
-  <!-- Ticket Details Drawer backdrop overlay -->
-  <div class="drawer-backdrop" id="ticket-drawer-backdrop">
-    <div class="drawer" id="ticket-drawer">
-      <div class="drawer-header">
-        <span class="drawer-title" id="drawer-ticket-id">TKT-1024</span>
-        <button class="drawer-close" id="drawer-close-btn" aria-label="Close details">
-          <svg viewBox="0 0 24 24">
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </button>
+<!-- ─── NEW TICKET MODAL ─── -->
+<div class="modal-overlay" id="new-ticket-modal" style="display:none" onclick="handleModalBgClick(event)">
+  <div class="modal" style="max-width:680px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.1);border:1px solid var(--border)" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head" style="padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px">
+      <div style="width:40px;height:40px;border-radius:8px;background:#8b5cf6;color:white;display:grid;place-items:center;flex-shrink:0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><path d="M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
       </div>
-
-      <!-- Drawer Tabs (Details / Agent Activity) -->
-      <div style="display:flex;border-bottom:1px solid var(--border-color);flex-shrink:0">
-        <button id="dtab-details" onclick="window._drawerTab('details')" data-drawer-tab="details"
-          style="padding:10px 20px;font-size:13px;font-weight:600;color:var(--accent-primary);background:transparent;border:none;border-bottom:2px solid var(--accent-primary);cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:-1px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-          Details
-        </button>
-        <button id="dtab-agent" onclick="window._drawerTab('agent')" data-drawer-tab="agent"
-          style="padding:10px 20px;font-size:13px;font-weight:600;color:var(--text-secondary);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;display:flex;align-items:center;gap:6px;margin-bottom:-1px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-          </svg>
-          Agent Activity
-        </button>
+      <div style="flex:1">
+        <div style="font-size:18px;font-weight:700;color:var(--text-primary)" id="modal-title">Create Support Ticket</div>
+        <div style="font-size:13px;color:var(--text-muted);font-weight:500" id="modal-subtitle">Step 1 of 2: Fill Ticket Details & Run AI Prediction</div>
       </div>
-
-      <!-- Details Panel (existing content) -->
-      <div id="drawer-panel-details" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden">
-        <!-- Integrated Multi-Column Layout for RAG Details Panel -->
-        <div class="drawer-content" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-          <div>
-            <h2 id="drawer-subject" style="font-size: 16px; font-weight: 700; margin-bottom: 4px;">API Authentication
-              failing in Production</h2>
-            <div style="display: flex; flex-direction: column; margin-bottom: 12px;">
-              <span id="drawer-user-name" style="font-weight: 600; font-size: 13px;">Corporate Employee</span>
-              <span id="drawer-user-email"
-                style="font-size: 11px; color: var(--text-muted);">employee@company.com</span>
-            </div>
-            <div style="display: flex; gap: 8px;" id="drawer-badges">
-              <span class="badge badge-priority-urgent">Urgent</span>
-              <span class="badge badge-status-open">Open</span>
-            </div>
-          </div>
-
-          <div>
-            <div class="drawer-section-title">Description</div>
-            <p id="drawer-desc" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);">
-              Details.
-            </p>
-          </div>
-
-          <!-- NEW: Milestone 2 Live RAG Pipeline Diagnostics Integrated Context Panel -->
-          <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 8px;">
-            <div class="drawer-section-title"
-              style="color: var(--accent-primary); display: flex; align-items: center; gap: 6px;">
-              桃 AI Resolution Generator RAG Telemetry
-            </div>
-
-            <div style="margin: 12px 0; background: var(--bg-app); padding: 12px; border-radius: 8px; font-size: 12px;">
-              <div
-                style="font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; font-size: 10px;">
-                RAG Workflow Execution Status</div>
-              <div style="display: flex; flex-direction: column; gap: 6px; color: #3b82f6; font-weight: 600;">
-                <div>鳩 1. Ticket Analysis & Query Generation</div>
-                <div>鳩 2. Knowledge Base Retrieval</div>
-                <div>鳩 3. Context Augmentation</div>
-                <div>鳩 4. Response Generation</div>
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-              <div
-                style="border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; background: var(--bg-primary);">
-                <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Retrieval Accuracy</div>
-                <div style="font-size: 16px; font-weight: 800; margin-top: 2px;">92%</div>
-              </div>
-              <div
-                style="border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; background: var(--bg-primary);">
-                <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Avg. Response Latency</div>
-                <div style="font-size: 16px; font-weight: 800; margin-top: 2px;">3.2s</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="drawer-section-title">Suggested AI Response (Augmented Context Output)</div>
-            <div
-              style="background-color: #f0f7ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 14px; font-family: monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; color: #1e40af;"
-              id="drawer-resolution-text">
-              Solution content.
-            </div>
-          </div>
-
-          <div>
-            <div class="drawer-section-title">AI Engine Classification</div>
-            <div class="ai-recommendation-box">
-              <span class="ai-box-badge" id="drawer-ai-confidence">97% Confident</span>
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <span style="font-size: 12px;"><strong>Predicted Category:</strong> <span
-                    id="drawer-ai-category">Authentication</span></span>
-                <span style="font-size: 12px;"><strong>Suggested Action:</strong> <span id="drawer-ai-dept">Engineering
-                    Department Escalation</span></span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="drawer-section-title">History timeline</div>
-            <div class="timeline-flow" id="drawer-timeline-flow">
-              <!-- Rendered dynamically -->
-            </div>
-          </div>
-
-          <div>
-            <div class="drawer-section-title">Attachments</div>
-            <div id="drawer-attachments-list" style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <!-- Rendered dynamically -->
-            </div>
-          </div>
-
-          <!-- Enterprise Integrations Card (Dynamic) -->
-          <div>
-            <div
-              style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-
-              <!-- Card Header -->
-              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                <div
-                  style="width: 24px; height: 24px; background: #1e293b; color: white; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                    <polyline points="16 18 22 12 16 6" />
-                    <polyline points="8 6 2 12 8 18" />
-                  </svg>
-                </div>
-                <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin: 0;">Enterprise Integrations</h3>
-              </div>
-
-              <!-- Integrations List -->
-              <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-                <!-- Jira -->
-                <div
-                  style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div
-                      style="width: 32px; height: 32px; background: #0052cc; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16"
-                        height="16">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <path d="M9 15l2 2 4-4" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div style="font-size: 13px; font-weight: 600; color: #1e293b;">Jira Integration</div>
-                      <div style="font-size: 11px; color: var(--text-muted);">Connected 窶｢ Last synced 2 mins ago</div>
-                    </div>
-                  </div>
-                  <span
-                    style="font-size: 11px; font-weight: 600; color: #3b82f6; background: #eff6ff; padding: 3px 8px; border-radius: 4px;">Active</span>
-                </div>
-
-                <!-- Email -->
-                <div
-                  style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div
-                      style="width: 32px; height: 32px; background: #10b981; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
-                        height="18">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                        <polyline points="22,6 12,13 2,6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div style="font-size: 13px; font-weight: 600; color: #1e293b;">Email Automation</div>
-                      <div style="font-size: 11px; color: var(--text-muted);">Connected 窶｢ 24 emails sent today</div>
-                    </div>
-                  </div>
-                  <span
-                    style="font-size: 11px; font-weight: 600; color: #3b82f6; background: #eff6ff; padding: 3px 8px; border-radius: 4px;">Active</span>
-                </div>
-              </div>
-
-              <!-- Jira Created Event -->
-              <div
-                style="background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 14px; margin-bottom: 12px;">
-                <div style="font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 10px;">Jira Ticket Created
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Ticket ID</div>
-                    <div style="font-size: 12px; font-weight: 600; color: #1e293b;" id="drawer-integ-jira-id">
-                      IT-2023-4521</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Status</div>
-                    <div style="font-size: 12px; font-weight: 600; color: #1e293b;" id="drawer-integ-jira-status">In
-                      Progress</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Assignee</div>
-                    <div style="font-size: 12px; font-weight: 600; color: #1e293b;" id="drawer-integ-jira-assignee">
-                      Network Team</div>
-                  </div>
-                  <div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 2px;">Priority</div>
-                    <div style="font-size: 12px; font-weight: 600; color: #1e293b;" id="drawer-integ-jira-priority">High
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Email Sent Event -->
-              <div
-                style="background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 0 8px 8px 0; padding: 14px;">
-                <div style="font-size: 13px; font-weight: 700; color: #047857; margin-bottom: 6px;">Email Notification
-                  Sent</div>
-                <div style="font-size: 12px; color: #065f46; line-height: 1.5;" id="drawer-integ-email-body">
-                  Your support ticket #T-2023-4521 has been received. We're working on resolving your VPN connection
-                  issue. Our AI system has identified potential solutions and assigned this to the Network Team. You'll
-                  receive updates as we progress.
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /drawer-panel-details -->
-
-      <!-- Agent Activity Panel -->
-      <div id="drawer-panel-agent" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden">
-        <div style="overflow-y:auto;flex:1;padding:0">
-          <div id="ap-panel-root"></div>
-        </div>
-      </div><!-- /drawer-panel-agent -->
-
-      <div class="drawer-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="btn btn-primary" id="btn-drawer-resolve"
-          style="flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #059669;">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M20 6L9 17l-5-5" />
-          </svg>
-          Resolve Ticket
-        </button>
-        <button class="btn btn-secondary" id="btn-drawer-escalate"
-          style="color: #dc2626; border-color: #fecaca; background: #fef2f2;">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4" />
-          </svg>
-          Escalate
-        </button>
-        <button class="btn btn-secondary" id="btn-drawer-assign">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          Reassign
-        </button>
-        <button class="btn btn-secondary" id="btn-drawer-close-ticket">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="m15 9-6 6M9 9l6 6" />
-          </svg>
-          Close
-        </button>
-      </div>
+      <button onclick="closeNewTicketModal()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-  </div>
-
-  <!-- Create New Ticket Dialog Modal (2-Step AI Prediction Workflow) -->
-  <div class="modal-backdrop" id="new-ticket-modal-backdrop">
-    <div class="modal" style="max-width: 680px; max-height: 90vh; display: flex; flex-direction: column;">
-      <div class="modal-header" style="border-bottom: 1px solid var(--border-color); padding: 18px 24px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div
-            style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white;">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M19.07 4.93l-2.83 2.83M2 12h4M18 12h4" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
+    <div class="modal-body" style="padding:24px">
+      <div id="new-ticket-msg"></div>
+      
+      <!-- STEP 1 -->
+      <form id="new-ticket-form" onsubmit="runAIPrediction(event)">
+        <div id="nt-step-1">
+        <div class="form-row" style="margin-bottom:20px;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Customer Name <span style="color:var(--danger)">*</span></label>
+            <input class="form-input" id="nt-name" type="text" placeholder="e.g. Sneh Singh" style="border-radius:8px;padding:10px 14px" required />
           </div>
-          <div>
-            <span class="modal-title" style="font-size: 17px; font-weight: 800;">Create Support Ticket</span>
-            <div id="modal-step-indicator" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Step 1 of
-              2: Fill Ticket Details &amp; Run AI Prediction</div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Customer Email <span style="color:var(--danger)">*</span></label>
+            <input class="form-input" id="nt-email" type="email" placeholder="e.g. sneh.singh@gmail.com" style="border-radius:8px;padding:10px 14px" required />
           </div>
         </div>
-        <button class="drawer-close" id="modal-close-btn" aria-label="Close dialog">
-          <svg viewBox="0 0 24 24" width="18" height="18">
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
 
-      <form id="new-ticket-form" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
-        <div class="modal-body" style="overflow-y: auto; padding: 20px 24px;">
-
-          <!-- FORM INPUTS CONTAINER -->
-          <div id="modal-form-fields">
-
-            <div class="form-group">
-              <label for="tkt-subject" style="font-weight: 600; font-size: 12px;">Subject Header <span
-                  style="color: #ef4444;">*</span></label>
-              <input type="text" class="form-control" id="tkt-subject" required
-                placeholder="e.g. VPN gateway connection timeout on office router">
-            </div>
-
-            <div class="form-group">
-              <label for="tkt-desc" style="font-weight: 600; font-size: 12px;">Detailed Description <span
-                  style="color: #ef4444;">*</span></label>
-              <textarea class="form-control" id="tkt-desc" rows="3" required
-                placeholder="Describe steps to reproduce, error codes, logs, impact..."></textarea>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group" style="flex: 1;">
-                <label for="tkt-dept" style="font-weight: 600; font-size: 12px;">Department (Optional Override)</label>
-                <select class="form-control" id="tkt-dept">
-                  <option value="">Auto-Detect via AI</option>
-                  <option value="Customer Support">Customer Support</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Billing">Billing</option>
-                  <option value="IT Security">IT Security</option>
-                </select>
-              </div>
-              <div class="form-group" style="flex: 1;">
-                <label for="tkt-category" style="font-weight: 600; font-size: 12px;">Category (Optional
-                  Override)</label>
-                <select class="form-control" id="tkt-category">
-                  <option value="">Auto-Detect via AI</option>
-                  <option value="Network">Network</option>
-                  <option value="Authentication">Authentication</option>
-                  <option value="Database Performance">Database Performance</option>
-                  <option value="Software">Software</option>
-                  <option value="Hardware">Hardware</option>
-                  <option value="Payment Issues">Payment Issues</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group" style="flex: 1;">
-                <label for="tkt-priority" style="font-weight: 600; font-size: 12px;">Priority (Optional
-                  Override)</label>
-                <select class="form-control" id="tkt-priority">
-                  <option value="">Auto-Detect via AI</option>
-                  <option value="Low">Low (P4)</option>
-                  <option value="Medium">Medium (P3)</option>
-                  <option value="High">High (P2)</option>
-                  <option value="Urgent">Urgent (P1)</option>
-                </select>
-              </div>
-              <div class="form-group" style="flex: 1;">
-                <label for="tkt-file" style="font-weight: 600; font-size: 12px;">Attachment (Optional)</label>
-                <input type="file" class="form-control" id="tkt-file" style="padding: 6px;">
-              </div>
-            </div>
-          </div>
-
-          <!-- AI PREDICTION PROCESSING STATE -->
-          <div id="ai-loading-container"
-            style="display: none; padding: 32px 16px; text-align: center; background: linear-gradient(180deg, rgba(99,102,241,0.03) 0%, rgba(139,92,246,0.08) 100%); border-radius: 12px; border: 1px dashed rgba(99,102,241,0.3); margin-top: 12px;">
-            <div
-              style="width: 48px; height: 48px; border-radius: 50%; background: white; box-shadow: 0 4px 14px rgba(99,102,241,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;">
-              <div class="loader-spinner"
-                style="width: 24px; height: 24px; border-width: 3px; border-top-color: #6366f1;"></div>
-            </div>
-            <div style="font-size: 14px; font-weight: 700; color: #4338ca;">SupportPilot AI Triage in Progress...</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="ai-loading-status-text">
-              Extracting technical entities, querying vector KB, and matching taxonomy...</div>
-          </div>
-
-          <!-- AI PREDICTION RESULTS CARD (STEP 2) -->
-          <div id="ai-prediction-card"
-            style="display: none; margin-top: 14px; background: white; border: 1px solid #e0e7ff; border-radius: 14px; padding: 18px; box-shadow: 0 10px 25px -5px rgba(99,102,241,0.1), 0 8px 10px -6px rgba(99,102,241,0.1);">
-            <div
-              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div
-                  style="width: 26px; height: 26px; border-radius: 6px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M19.07 4.93l-2.83 2.83M2 12h4M18 12h4" />
-                  </svg>
-                </div>
-                <span style="font-size: 13px; font-weight: 800; color: #1e1b4b;">AI Prediction Assessment</span>
-              </div>
-              <span id="ai-pred-confidence"
-                style="font-size: 12px; font-weight: 800; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 20px;">96%
-                Confidence</span>
-            </div>
-
-            <!-- Prediction 4-Grid -->
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px;">
-              <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                  Predicted Category</div>
-                <div id="ai-pred-category" style="font-size: 13px; font-weight: 700; color: #4338ca; margin-top: 2px;">
-                  Network</div>
-              </div>
-              <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                  Suggested Department</div>
-                <div id="ai-pred-dept" style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 2px;">
-                  Engineering</div>
-              </div>
-              <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                  Priority &amp; Severity</div>
-                <div id="ai-pred-priority" style="font-size: 13px; font-weight: 700; color: #d97706; margin-top: 2px;">
-                  High</div>
-              </div>
-              <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                  Recommended Team</div>
-                <div id="ai-pred-team" style="font-size: 13px; font-weight: 700; color: #0284c7; margin-top: 2px;">
-                  Network Operations (NetOps)</div>
-              </div>
-            </div>
-
-            <!-- Suggested Tags -->
-            <div style="margin-bottom: 12px;">
-              <div
-                style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
-                Taxonomy Tags</div>
-              <div id="ai-pred-tags" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <span class="badge" style="background: #e0e7ff; color: #4338ca; font-size: 11px;">#network</span>
-                <span class="badge" style="background: #e0e7ff; color: #4338ca; font-size: 11px;">#vpn-gateway</span>
-              </div>
-            </div>
-
-            <!-- Reasoning Analysis -->
-            <div
-              style="margin-bottom: 12px; background: #faf5ff; border-left: 3px solid #a855f7; border-radius: 0 8px 8px 0; padding: 10px 12px;">
-              <div style="font-size: 11px; font-weight: 700; color: #7e22ce; margin-bottom: 2px;">Root Cause &amp;
-                Reasoning</div>
-              <div id="ai-pred-reasoning" style="font-size: 12px; color: #581c87; line-height: 1.4;">Issue exhibits
-                network interface timeout patterns indicating gateway congestion or DNS resolution latency.</div>
-            </div>
-
-            <!-- Suggested Resolution Preview -->
-            <div
-              style="background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 0 8px 8px 0; padding: 10px 12px;">
-              <div style="font-size: 11px; font-weight: 700; color: #047857; margin-bottom: 2px;">Generated Remediation
-                Action Plan</div>
-              <div id="ai-pred-resolution"
-                style="font-size: 12px; color: #065f46; line-height: 1.4; white-space: pre-wrap; font-family: monospace;">
-                1. Reset local network adapter.\n2. Invalidate expired session tokens.</div>
-            </div>
-          </div>
-
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Subject Header <span style="color:var(--danger)">*</span></label>
+          <input class="form-input" id="nt-subject" type="text" placeholder="e.g. VPN gateway connection timeout on office router" style="border-radius:8px;padding:10px 14px" required />
         </div>
 
-        <!-- MODAL FOOTER BUTTONS -->
-        <div class="modal-footer"
-          style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-          <!-- Step 1 Actions (Initial) -->
-          <div id="modal-footer-step1" style="display: flex; justify-content: space-between; width: 100%;">
-            <button type="button" class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
-            <button type="button" class="btn btn-primary" id="btn-modal-predict"
-              style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); box-shadow: 0 4px 12px rgba(99,102,241,0.3); display: flex; align-items: center; gap: 8px;">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M19.07 4.93l-2.83 2.83M2 12h4M18 12h4" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              <span>Run AI Prediction</span>
-            </button>
-          </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Detailed Description <span style="color:var(--danger)">*</span></label>
+          <textarea class="form-textarea" id="nt-desc" placeholder="Describe steps to reproduce, error codes, logs, impact..." style="border-radius:8px;padding:10px 14px;min-height:100px" required></textarea>
+        </div>
 
-          <!-- Step 2 Actions (After AI Prediction) -->
-          <div id="modal-footer-step2"
-            style="display: none; justify-content: space-between; width: 100%; align-items: center;">
-            <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn btn-secondary" id="btn-modal-edit" style="font-size: 12px;">Edit
-                Ticket</button>
-              <button type="button" class="btn btn-secondary" id="btn-modal-repredict" style="font-size: 12px;">Run
-                Again</button>
-            </div>
-            <button type="submit" class="btn btn-primary" id="btn-modal-confirm"
-              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 8px;">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              <span>Confirm &amp; Insert Ticket</span>
-            </button>
+        <div class="form-row" style="margin-bottom:20px;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Department (Optional Override)</label>
+            <select class="form-select" id="nt-dept" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="IT">IT</option>
+              <option value="HR">HR</option>
+              <option value="Finance">Finance</option>
+              <option value="Operations">Operations</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Category (Optional Override)</label>
+            <select class="form-select" id="nt-category" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="Network">Network</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Software">Software</option>
+              <option value="Billing">Billing</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
         </div>
+
+        <div class="form-row" style="margin-bottom:0;gap:24px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Priority (Optional Override)</label>
+            <select class="form-select" id="nt-priority" style="border-radius:8px;padding:10px 14px;appearance:none;background:url('data:image/svg+xml;utf8,<svg width=\'12\' height=\'8\' viewBox=\'0 0 12 8\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M1.41 0.589966L6 5.16997L10.59 0.589966L12 1.99997L6 7.99997L0 1.99997L1.41 0.589966Z\' fill=\'%23111827\'/></svg>') no-repeat right 14px center/10px auto">
+              <option value="">Auto-Detect via AI</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" style="text-transform:none;letter-spacing:normal;font-size:13px;color:var(--text-secondary)">Attachment (Optional)</label>
+            <input class="form-input" id="nt-attachment" type="file" style="border-radius:8px;padding:7px 10px;font-size:13px" />
+          </div>
+        </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="nt-step-2" style="display:none;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px;background:var(--accent-light);border-radius:8px;border:1px solid rgba(37,99,235,0.2)">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--accent)">AI Analysis Complete</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Review the intelligent classification below before submitting.</div>
+            </div>
+          </div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Predicted Category</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-cat">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Predicted Priority</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-pri">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Severity</div>
+              <div style="font-size:14px;font-weight:700" id="ai-res-sev">—</div>
+            </div>
+            <div style="padding:14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px">Confidence Score</div>
+              <div style="font-size:14px;font-weight:700;color:var(--success)" id="ai-res-conf">—</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);background:var(--bg-input);padding:14px;border-radius:8px;border:1px solid var(--border)">
+            <strong style="color:var(--text-primary)">AI Reasoning:</strong> <span id="ai-res-reason"></span>
+          </div>
+        </div>
+
       </form>
     </div>
+    <div class="modal-foot" style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;background:var(--bg-input);border-bottom-left-radius:12px;border-bottom-right-radius:12px">
+      <button class="btn btn-ghost" onclick="closeNewTicketModal()" style="border-radius:8px;padding:10px 20px;font-weight:600">Cancel</button>
+      
+      <button class="btn btn-primary" id="nt-run-btn" onclick="runAIPrediction(event)" style="border-radius:8px;padding:10px 20px;font-weight:600;background:#8b5cf6;border:none;box-shadow:none;display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/><path d="M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/></svg>
+        Run AI Prediction
+      </button>
+
+      <button class="btn btn-primary" id="nt-submit-btn" onclick="submitNewTicket(event)" style="display:none;border-radius:8px;padding:10px 20px;font-weight:600;background:var(--success);border:none;box-shadow:none;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Confirm & Submit Ticket
+      </button>
+    </div>
   </div>
+</div>
 
-  <!-- Toast Notification Stack -->
-  <div class="toast-container" id="toast-stack-container">
-    <!-- Rendered dynamically -->
+<!-- ─── LOGOUT CONFIRM MODAL ─── -->
+<div class="modal-overlay" id="logout-modal" style="display:none" onclick="handleLogoutBgClick(event)">
+  <div class="modal" style="max-width:380px" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div style="font-size:17px;font-weight:800">Sign Out</div>
+      <button class="icon-btn" onclick="document.getElementById('logout-modal').style.display='none'" style="width:32px;height:32px;border-radius:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:24px">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--danger-light);display:grid;place-items:center;margin:0 auto 16px">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">Are you sure?</div>
+      <div style="font-size:13px;color:var(--text-muted)">You'll be signed out of SupportPilot Employee Portal.</div>
+    </div>
+    <div class="modal-foot" style="justify-content:center">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('logout-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="logout-confirm-btn" onclick="doLogout()">Yes, Sign Out</button>
+    </div>
   </div>
+</div>
 
-  <!-- React 18 + ReactDOM CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
 
-  <script src="../js/dashboard-react.js?v=22"></script>
-  <script src="../js/data.js?v=3"></script>
-  <script src="../js/tickets.js?v=21"></script>
-  <script src="../js/assistant.js?v=2"></script>
-  <script src="../js/workflow.js?v=3"></script>
-  <script src="../js/settings.js?v=3"></script>
-  <script src="../js/app.js?v=5"></script>
-  <!-- Milestone 3 Feature Modules Removed for Employee -->
-  <script>
-    // Tab switcher for ticket drawer
-    window._drawerTab = function (tab) {
-      var panels = { details: document.getElementById('drawer-panel-details'), agent: document.getElementById('drawer-panel-agent') };
-      var btns = { details: document.getElementById('dtab-details'), agent: document.getElementById('dtab-agent') };
-      Object.keys(panels).forEach(function (k) {
-        var show = k === tab;
-        panels[k].style.display = show ? 'flex' : 'none';
-        btns[k].style.color = show ? 'var(--accent-primary)' : 'var(--text-secondary)';
-        btns[k].style.borderBottom = show ? '2px solid var(--accent-primary)' : '2px solid transparent';
-      });
-    };
-  </script>
+<script>
+  /* ────────────────────────────────────────────────────────────────
+     CONSTANTS
+  ──────────────────────────────────────────────────────────────── */
+  const API = 'http://127.0.0.1:8000';
 
-  <!-- React Settings Panel Component -->
-  <script src="../js/settings-react.js"></script>
+  /* ────────────────────────────────────────────────────────────────
+     AUTH GUARD
+  ──────────────────────────────────────────────────────────────── */
+  let currentUser = null;
+  let authToken = null;
 
-  <script>
-    (function () {
-      function patchSettingsNav() {
-        const settingsNavItems = document.querySelectorAll('[data-target="profile"]');
-        if (!settingsNavItems.length) { setTimeout(patchSettingsNav, 300); return; }
+  function getSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem('sp_session')) || JSON.parse(sessionStorage.getItem('sp_session'));
+      return s;
+    } catch { return null; }
+  }
 
-        settingsNavItems.forEach(function (navEl) {
-          navEl.addEventListener('click', function () {
-            var all = document.querySelectorAll('.view-section');
-            all.forEach(function (s) { s.classList.remove('active-view'); });
-            var sv = document.getElementById('settings-view');
-            if (sv) sv.classList.add('active-view');
+  (function authGuard() {
+    const session = getSession();
+    if (!session || !session.token) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = session;
+    authToken = session.token;
+    applyUser(session);
+    loadDashboard();
+  })();
 
-            var attempts = 0;
-            (function tryMount() {
-              if (typeof window.__mountSettingsPanel === 'function') {
-                window.__mountSettingsPanel();
-              } else if (attempts++ < 20) {
-                setTimeout(tryMount, 200);
-              }
-            })();
-          });
-        });
-      }
+  function applyUser(u) {
+    const initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+    document.getElementById('sidebar-name').textContent = u.name || u.email;
+    const av = document.getElementById('sidebar-avatar');
+    av.textContent = initials;
 
-      function patchNavHighlight() {
-        document.querySelectorAll('.nav-item').forEach(function (el) {
-          el.addEventListener('click', function () {
-            document.querySelectorAll('.nav-item').forEach(function (e) { e.classList.remove('active'); });
-            el.classList.add('active');
-          });
-        });
-      }
+    // Profile section
+    document.getElementById('profile-fullname').textContent = u.name || '—';
+    document.getElementById('profile-email-disp').textContent = u.email || '—';
 
-      function patchProfileNav() {
-        var profileBtn = document.getElementById('navbar-profile-btn');
-        if (profileBtn) {
-          profileBtn.addEventListener('click', function () {
-            var settingsNav = document.querySelector('[data-target="profile"]');
-            if (settingsNav) settingsNav.click();
-          });
-        }
-      }
+    const bigAv = document.getElementById('profile-avatar-big');
+    bigAv.textContent = initials;
 
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-          patchSettingsNav();
-          patchNavHighlight();
-          patchProfileNav();
-          if (window.SupportPilotReactDashboard && typeof ReactDOM !== 'undefined') {
-            ReactDOM.createRoot(document.getElementById('dashboard-react-root')).render(React.createElement(window.SupportPilotReactDashboard));
-          }
-        });
-      } else {
-        patchSettingsNav();
-        patchNavHighlight();
-        patchProfileNav();
-        if (window.SupportPilotReactDashboard && typeof ReactDOM !== 'undefined') {
-          ReactDOM.createRoot(document.getElementById('dashboard-react-root')).render(React.createElement(window.SupportPilotReactDashboard));
-        }
-      }
-    })();
-  </script>
+    document.getElementById('p-name').value = u.name || '';
+    document.getElementById('p-email').value = u.email || '';
+    document.getElementById('p-phone').value = u.phone || '';
+    document.getElementById('p-dept').value = u.department || '';
+    document.getElementById('topbar-sub').textContent = `Welcome back, ${u.name?.split(' ')[0] || 'Employee'} 👋`;
+  }
 
-  <!-- Mobile Sidebar Menu Logic -->
-  <script>
-    (function () {
-      function isMobile() {
-        return window.innerWidth <= 768;
-      }
+  /* ────────────────────────────────────────────────────────────────
+     THEME
+  ──────────────────────────────────────────────────────────────── */
+  const DARK_SVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  const LIGHT_SVG = `<line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/><circle cx="12" cy="12" r="5"/>`;
 
-      function openMobileSidebar() {
-        document.body.classList.add('mobile-menu-open');
-        var overlay = document.getElementById('mobile-sidebar-overlay');
-        if (overlay) {
-          overlay.style.display = 'block';
-          requestAnimationFrame(function () {
-            overlay.classList.add('active');
-          });
-        }
-      }
+  let savedTheme = localStorage.getItem('sp_theme');
+  let isDark = savedTheme ? savedTheme === 'dark' : false;
+  applyTheme();
 
-      function closeMobileSidebar() {
-        document.body.classList.remove('mobile-menu-open');
-        var overlay = document.getElementById('mobile-sidebar-overlay');
-        if (overlay) {
-          overlay.classList.remove('active');
-          setTimeout(function () {
-            overlay.style.display = 'none';
-          }, 300);
-        }
-      }
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.getElementById('theme-icon').innerHTML = isDark ? LIGHT_SVG : DARK_SVG;
+    localStorage.setItem('sp_theme', isDark ? 'dark' : 'light');
+  }
+  function toggleTheme() { isDark = !isDark; applyTheme(); }
 
-      function patchMobileSidebar() {
-        var hamburger = document.getElementById('navbar-sidebar-toggle');
-        if (hamburger) {
-          hamburger.addEventListener('click', function () {
-            if (isMobile()) {
-              if (document.body.classList.contains('mobile-menu-open')) {
-                closeMobileSidebar();
-              } else {
-                openMobileSidebar();
-              }
-            }
-          });
-        }
+  /* ────────────────────────────────────────────────────────────────
+     NAVIGATION
+  ──────────────────────────────────────────────────────────────── */
+  function showSection(name) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    const nb = document.getElementById('nav-' + name);
+    if (nb) nb.classList.add('active');
 
-        var closeBtn = document.getElementById('sidebar-close-btn');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function () {
-            closeMobileSidebar();
-          });
-        }
+    const titles = { dashboard: 'Dashboard', tickets: 'My Tickets', profile: 'My Profile', assistant: 'AI Assistant' };
+    document.getElementById('topbar-title').textContent = titles[name] || name;
 
-        var overlay = document.getElementById('mobile-sidebar-overlay');
-        if (overlay) {
-          overlay.addEventListener('click', function () {
-            closeMobileSidebar();
-          });
-        }
+    if (name === 'tickets') loadTickets();
+    if (name === 'profile') loadProfile();
+    if (name === 'assistant' && window.SupportPilotAssistant) {
+      window.SupportPilotAssistant.init();
+    }
+  }
 
-        document.querySelectorAll('.nav-item').forEach(function (item) {
-          item.addEventListener('click', function () {
-            if (isMobile()) {
-              closeMobileSidebar();
-            }
-          });
-        });
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', patchMobileSidebar);
-      } else {
-        patchMobileSidebar();
-      }
-    })();
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const dockMenu = document.querySelector('.dock-menu');
-      const toggleBtn = document.getElementById('dock-toggle-btn');
-
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-          dockMenu.classList.toggle('expanded');
-        });
+  /* ────────────────────────────────────────────────────────────────
+     API HELPERS
+  ──────────────────────────────────────────────────────────────── */
+  async function apiFetch(path, opts = {}) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: {
+        'Authorization': 'Bearer ' + authToken,
+        'Content-Type': 'application/json',
+        ...(opts.headers || {})
       }
     });
-  </script>
-</body>
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('sp_session');
+      sessionStorage.removeItem('sp_session');
+      window.location.href = 'login.html';
+      return null;
+    }
+    return res;
+  }
 
+  /* ────────────────────────────────────────────────────────────────
+     DASHBOARD
+  ──────────────────────────────────────────────────────────────── */
+  async function loadDashboard() {
+    await Promise.all([loadStats(), loadRecentTickets(), loadActivity()]);
+  }
+
+  async function loadStats() {
+    try {
+      const res = await apiFetch('/api/employee/dashboard/summary');
+      if (!res || !res.ok) return;
+      const d = await res.json();
+      document.getElementById('stat-total').textContent = d.total_tickets ?? 0;
+      document.getElementById('stat-open').textContent = d.open_tickets ?? 0;
+      document.getElementById('stat-resolved').textContent = d.resolved_tickets ?? 0;
+      document.getElementById('stat-satisfaction').textContent = (d.user_satisfaction ?? 100) + '%';
+    } catch (e) {
+      console.error('Stats error:', e);
+    }
+  }
+
+  async function loadRecentTickets() {
+    const wrap = document.getElementById('recent-tickets-wrap');
+    try {
+      const res = await apiFetch('/api/employee/tickets/?limit=5');
+      if (!res || !res.ok) { wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">Could not load tickets.</div>'; return; }
+      const tickets = await res.json();
+      if (!tickets.length) {
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎫</div><div class="empty-state-title">No tickets yet</div><div class="empty-state-sub">Submit your first support request</div></div>`;
+        return;
+      }
+      wrap.innerHTML = `<div style="overflow-x:auto"><table class="ticket-table"><thead><tr><th>ID</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead><tbody>${tickets.slice(0,5).map(t => `
+        <tr>
+          <td><span class="ticket-id">TKT-${t.ticket_id}</span></td>
+          <td><span class="ticket-subject" title="${esc(t.subject)}">${esc(t.subject)}</span></td>
+          <td>${badgeHtml(t.status)}</td>
+          <td><span class="ticket-date">${fmtDate(t.created_at)}</span></td>
+        </tr>`).join('')}</tbody></table></div>`;
+    } catch(e) {
+      wrap.innerHTML = '<div style="padding:20px;text-align:center;color:var(--danger);font-size:13px">Failed to load tickets.</div>';
+    }
+  }
+
+  async function loadActivity() {
+    const el = document.getElementById('activity-list');
+    try {
+      const res = await apiFetch('/api/employee/dashboard/activity');
+      if (!res || !res.ok) { el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:12px 0">No activity data.</div>'; return; }
+      const d = await res.json();
+      const activities = d.recent_activities || [];
+      if (!activities.length) {
+        el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:12px 0">No recent activity.</div>';
+        return;
+      }
+      el.innerHTML = `<div class="activity-list">${activities.map(a => `
+        <div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <div class="activity-desc">${esc(a.description)}</div>
+            <div class="activity-time">${fmtDate(a.timestamp)}</div>
+          </div>
+        </div>`).join('')}</div>`;
+    } catch(e) {
+      el.innerHTML = '<div style="text-align:center;color:var(--danger);font-size:13px;padding:12px 0">Failed to load activity.</div>';
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     TICKETS TABLE
+  ──────────────────────────────────────────────────────────────── */
+  let allTickets = [];
+
+  async function loadTickets() {
+    const wrap = document.getElementById('tickets-table-wrap');
+    wrap.innerHTML = '<div style="padding:24px"><div class="skeleton" style="height:36px;margin-bottom:8px"></div><div class="skeleton" style="height:36px;margin-bottom:8px"></div><div class="skeleton" style="height:36px"></div></div>';
+    try {
+      const res = await apiFetch('/api/employee/tickets/?limit=100');
+      if (!res || !res.ok) { wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">Failed to load tickets.</div>'; return; }
+      allTickets = await res.json();
+      document.getElementById('tickets-count-sub').textContent = `${allTickets.length} total ticket${allTickets.length !== 1 ? 's' : ''}`;
+      renderTicketTable();
+    } catch(e) {
+      wrap.innerHTML = '<div style="padding:24px;text-align:center;color:var(--danger)">Network error.</div>';
+    }
+  }
+
+  function renderTicketTable() {
+    const statusF = document.getElementById('filter-status').value;
+    const priorityF = document.getElementById('filter-priority').value;
+    let filtered = allTickets.filter(t => {
+      if (statusF && t.status !== statusF) return false;
+      if (priorityF && t.priority !== priorityF) return false;
+      return true;
+    });
+
+    const wrap = document.getElementById('tickets-table-wrap');
+    if (!filtered.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎫</div><div class="empty-state-title">No tickets found</div><div class="empty-state-sub">Try adjusting your filters, or submit a new ticket.</div></div>`;
+      return;
+    }
+
+    wrap.innerHTML = `<div style="overflow-x:auto"><table class="ticket-table">
+      <thead><tr><th>ID</th><th>Subject</th><th>Dept</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead>
+      <tbody>${filtered.map(t => `
+        <tr>
+          <td><span class="ticket-id">TKT-${t.ticket_id}</span></td>
+          <td><span class="ticket-subject" title="${esc(t.subject)}">${esc(t.subject)}</span></td>
+          <td style="font-size:12px;color:var(--text-muted);font-weight:600">${esc(t.department || '—')}</td>
+          <td>${priorityBadge(t.priority)}</td>
+          <td>${badgeHtml(t.status)}</td>
+          <td><span class="ticket-date">${fmtDate(t.created_at)}</span></td>
+        </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     NEW TICKET MODAL
+  ──────────────────────────────────────────────────────────────── */
+  function openNewTicketModal() {
+    document.getElementById('new-ticket-form').reset();
+    document.getElementById('new-ticket-msg').innerHTML = '';
+    
+    // Pre-fill Name and Email
+    if (currentUser) {
+      document.getElementById('nt-name').value = currentUser.name || '';
+      document.getElementById('nt-email').value = currentUser.email || '';
+    }
+
+    // Reset UI to step 1
+    document.getElementById('nt-step-1').style.display = 'block';
+    document.getElementById('nt-step-2').style.display = 'none';
+    document.getElementById('nt-run-btn').style.display = 'flex';
+    document.getElementById('nt-submit-btn').style.display = 'none';
+    document.getElementById('modal-subtitle').textContent = 'Step 1 of 2: Fill Ticket Details & Run AI Prediction';
+
+    document.getElementById('new-ticket-modal').style.display = 'flex';
+  }
+  function closeNewTicketModal() {
+    document.getElementById('new-ticket-modal').style.display = 'none';
+  }
+  function handleModalBgClick(e) {
+    if (e.target === e.currentTarget) closeNewTicketModal();
+  }
+
+  async function runAIPrediction(e) {
+    e.preventDefault();
+    const subject = document.getElementById('nt-subject').value.trim();
+    const desc = document.getElementById('nt-desc').value.trim();
+    const reqName = document.getElementById('nt-name').value.trim();
+    const reqEmail = document.getElementById('nt-email').value.trim();
+
+    if (!subject || !desc || !reqName || !reqEmail) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Please fill in all required fields.</div>`;
+      return;
+    }
+
+    const btn = document.getElementById('nt-run-btn');
+    btn.disabled = true;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('new-ticket-msg').innerHTML = '';
+
+    try {
+      const res = await apiFetch('/api/employee/ai/triage', {
+        method: 'POST',
+        body: JSON.stringify({ title: subject, description: desc })
+      });
+
+      if (res && res.ok) {
+        const aiData = await res.json();
+        
+        // Show AI data in UI
+        document.getElementById('ai-res-cat').textContent = aiData.category || 'Unknown';
+        document.getElementById('ai-res-pri').textContent = aiData.priority || 'Unknown';
+        document.getElementById('ai-res-sev').textContent = aiData.severity || 'Unknown';
+        document.getElementById('ai-res-conf').textContent = aiData.confidence_score ? (aiData.confidence_score * 100).toFixed(0) + '%' : 'N/A';
+        document.getElementById('ai-res-reason').textContent = aiData.reasoning_summary || 'Analyzed successfully.';
+
+        // Switch to Step 2
+        document.getElementById('nt-step-1').style.display = 'none';
+        document.getElementById('nt-step-2').style.display = 'block';
+        document.getElementById('nt-run-btn').style.display = 'none';
+        document.getElementById('nt-submit-btn').style.display = 'flex';
+        document.getElementById('modal-subtitle').textContent = 'Step 2 of 2: Review AI Classification & Submit';
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to run AI prediction.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Network error during AI prediction.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+    }
+  }
+
+  async function submitNewTicket(e) {
+    e.preventDefault();
+    const subject = document.getElementById('nt-subject').value.trim();
+    const desc = document.getElementById('nt-desc').value.trim();
+    const dept = document.getElementById('nt-dept').value || null;
+    const reqName = document.getElementById('nt-name').value.trim();
+    const reqEmail = document.getElementById('nt-email').value.trim();
+
+    const btn = document.getElementById('nt-submit-btn');
+    btn.disabled = true;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('new-ticket-msg').innerHTML = '';
+
+    try {
+      const payload = {
+        subject,
+        description: desc,
+        requester_email: reqEmail,
+        requester_name: reqName
+      };
+      if (dept) payload.department = dept;
+
+      const res = await apiFetch('/api/employee/tickets/', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (res && res.ok) {
+        closeNewTicketModal();
+        showToast('Ticket submitted successfully! 🎉', 'success');
+        await loadDashboard();
+        if (document.getElementById('section-tickets').classList.contains('active')) loadTickets();
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to submit ticket.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('new-ticket-msg').innerHTML = `<div class="alert alert-error">Network error.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = oldHtml;
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     PROFILE
+  ──────────────────────────────────────────────────────────────── */
+  async function loadProfile() {
+    try {
+      const res = await apiFetch('/api/employee/profile');
+      if (!res || !res.ok) return;
+      const d = await res.json();
+      const u = d.user || d;
+      document.getElementById('p-name').value = u.name || '';
+      document.getElementById('p-email').value = u.email || '';
+      document.getElementById('p-phone').value = u.phone || '';
+      document.getElementById('p-dept').value = u.department || '';
+      document.getElementById('profile-fullname').textContent = u.name || '—';
+      document.getElementById('profile-email-disp').textContent = u.email || '—';
+      const initials = (u.name || u.email || '?').charAt(0).toUpperCase();
+      document.getElementById('profile-avatar-big').textContent = initials;
+    } catch(e) { console.error('Profile load error:', e); }
+  }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    const btn = document.getElementById('profile-save-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    document.getElementById('profile-msg').innerHTML = '';
+
+    try {
+      const res = await apiFetch('/api/employee/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          name: document.getElementById('p-name').value.trim(),
+          phone: document.getElementById('p-phone').value.trim(),
+          department: document.getElementById('p-dept').value.trim()
+        })
+      });
+
+      if (res && res.ok) {
+        const d = await res.json();
+        const u = d.user || d;
+        // Update session
+        currentUser = { ...currentUser, name: u.name, phone: u.phone, department: u.department };
+        const sessionKey = localStorage.getItem('sp_session') ? 'sp_session' : null;
+        if (sessionKey) localStorage.setItem('sp_session', JSON.stringify({ ...currentUser, token: authToken }));
+        else sessionStorage.setItem('sp_session', JSON.stringify({ ...currentUser, token: authToken }));
+
+        applyUser(currentUser);
+        document.getElementById('profile-msg').innerHTML = `<div class="alert alert-success">Profile updated successfully!</div>`;
+        showToast('Profile saved!', 'success');
+        setTimeout(() => { document.getElementById('profile-msg').innerHTML = ''; }, 3000);
+      } else {
+        const err = res ? await res.json() : {};
+        document.getElementById('profile-msg').innerHTML = `<div class="alert alert-error">${esc(err.detail || 'Failed to save profile.')}</div>`;
+      }
+    } catch(e) {
+      document.getElementById('profile-msg').innerHTML = `<div class="alert alert-error">Network error.</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Save Changes';
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     LOGOUT
+  ──────────────────────────────────────────────────────────────── */
+  function confirmLogout() {
+    document.getElementById('logout-modal').style.display = 'flex';
+  }
+  function handleLogoutBgClick(e) {
+    if (e.target === e.currentTarget) document.getElementById('logout-modal').style.display = 'none';
+  }
+
+  async function doLogout() {
+    const btn = document.getElementById('logout-confirm-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    try {
+      await apiFetch('/api/employee/auth/logout', { method: 'POST' });
+    } catch(e) {}
+    localStorage.removeItem('sp_session');
+    sessionStorage.removeItem('sp_session');
+    window.location.href = 'login.html';
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     TOAST
+  ──────────────────────────────────────────────────────────────── */
+  function showToast(msg, type = '') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 3000);
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     UTILS
+  ──────────────────────────────────────────────────────────────── */
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function fmtDate(ds) {
+    if (!ds) return '—';
+    try {
+      const d = new Date(ds);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch { return ds; }
+  }
+
+  function badgeHtml(status) {
+    const s = (status || 'open').toLowerCase().replace(' ', '_');
+    const labels = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', closed: 'Closed', escalated: 'Escalated', pending: 'Pending' };
+    return `<span class="badge badge-${s}">${labels[s] || status}</span>`;
+  }
+
+  function priorityBadge(priority) {
+    const p = (priority || 'medium').toLowerCase();
+    return `<span class="badge badge-${p}">${priority || 'Medium'}</span>`;
+  }
+</script>
+<script src="../js/assistant.js"></script>
+</body>
 </html>

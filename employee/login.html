@@ -1132,12 +1132,16 @@
     /* ─── Root App ──────────────────────────────────────────── */
     function App() {
       const [view, setView] = useState('login');
-      const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const [dark, setDark] = useState(() => {
+        const saved = localStorage.getItem('sp_theme');
+        return saved ? saved === 'dark' : false;
+      });
       const [user, setUser] = useState(null);
       const [animKey, setAnimKey] = useState(0);
 
       useEffect(() => {
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        localStorage.setItem('sp_theme', dark ? 'dark' : 'light');
       }, [dark]);
 
       useEffect(() => {
