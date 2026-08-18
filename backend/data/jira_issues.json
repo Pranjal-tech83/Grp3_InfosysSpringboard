@@ -1,5 +1,43 @@
 [
   {
+    "id": "jira-7-3573",
+    "ticket_id": 7,
+    "ticket_code": "TKT-7",
+    "jira_key": "SEC-3573",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "ARYAN",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-18T21:00:49.397509+00:00",
+    "last_updated": "2026-08-18T21:00:49.397509+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 1263,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-3573",
+    "comments": [
+      {
+        "id": "c-auto-788",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-7 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-18T21:00:49.397509+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-18T21:00:49.397509+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-3573 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
     "id": "jira-6-1760",
     "ticket_id": 6,
     "ticket_code": "TKT-6",
