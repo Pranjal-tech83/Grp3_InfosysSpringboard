@@ -73,6 +73,7 @@
 - **Retrieval Agent (RAG)**: Queries vector store and corporate knowledge base to extract matching runbooks and past solutions.
 - **Resolution Agent**: Synthesizes structured remediation steps with actionable recovery guides.
 - **Escalation Agent**: Monitors SLA breach risks and coordinates Jira syncing & team notifications.
+- **Smart IT Helpdesk Assistant**: Integrated interactive chatbot in both admin and employee dashboards for real-time troubleshooting, network remediation, and ticket escalation.
 
 </td>
 <td width="50%" valign="top">
