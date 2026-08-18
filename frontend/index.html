@@ -5,64 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SupportPilot - AI Ticket Resolution Platform</title>
-  <script>
-    // --- Admin Authentication Check & Fetch Interceptor ---
-    (function() {
-        let session = null;
-        try {
-            session = JSON.parse(localStorage.getItem('sp_session') || sessionStorage.getItem('sp_session'));
-        } catch (e) {}
-
-        if (!session || !session.token) {
-            window.location.href = 'login.html';
-        } else {
-            // Intercept fetch to add Authorization header
-            const originalFetch = window.fetch;
-            window.fetch = async function() {
-                let [resource, config] = arguments;
-                if (typeof resource === 'string' && resource.includes('/api/')) {
-                    config = config || {};
-                    config.headers = config.headers || {};
-                    if (config.headers instanceof Headers) {
-                        config.headers.append('Authorization', 'Bearer ' + session.token);
-                    } else {
-                        config.headers['Authorization'] = 'Bearer ' + session.token;
-                    }
-                }
-                const response = await originalFetch(resource, config);
-                if (response.status === 401 || response.status === 403) {
-                    localStorage.removeItem('sp_session');
-                    sessionStorage.removeItem('sp_session');
-                    window.location.href = 'login.html';
-                }
-                return response;
-            };
-        }
-        
-        // Handle logout
-        document.addEventListener('click', function(e) {
-            const btn = e.target.closest('#sidebar-logout-btn') || e.target.closest('#logout-btn');
-            if (btn) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (session && session.token) {
-                    fetch('http://127.0.0.1:8000/api/admin/auth/logout', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + session.token }
-                    }).finally(() => {
-                        localStorage.removeItem('sp_session');
-                        sessionStorage.removeItem('sp_session');
-                        window.location.href = 'login.html';
-                    });
-                } else {
-                    localStorage.removeItem('sp_session');
-                    sessionStorage.removeItem('sp_session');
-                    window.location.href = 'login.html';
-                }
-            }
-        });
-    })();
-  </script>
   <link rel="stylesheet" href="css/styles.css?v=14">
   <style>
     .dock-menu {
@@ -319,7 +261,7 @@
           </div>
           <span class="dock-name">Settings</span>
         </div>
-        
+
         <!-- Spacer to push logout to bottom if needed, or just let it sit at the end -->
         <div style="flex: 1;"></div>
 
