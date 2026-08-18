@@ -1,0 +1,9 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.35
+pydantic[email]==2.9.2
+python-dotenv==1.0.1
+ollama==0.6.2
+pyjwt>=2.8.0
+passlib[bcrypt]>=1.7.4
+brevo-python>=3.0.0
