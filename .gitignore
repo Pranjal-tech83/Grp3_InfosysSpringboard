@@ -2,3 +2,4 @@ venv/
 Ticket-Management/supportpilot.db
 supportpilot.db
 **/__pycache__/
+.env 
