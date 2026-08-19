@@ -62,11 +62,21 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Wide-open CORS for development so the frontend (running on a different
-# port) can call this API freely. Tighten allow_origins before production.
+# CORS: browsers block allow_origins=["*"] when allow_credentials=True.
+# List every frontend origin explicitly instead.
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5500",   # Live Server / VS Code
+    "http://localhost:5500",
+    # ⬇️  Replace this with your actual Vercel deployment URL
+    "https://grp3-infosys-springboard.vercel.app",
+    "https://grp3-infosysspringboard.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
