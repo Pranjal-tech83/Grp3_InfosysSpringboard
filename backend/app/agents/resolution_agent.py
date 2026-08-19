@@ -36,7 +36,7 @@ from langgraph.graph import StateGraph, END
 # ---------------------------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------------------------
-API_BASE_URL = "http://127.0.0.1:8000"      # Backend FastAPI server endpoint
+API_BASE_URL = "https://grp3-infosysspringboard.onrender.com"      # Backend FastAPI server endpoint
 LLM_MODEL = "llama3.2"                       # Local Ollama LLM model
 CONFIDENCE_THRESHOLD = 0.65                  # Auto-resolution score boundary
 

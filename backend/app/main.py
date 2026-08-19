@@ -72,6 +72,7 @@ ALLOWED_ORIGINS = [
     # ⬇️  Replace this with your actual Vercel deployment URL
     "https://grp3-infosys-springboard.vercel.app",
     "https://grp3-infosysspringboard.vercel.app",
+    "https://grp3-infosysspringboard.onrender.com",
 ]
 
 app.add_middleware(

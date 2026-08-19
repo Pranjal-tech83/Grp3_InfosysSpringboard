@@ -1,5 +1,43 @@
 [
   {
+    "id": "jira-17-9550",
+    "ticket_id": 17,
+    "ticket_code": "TKT-17",
+    "jira_key": "SEC-9550",
+    "project_key": "SEC",
+    "issue_type": "Task",
+    "summary": "password issue",
+    "description": "test",
+    "status": "Open",
+    "priority": "Medium",
+    "severity": "Medium",
+    "assigned_team": "Identity & Access / SecOps",
+    "assignee": "Marcus Brody (SecOps Lead)",
+    "reporter_name": "ARYAN",
+    "reporter_email": "roman838303@gmail.com",
+    "created_at": "2026-08-19T17:16:08.968393+00:00",
+    "last_updated": "2026-08-19T17:16:08.968393+00:00",
+    "sync_status": "Synced",
+    "sync_latency_ms": 840,
+    "jira_url": "https://supportpilot.atlassian.net/browse/SEC-9550",
+    "comments": [
+      {
+        "id": "c-auto-160",
+        "author": "SupportPilot Jira Engine",
+        "content": "Ticket TKT-17 ingested. Automatically assigned to Identity & Access / SecOps (Marcus Brody (SecOps Lead)).",
+        "created_at": "2026-08-19T17:16:08.968393+00:00"
+      }
+    ],
+    "sync_history": [
+      {
+        "event": "Created in Jira",
+        "timestamp": "2026-08-19T17:16:08.968393+00:00",
+        "status": "201 Created",
+        "detail": "Issue SEC-9550 created with intelligent team assignment: Identity & Access / SecOps"
+      }
+    ]
+  },
+  {
     "id": "jira-16-5075",
     "ticket_id": 16,
     "ticket_code": "TKT-16",
@@ -2674,56 +2712,6 @@
         "timestamp": "2026-08-08T15:03:12.542093+00:00",
         "status": "201 Created",
         "detail": "Comment posted by SupportPilot Operator"
-      }
-    ]
-  },
-  {
-    "id": "jira-17-1805",
-    "ticket_id": 17,
-    "ticket_code": "TKT-17",
-    "jira_key": "NET-1805",
-    "project_key": "NET",
-    "issue_type": "Incident",
-    "summary": "critacal vpn authentication loop failure",
-    "description": "test",
-    "status": "Resolved",
-    "priority": "Medium",
-    "severity": "P3",
-    "assigned_team": "Network Support Team",
-    "assignee": "Alex Rivera (NetOps Lead)",
-    "reporter_name": "roman",
-    "reporter_email": "roman838303@gmail.com",
-    "created_at": "2026-08-07T17:10:26.496121+00:00",
-    "last_updated": "2026-08-08T10:23:14.748657+00:00",
-    "sync_status": "Synced",
-    "sync_latency_ms": 795,
-    "jira_url": "https://supportpilot.atlassian.net/browse/NET-1805",
-    "comments": [
-      {
-        "id": "c-auto-717",
-        "author": "SupportPilot Jira Engine",
-        "content": "Ticket TKT-17 ingested. Automatically assigned to Network Support Team (Alex Rivera (NetOps Lead)).",
-        "created_at": "2026-08-07T17:10:26.496121+00:00"
-      }
-    ],
-    "sync_history": [
-      {
-        "event": "Created in Jira",
-        "timestamp": "2026-08-07T17:10:26.496121+00:00",
-        "status": "201 Created",
-        "detail": "Issue NET-1805 created with intelligent team assignment: Network Support Team"
-      },
-      {
-        "event": "Status Updated: Resolved",
-        "timestamp": "2026-08-07T17:31:52.408535+00:00",
-        "status": "200 OK",
-        "detail": "Status set to Resolved by Operator"
-      },
-      {
-        "event": "Bulk Synchronization",
-        "timestamp": "2026-08-08T10:23:14.748657+00:00",
-        "status": "200 OK",
-        "detail": "Bulk batch synchronization verified"
       }
     ]
   },

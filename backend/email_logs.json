@@ -4053,5 +4053,41 @@
         "detail": "Accepted by Brevo. Message ID: <202608191633.39713788020@smtp-relay.mailin.fr>"
       }
     ]
+  },
+  {
+    "id": "EML-40E974",
+    "to": "roman838303@gmail.com",
+    "recipient_name": "ARYAN",
+    "from": "Support Pilot <theman838303@gmail.com>",
+    "subject": "RECEIVED: We received your support request - password issue",
+    "ticket_id": "TKT-17",
+    "ticket_status": "open",
+    "event_type": "created",
+    "body": "Dear ARYAN,\n\nThank you for contacting SupportPilot. We have received your support request:\n\n\u2022 Ticket ID: TKT-17\n\u2022 Subject: password issue\n\u2022 Department: General Support\n\nOur AI diagnostic agents are actively analyzing your issue and generating remediation steps. You can monitor live progress directly in the SupportPilot portal.\n\nBest regards,\nSupportPilot Automated Support Team",
+    "status": "Delivered",
+    "brevo_message_id": "<202608191716.46395453543@smtp-relay.mailin.fr>",
+    "error": null,
+    "created_at": "2026-08-19T17:16:06.607504+00:00",
+    "sent_at": "2026-08-19T17:16:06.607504+00:00",
+    "delivered_at": "2026-08-19T17:16:06.607504+00:00",
+    "opened_at": null,
+    "attachments": [],
+    "timeline": [
+      {
+        "stage": "Generated",
+        "time": "2026-08-19T17:16:06.607504+00:00",
+        "detail": "Automated email triggered by ticket event: created."
+      },
+      {
+        "stage": "Routed",
+        "time": "2026-08-19T17:16:06.607504+00:00",
+        "detail": "Brevo transactional email API called."
+      },
+      {
+        "stage": "Delivered",
+        "time": "2026-08-19T17:16:06.607504+00:00",
+        "detail": "Accepted by Brevo. Message ID: <202608191716.46395453543@smtp-relay.mailin.fr>"
+      }
+    ]
   }
 ]

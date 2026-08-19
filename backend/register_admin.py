@@ -1,6 +1,6 @@
 import requests
 
-res_admin = requests.post("http://127.0.0.1:8000/api/admin/auth/register", json={
+res_admin = requests.post("https://grp3-infosysspringboard.onrender.com/api/admin/auth/register", json={
     "name": "Pranjal", 
     "email": "theman838303@gmail.com", 
     "password": "Pranjal@"
