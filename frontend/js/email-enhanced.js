@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = 'https://grp3-infosysspringboard.onrender.com';
 
   // ── State ─────────────────────────────────────────────────────────────────
   let emails = [];
@@ -1113,7 +1113,7 @@
   // ── Real-Time WebSockets & Listeners ──────────────────────────────────────
   function initWebSocket() {
     try {
-      const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:8000/ws/dashboard`;
+      const wsUrl = `wss://grp3-infosysspringboard.onrender.com/ws/dashboard`;
       socket = new WebSocket(wsUrl);
 
       socket.onmessage = function (event) {

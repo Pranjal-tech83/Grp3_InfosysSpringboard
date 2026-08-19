@@ -14,7 +14,7 @@
     if (window.location.origin && window.location.origin.includes('8000')) {
       return window.location.origin;
     }
-    return 'http://127.0.0.1:8000';
+    return 'https://grp3-infosysspringboard.onrender.com';
   }
 
   function formatMediaUrl(url) {
