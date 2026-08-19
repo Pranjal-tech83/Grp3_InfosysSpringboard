@@ -60,15 +60,18 @@ async def triage_ticket(ticket: TicketInput):
         # Parse output safely through structural schema contract verification
         result = TicketClassificationResponse.model_validate_json(raw_content.strip())
         
-        # Commit record directly into local SQLite storage table
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO tickets (timestamp, title, description, category, severity, confidence_score, reasoning) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ticket.title, ticket.description, result.category, result.severity, result.confidence_score, result.reasoning_summary)
-        )
-        conn.commit()
-        conn.close()
+        # Commit record directly into local SQLite storage table (optional log)
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO tickets (timestamp, title, description, category, severity, confidence_score, reasoning) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), ticket.title, ticket.description, result.category, result.severity, result.confidence_score, result.reasoning_summary)
+            )
+            conn.commit()
+            conn.close()
+        except Exception as db_err:
+            print(f"[Triage DB Logging Warning] Failed to log triage attempt to local SQLite: {db_err}")
         
         return result
         

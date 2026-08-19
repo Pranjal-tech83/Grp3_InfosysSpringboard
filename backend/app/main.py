@@ -73,6 +73,7 @@ ALLOWED_ORIGINS = [
     "https://grp3-infosys-springboard.vercel.app",
     "https://grp3-infosysspringboard.vercel.app",
     "https://grp3-infosysspringboard.onrender.com",
+    "null",  # Allows local files opened via file:// protocol in the browser
 ]
 
 app.add_middleware(
@@ -84,6 +85,7 @@ app.add_middleware(
 )
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 
 admin_deps = [Depends(require_role(Role.ADMIN))]
 
@@ -160,3 +162,10 @@ class EmailPayload(BaseModel):
 @app.get("/", tags=["Health"])
 def health_check():
     return {"status": "ok", "service": "SupportPilot API"}
+
+
+# Serve the static frontend directly from the backend for easy local testing
+if os.path.exists("../frontend"):
+    app.mount("/frontend", StaticFiles(directory="../frontend", html=True), name="frontend")
+elif os.path.exists("frontend"):
+    app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")

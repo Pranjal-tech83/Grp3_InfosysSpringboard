@@ -395,7 +395,8 @@
     const rawId = ticket.rawId || ticket.id?.replace(/\D/g, '');
     if (rawId) {
       try {
-        const res = await fetch(`https://grp3-infosysspringboard.onrender.com/api/agents/${rawId}`);
+        const baseUrl = window.API_BASE_URL || 'https://grp3-infosysspringboard.onrender.com';
+        const res = await fetch(`${baseUrl}/api/agents/${rawId}`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.stages) {

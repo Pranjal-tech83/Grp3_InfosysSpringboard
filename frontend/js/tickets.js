@@ -1,6 +1,8 @@
 // tickets.js - Modern Enterprise AI Ticket Management System
 // Connected to FastAPI backend with 2-step AI Prediction, Live RAG Telemetry, Integrations & Multi-Agent Execution
 
+const API_BASE = window.API_BASE_URL || "https://grp3-infosysspringboard.onrender.com";
+
 let currentTickets = [];
 let tableState = {
   searchQuery: "",
@@ -138,7 +140,7 @@ async function fetchLiveTickets(isBackground = false) {
   }
 
   try {
-    const response = await fetch("https://grp3-infosysspringboard.onrender.com/api/tickets?limit=500");
+    const response = await fetch(`${API_BASE}/api/tickets?limit=500`);
     if (response.ok) {
       const backendTickets = await response.json();
       if (backendTickets && Array.isArray(backendTickets)) {
@@ -633,7 +635,7 @@ async function handleRunAIPrediction(e) {
   }, 700);
 
   try {
-    const triageRes = await fetch("https://grp3-infosysspringboard.onrender.com/api/triage", {
+    const triageRes = await fetch(`${API_BASE}/api/triage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -735,7 +737,7 @@ async function handleNewTicketConfirmSubmit(e) {
 
   try {
     // 1. Create in backend DB
-    const createRes = await fetch("https://grp3-infosysspringboard.onrender.com/api/tickets", {
+    const createRes = await fetch(`${API_BASE}/api/tickets`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -752,7 +754,7 @@ async function handleNewTicketConfirmSubmit(e) {
     const newId = `TKT-${createdTicket.ticket_id}`;
 
     // 2. Patch with full AI classification taxonomy & resolution
-    await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${createdTicket.ticket_id}/classification`, {
+    await fetch(`${API_BASE}/api/tickets/${createdTicket.ticket_id}/classification`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1001,7 +1003,7 @@ async function handleDrawerResolve() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${rawId}/status`, {
+      await fetch(`${API_BASE}/api/tickets/${rawId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1017,7 +1019,7 @@ async function handleDrawerResolve() {
   // Send Email Notification
   const recipientEmail = ticket.user?.email || "22snehs@gmail.com";
   try {
-    await fetch("https://grp3-infosysspringboard.onrender.com/api/email/send", {
+    await fetch(`${API_BASE}/api/email/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1064,7 +1066,7 @@ async function handleDrawerEscalate() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch("https://grp3-infosysspringboard.onrender.com/api/escalate", {
+      await fetch(`${API_BASE}/api/escalate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1112,7 +1114,7 @@ async function handleDrawerAssign() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch("https://grp3-infosysspringboard.onrender.com/api/reassign", {
+      await fetch(`${API_BASE}/api/reassign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1157,7 +1159,7 @@ async function handleDrawerCloseTicket() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${rawId}/status`, {
+      await fetch(`${API_BASE}/api/tickets/${rawId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Closed", resolution_notes: "Closed by user." })

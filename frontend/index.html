@@ -46,7 +46,8 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (session && session.token) {
-                    fetch('https://grp3-infosysspringboard.onrender.com/api/admin/auth/logout', {
+                    const baseUrl = window.API_BASE_URL || 'https://grp3-infosysspringboard.onrender.com';
+                    fetch(`${baseUrl}/api/admin/auth/logout`, {
                         method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + session.token }
                     }).finally(() => {
@@ -1266,6 +1267,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
+  <script src="js/config.js"></script>
   <script src="js/dashboard-react.js?v=22"></script>
   <script src="js/data.js?v=3"></script>
   <script src="js/tickets.js?v=21"></script>

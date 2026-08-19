@@ -11,6 +11,7 @@
   var useRef = R.useRef;
 
   function getApiBase() {
+    if (window.API_BASE_URL) return window.API_BASE_URL;
     if (window.location.origin && window.location.origin.includes('8000')) {
       return window.location.origin;
     }

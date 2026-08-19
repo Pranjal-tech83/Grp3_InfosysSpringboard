@@ -8,3 +8,5 @@ pyjwt>=2.8.0
 passlib[bcrypt]>=1.7.4
 brevo-python>=3.0.0
 python-multipart
+psycopg2-binary>=2.9.9
+

@@ -12,6 +12,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="js/config.js"></script>
 
   <style>
     :root {
@@ -750,8 +751,9 @@
 
       const isEmployee = role === 'employee';
       const heading = isSignup ? 'Create Employee Account' : (isEmployee ? 'Welcome Back, Employee' : 'Welcome Back, Admin');
-      const loginUrl = isEmployee ? 'https://grp3-infosysspringboard.onrender.com/api/employee/auth/login' : 'https://grp3-infosysspringboard.onrender.com/api/admin/auth/login';
-      const registerUrl = 'https://grp3-infosysspringboard.onrender.com/api/employee/auth/register';
+      const baseUrl = window.API_BASE_URL || 'https://grp3-infosysspringboard.onrender.com';
+      const loginUrl = isEmployee ? `${baseUrl}/api/employee/auth/login` : `${baseUrl}/api/admin/auth/login`;
+      const registerUrl = `${baseUrl}/api/employee/auth/register`;
 
       const handleSubmit = async (e) => {
         e.preventDefault();

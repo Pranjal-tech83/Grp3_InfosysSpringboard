@@ -1592,11 +1592,12 @@
   <!-- TOAST -->
   <div class="toast-container" id="toast-container"></div>
 
+  <script src="../js/config.js"></script>
   <script>
     /* ────────────────────────────────────────────────────────────────
        CONSTANTS
     ──────────────────────────────────────────────────────────────── */
-    const API = 'https://grp3-infosysspringboard.onrender.com';
+    const API = window.API_BASE_URL || 'https://grp3-infosysspringboard.onrender.com';
 
     /* ────────────────────────────────────────────────────────────────
        AUTH GUARD

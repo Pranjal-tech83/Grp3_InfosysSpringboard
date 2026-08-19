@@ -8,7 +8,8 @@ let currentEmails = [];
  */
 async function initEmailModule() {
   try {
-    const response = await fetch("https://grp3-infosysspringboard.onrender.com/api/email/logs");
+    const baseUrl = window.API_BASE_URL || "https://grp3-infosysspringboard.onrender.com";
+    const response = await fetch(`${baseUrl}/api/email/logs`);
     if (response.ok) {
       const liveEmails = await response.json();
       if (liveEmails && liveEmails.length > 0) {
