@@ -750,8 +750,8 @@
 
       const isEmployee = role === 'employee';
       const heading = isSignup ? 'Create Employee Account' : (isEmployee ? 'Welcome Back, Employee' : 'Welcome Back, Admin');
-      const loginUrl = isEmployee ? 'https://grp3-infosysspringboard.onrender.com/api/employee/auth/login' : 'https://grp3-infosysspringboard.onrender.com/api/admin/auth/login';
-      const registerUrl = 'https://grp3-infosysspringboard.onrender.com/api/employee/auth/register';
+      const loginUrl = isEmployee ? 'http://127.0.0.1:8000/api/employee/auth/login' : 'http://127.0.0.1:8000/api/admin/auth/login';
+      const registerUrl = 'http://127.0.0.1:8000/api/employee/auth/register';
 
       const handleSubmit = async (e) => {
         e.preventDefault();
