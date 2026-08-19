@@ -138,7 +138,7 @@ async function fetchLiveTickets(isBackground = false) {
   }
 
   try {
-    const response = await fetch("https://grp3-infosysspringboard.onrender.com/api/tickets?limit=500");
+    const response = await fetch("http://127.0.0.1:8000/api/tickets?limit=500");
     if (response.ok) {
       const backendTickets = await response.json();
       if (backendTickets && Array.isArray(backendTickets)) {
@@ -633,7 +633,7 @@ async function handleRunAIPrediction(e) {
   }, 700);
 
   try {
-    const triageRes = await fetch("https://grp3-infosysspringboard.onrender.com/api/triage", {
+    const triageRes = await fetch("http://127.0.0.1:8000/api/triage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -735,7 +735,7 @@ async function handleNewTicketConfirmSubmit(e) {
 
   try {
     // 1. Create in backend DB
-    const createRes = await fetch("https://grp3-infosysspringboard.onrender.com/api/tickets", {
+    const createRes = await fetch("http://127.0.0.1:8000/api/tickets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -752,7 +752,7 @@ async function handleNewTicketConfirmSubmit(e) {
     const newId = `TKT-${createdTicket.ticket_id}`;
 
     // 2. Patch with full AI classification taxonomy & resolution
-    await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${createdTicket.ticket_id}/classification`, {
+    await fetch(`http://127.0.0.1:8000/api/tickets/${createdTicket.ticket_id}/classification`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1001,7 +1001,7 @@ async function handleDrawerResolve() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${rawId}/status`, {
+      await fetch(`http://127.0.0.1:8000/api/tickets/${rawId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1017,7 +1017,7 @@ async function handleDrawerResolve() {
   // Send Email Notification
   const recipientEmail = ticket.user?.email || "22snehs@gmail.com";
   try {
-    await fetch("https://grp3-infosysspringboard.onrender.com/api/email/send", {
+    await fetch("http://127.0.0.1:8000/api/email/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1064,7 +1064,7 @@ async function handleDrawerEscalate() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch("https://grp3-infosysspringboard.onrender.com/api/escalate", {
+      await fetch("http://127.0.0.1:8000/api/escalate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1112,7 +1112,7 @@ async function handleDrawerAssign() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch("https://grp3-infosysspringboard.onrender.com/api/reassign", {
+      await fetch("http://127.0.0.1:8000/api/reassign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1157,7 +1157,7 @@ async function handleDrawerCloseTicket() {
   const rawId = ticket.rawId || ticket.id.replace(/\D/g, '');
   if (rawId) {
     try {
-      await fetch(`https://grp3-infosysspringboard.onrender.com/api/tickets/${rawId}/status`, {
+      await fetch(`http://127.0.0.1:8000/api/tickets/${rawId}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "Closed", resolution_notes: "Closed by user." })

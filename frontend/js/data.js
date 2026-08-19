@@ -7,7 +7,7 @@ window.SupportPilotData = {
     // Core function to load live tickets from the FastAPI backend
     fetchLiveTickets: async function () {
         try {
-            const response = await fetch('https://grp3-infosysspringboard.onrender.com/api/tickets');
+            const response = await fetch('http://127.0.0.1:8000/api/tickets');
             if (!response.ok) throw new Error('Network response was not ok');
 
             const backendTickets = await response.json();

@@ -46,7 +46,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (session && session.token) {
-                    fetch('https://grp3-infosysspringboard.onrender.com/api/admin/auth/logout', {
+                    fetch('http://127.0.0.1:8000/api/admin/auth/logout', {
                         method: 'POST',
                         headers: { 'Authorization': 'Bearer ' + session.token }
                     }).finally(() => {

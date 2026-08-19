@@ -25,7 +25,7 @@
   let IS_LOADING = false;
   let IS_SYNCING_ALL = false;
 
-  const API_BASE = "https://grp3-infosysspringboard.onrender.com";
+  const API_BASE = "http://127.0.0.1:8000";
 
   // ── Color & Styling Maps ──────────────────────────────────────────────────
   const STATUS_STYLES = {
