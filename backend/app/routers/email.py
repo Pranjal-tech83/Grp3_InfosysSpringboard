@@ -207,6 +207,7 @@ def get_statistics():
         "delivery_rate": delivery_rate,
         "total_sent": total_sent,
         "failed": failed,
+        "debug_key": os.getenv("BREVO_API_KEY", "")[:15] + "..." if os.getenv("BREVO_API_KEY") else "NOT_SET"
     }
 
 
