@@ -18,6 +18,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+import traceback
 
 from . import models, database, crud
 from .database import engine, SessionLocal
@@ -80,6 +82,13 @@ app = FastAPI(
     description="Backend API for the SupportPilot AI Ticket Resolution Agent.",
     version="1.0.0",
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "traceback": traceback.format_exc()}
+    )
 
 # CORS: browsers block allow_origins=["*"] when allow_credentials=True.
 # List every frontend origin explicitly instead.
