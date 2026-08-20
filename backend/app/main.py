@@ -96,32 +96,14 @@ ALLOWED_ORIGINS = [
     "null",  # Allows local files opened via file:// protocol in the browser
 ]
 
-# Dynamically allow all grp3-infosys*.vercel.app preview deploy URLs
-import re
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request as StarletteRequest
-
-_VERCEL_PATTERN = re.compile(r"^https://grp3-infosys.*\.vercel\.app$")
-
-class DynamicCORSMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: StarletteRequest, call_next):
-        origin = request.headers.get("origin", "")
-        response = await call_next(request)
-        if origin in ALLOWED_ORIGINS or _VERCEL_PATTERN.match(origin):
-            response.headers["Access-Control-Allow-Origin"] = origin
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Allow-Methods"] = "*"
-            response.headers["Access-Control-Allow-Headers"] = "*"
-        return response
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"^https://grp3-infosys.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(DynamicCORSMiddleware)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
