@@ -69,12 +69,31 @@ ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5500",   # Live Server / VS Code
     "http://localhost:5500",
-    # ⬇️  Replace this with your actual Vercel deployment URL
+    # Vercel production & all preview deployment URLs
     "https://grp3-infosys-springboard.vercel.app",
     "https://grp3-infosysspringboard.vercel.app",
+    "https://grp3-infosys-springboard-gpuijfc7l-sssnehsinghs-projects.vercel.app",
     "https://grp3-infosysspringboard.onrender.com",
     "null",  # Allows local files opened via file:// protocol in the browser
 ]
+
+# Dynamically allow all grp3-infosys*.vercel.app preview deploy URLs
+import re
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+
+_VERCEL_PATTERN = re.compile(r"^https://grp3-infosys.*\.vercel\.app$")
+
+class DynamicCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        origin = request.headers.get("origin", "")
+        response = await call_next(request)
+        if origin in ALLOWED_ORIGINS or _VERCEL_PATTERN.match(origin):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -83,6 +102,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(DynamicCORSMiddleware)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
