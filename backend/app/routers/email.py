@@ -202,13 +202,12 @@ def get_statistics():
     delivered = sum(1 for log in logs if log.get("status", "").lower() in ["delivered", "sent"])
     delivery_rate = 100 if total_sent == 0 else round((delivered / total_sent) * 100)
 
-    debug_env = {k: v[:15] + "..." for k, v in os.environ.items() if "BREVO" in k.upper()}
     return {
         "emails_today": emails_today,
         "delivery_rate": delivery_rate,
         "total_sent": total_sent,
         "failed": failed,
-        "debug_key": debug_env
+        "debug_key": os.getenv("BREVO_API_KEY", "")[:15] + "..." if os.getenv("BREVO_API_KEY") else "NOT_SET"
     }
 
 
