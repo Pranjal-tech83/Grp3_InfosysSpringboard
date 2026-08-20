@@ -50,6 +50,25 @@ try:
         crud.ensure_user_schema_columns(init_db)
         crud.get_or_create_authenticated_user(init_db)
         crud.triage_all_unclassified_tickets(init_db)
+        # Auto-seed default admin and employee accounts if they don't exist
+        _seed_accounts = [
+            {"name": "Pranjal", "email": "theman838303@gmail.com", "password": "Pranjal@", "role": "ADMIN"},
+            {"name": "Roman", "email": "roman838303@gmail.com", "password": "Pranjal@", "role": "EMPLOYEE"},
+        ]
+        from app.security.authorization import get_password_hash as _hash_pw
+        for _acc in _seed_accounts:
+            _existing = crud.get_user_by_email(init_db, _acc["email"])
+            if not _existing:
+                _user = models.User(
+                    name=_acc["name"],
+                    email=_acc["email"],
+                    role=_acc["role"],
+                    password_hash=_hash_pw(_acc["password"]),
+                    email_verified=True,
+                )
+                init_db.add(_user)
+                print(f"[Startup] Seeded default account: {_acc['email']}")
+        init_db.commit()
 except Exception as e:
     print(f"[Init Warning] {e}")
 
